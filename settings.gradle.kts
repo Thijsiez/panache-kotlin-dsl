@@ -18,3 +18,4 @@ pluginManagement {
 }
 
 rootProject.name = "panache-kotlin-dsl"
+include(":library", ":examples")
