@@ -1,7 +1,6 @@
 package ch.icken.query
 
-@JvmInline
-value class ColumnName<T : Any?>(internal val name: String) {
+open class ColumnName<T : Any?>(internal val name: String) {
     infix fun eq(value: T) = BooleanExpression.EqualTo(name, hql(value))
     infix fun neq(value: T) = BooleanExpression.NotEqualTo(name, hql(value))
     infix fun lt(value: T) = BooleanExpression.LessThan(name, hql(value))
@@ -15,19 +14,23 @@ value class ColumnName<T : Any?>(internal val name: String) {
     infix fun `in`(values: Collection<T>) = BooleanExpression.In(name, values.map { hql(it) })
     infix fun notIn(values: Collection<T>) = BooleanExpression.NotIn(name, values.map { hql(it) })
 
-    companion object {
-        /**
-         * Convert to Hibernate query language format
-         */
-        private fun hql(value: Any?): String = when (value) {
-            null -> "NULL"
-            is Boolean -> value.toString().uppercase()
-            is Int, is Long -> value.toString()
-            //TODO Float, Double
-            is String -> "'$value'"
-            //TODO LocalDate, LocalDateTime
-            else -> TODO()
-        }
+    /**
+     * Convert to Hibernate query language format
+     */
+    protected open fun hql(value: T): String = when (value) {
+        null -> "NULL"
+        is Boolean -> value.toString().uppercase()
+        //TODO Float, Double
+        is String -> "'$value'"
+        //TODO LocalDate, LocalDateTime
+        else -> value.toString()
+    }
+
+    class EnumTypeOrdinal<E : Enum<E>>(name: String) : ColumnName<E>(name) {
+        override fun hql(value: E) = value.ordinal.toString()
+    }
+    class EnumTypeString<E : Enum<E>>(name: String) : ColumnName<E>(name) {
+        override fun hql(value: E) = "'${value.name}'"
     }
 }
 

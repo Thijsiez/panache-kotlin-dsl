@@ -1,6 +1,8 @@
 package ch.icken.processor
 
 import ch.icken.processor.ClassNames.ColumnNameClassName
+import ch.icken.processor.ClassNames.EnumTypeOrdinalClassName
+import ch.icken.processor.ClassNames.EnumTypeStringClassName
 import ch.icken.processor.ClassNames.StringClassName
 import ch.icken.processor.GenerationValues.COLUMN_NAME_BASE_CLASS_PARAM_NAME
 import ch.icken.processor.GenerationValues.COLUMN_NAME_BASE_CLASS_SUFFIX
@@ -10,16 +12,21 @@ import ch.icken.processor.GenerationValues.GENERATED_PACKAGE_SUFFIX
 import ch.icken.processor.QualifiedNames.HibernatePanacheEntityBase
 import ch.icken.processor.QualifiedNames.JakartaPersistenceColumn
 import ch.icken.processor.QualifiedNames.JakartaPersistenceEntity
+import ch.icken.processor.QualifiedNames.JakartaPersistenceEnumerated
 import ch.icken.processor.QualifiedNames.JakartaPersistenceJoinColumn
+import ch.icken.processor.QualifiedNames.KotlinEnum
+import com.google.devtools.ksp.getClassDeclarationByName
 import com.google.devtools.ksp.processing.*
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
+import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.validate
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.plusParameter
 import com.squareup.kotlinpoet.ksp.toClassName
 import com.squareup.kotlinpoet.ksp.writeTo
+import jakarta.persistence.EnumType
 
 class PanacheEntityBaseProcessor(
     private val codeGenerator: CodeGenerator,
@@ -29,19 +36,22 @@ class PanacheEntityBaseProcessor(
         val (valid, invalid) = resolver.getSymbolsWithAnnotation(JakartaPersistenceEntity)
             .partition(KSAnnotated::validate)
 
+        val enumType = resolver.getClassDeclarationByName(KotlinEnum)?.asStarProjectedType()
+
         valid.filterIsInstance<KSClassDeclaration>()
             .filter { it.isSubclass(HibernatePanacheEntityBase) }
             .forEach { ksClassDeclaration ->
                 val columnProperties = ksClassDeclaration.getAllProperties().filter {
                     it.hasAnnotation(JakartaPersistenceColumn) || it.hasAnnotation(JakartaPersistenceJoinColumn)
                 }
-                createColumnNamesObject(ksClassDeclaration, columnProperties.toList())
+                createColumnNamesObject(ksClassDeclaration, columnProperties.toList(), enumType)
             }
 
         return invalid
     }
 
-    private fun createColumnNamesObject(ksClass: KSClassDeclaration, ksProperties: List<KSPropertyDeclaration>) {
+    private fun createColumnNamesObject(ksClass: KSClassDeclaration, ksProperties: List<KSPropertyDeclaration>,
+                                        enumType: KSType?) {
         val packageName = ksClass.packageName.asString() + GENERATED_PACKAGE_SUFFIX
         val objectName = ksClass.simpleName.asString() + COLUMN_NAME_OBJECT_SUFFIX
         val baseClassName = objectName + COLUMN_NAME_BASE_CLASS_SUFFIX
@@ -76,9 +86,19 @@ class PanacheEntityBaseProcessor(
                         val ksPropertyType = ksPropertyDeclaration.type.resolve()
                         val columnNameParameterType = ksPropertyType.toClassName()
                             .copy(nullable = ksPropertyType.isMarkedNullable)
+                        val isEnum = enumType?.isAssignableFrom(ksPropertyType) ?: false
+
+                        val initType = if (isEnum) {
+                            val enumerated = ksPropertyDeclaration.getAnnotationEnumArgumentValue<EnumType>(
+                                JakartaPersistenceEnumerated, "value") ?: EnumType.ORDINAL
+                            when (enumerated) {
+                                EnumType.ORDINAL -> EnumTypeOrdinalClassName
+                                EnumType.STRING -> EnumTypeStringClassName
+                            }
+                        } else ColumnNameClassName
 
                         PropertySpec.builder(propertyName, ColumnNameClassName.plusParameter(columnNameParameterType))
-                            .initializer("%T(%P)", ColumnNameClassName,
+                            .initializer("%T(%P)", initType,
                                 "\${${COLUMN_NAME_BASE_CLASS_PARAM_NAME}.orEmpty()}$propertyName")
                     }
 

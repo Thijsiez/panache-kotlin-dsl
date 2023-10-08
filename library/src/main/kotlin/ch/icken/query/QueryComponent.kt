@@ -33,5 +33,7 @@ abstract class QueryComponent<Entity : PanacheEntityBase, Id : Any> internal con
     fun getSingle() = find().singleResult()
     fun getMultiple() = find().list()
     fun getMultiple(sort: Sort) = find(sort).list()
+
+    fun printQuery() = println("WHERE ${compile()}")
     //endregion
 }
