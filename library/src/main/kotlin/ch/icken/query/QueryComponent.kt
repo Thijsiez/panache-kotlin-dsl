@@ -47,6 +47,7 @@ abstract class QueryComponent<Entity : PanacheEntityBase, Id : Any> internal con
     fun update() = companion.update(compile())
 
     fun getSingle() = find().singleResult()
+    fun getSingleSafe() = find().singleResultSafe()
     fun getMultiple() = find().list()
     fun getMultiple(sort: Sort) = find(sort).list()
 
