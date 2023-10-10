@@ -14,24 +14,18 @@
  * limitations under the License.
  */
 
-plugins {
-    id("io.quarkus")
-    kotlin("plugin.allopen")
-    kotlin("plugin.jpa")
-    id("com.google.devtools.ksp")
-}
+@file:Suppress("unused")
 
-dependencies {
-    implementation(project(":library"))
-    ksp(project(":library"))
-}
+package ch.icken.processor
 
-ksp {
-    arg("addGeneratedAnnotation", "false")
-}
+import kotlin.annotation.AnnotationRetention.RUNTIME
+import kotlin.annotation.AnnotationTarget.*
 
-tasks.jacocoTestReport {
-    dependsOn(":library:test")
-    sourceSets(sourceSets["main"], project(":library").sourceSets["main"])
-    executionData(project(":library").tasks.jacocoTestReport)
-}
+@MustBeDocumented
+@Retention(RUNTIME)
+@Target(FILE, CLASS, PROPERTY, FUNCTION)
+annotation class Generated(
+    val value: String,
+    val date: String,
+    val comments: String
+)

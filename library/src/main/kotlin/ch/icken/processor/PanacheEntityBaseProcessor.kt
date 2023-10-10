@@ -20,6 +20,8 @@ import ch.icken.processor.ClassNames.ColumnNameClassName
 import ch.icken.processor.ClassNames.EnumTypeOrdinalClassName
 import ch.icken.processor.ClassNames.EnumTypeStringClassName
 import ch.icken.processor.ClassNames.StringClassName
+import ch.icken.processor.GenerationOptions.ADD_GENERATED_ANNOTATION
+import ch.icken.processor.GenerationOptions.generatedAnnotation
 import ch.icken.processor.GenerationValues.COLUMN_NAME_BASE_CLASS_PARAM_NAME
 import ch.icken.processor.GenerationValues.COLUMN_NAME_BASE_CLASS_SUFFIX
 import ch.icken.processor.GenerationValues.COLUMN_NAME_OBJECT_SUFFIX
@@ -45,6 +47,7 @@ import com.squareup.kotlinpoet.ksp.writeTo
 import jakarta.persistence.EnumType
 
 class PanacheEntityBaseProcessor(
+    private val options: Map<String, String>,
     private val codeGenerator: CodeGenerator,
     private val logger: KSPLogger
 ) : SymbolProcessor {
@@ -53,6 +56,7 @@ class PanacheEntityBaseProcessor(
             .partition(KSAnnotated::validate)
 
         val enumType = resolver.getClassDeclarationByName(KotlinEnum)?.asStarProjectedType()
+        val addGeneratedAnnotation = options[ADD_GENERATED_ANNOTATION].toBoolean()
 
         valid.filterIsInstance<KSClassDeclaration>()
             .filter { it.isSubclass(HibernatePanacheEntityBase) }
@@ -60,14 +64,15 @@ class PanacheEntityBaseProcessor(
                 val columnProperties = ksClassDeclaration.getAllProperties().filter {
                     it.hasAnnotation(JakartaPersistenceColumn) || it.hasAnnotation(JakartaPersistenceJoinColumn)
                 }
-                createColumnNamesObject(ksClassDeclaration, columnProperties.toList(), enumType)
+                createColumnNamesObject(ksClassDeclaration, columnProperties.toList(),
+                    enumType, addGeneratedAnnotation)
             }
 
         return invalid
     }
 
     private fun createColumnNamesObject(ksClass: KSClassDeclaration, ksProperties: List<KSPropertyDeclaration>,
-                                        enumType: KSType?) {
+                                        enumType: KSType?, addGeneratedAnnotation: Boolean) {
         val packageName = ksClass.packageName.asString() + GENERATED_PACKAGE_SUFFIX
         val objectName = ksClass.simpleName.asString() + COLUMN_NAME_OBJECT_SUFFIX
         val baseClassName = objectName + COLUMN_NAME_BASE_CLASS_SUFFIX
@@ -76,6 +81,7 @@ class PanacheEntityBaseProcessor(
         // Generate base class
         val baseClassBuilder = TypeSpec.classBuilder(baseClassName)
             .addModifiers(KModifier.OPEN)
+            .addAnnotationIf(GeneratedAnnotation, addGeneratedAnnotation)
             .apply {
                 // Generate constructor
                 val constructorParamBuilder = ParameterSpec
@@ -116,7 +122,7 @@ class PanacheEntityBaseProcessor(
                         PropertySpec.builder(propertyName, ColumnNameClassName.plusParameter(columnNameParameterType))
                             .initializer("%T(%P)", initType,
                                 "\${${COLUMN_NAME_BASE_CLASS_PARAM_NAME}.orEmpty()}$propertyName")
-                    }
+                    }.addAnnotationIf(GeneratedAnnotation, addGeneratedAnnotation)
 
                     addProperty(propertyBuilder.build())
                 }
@@ -125,18 +131,24 @@ class PanacheEntityBaseProcessor(
         // Generate implementation
         val objectBuilder = TypeSpec.objectBuilder(objectName)
             .superclass(ClassName(packageName, baseClassName))
+            .addAnnotationIf(GeneratedAnnotation, addGeneratedAnnotation)
 
         // Generate actual source code file
         FileSpec.builder(packageName, objectName)
             .addType(baseClassBuilder.build())
             .addType(objectBuilder.build())
             .addAnnotation(FileSuppress)
+            .addAnnotationIf(GeneratedAnnotation, addGeneratedAnnotation)
             .build()
             .writeTo(codeGenerator, Dependencies(false))
+    }
+
+    companion object {
+        private val GeneratedAnnotation = generatedAnnotation(PanacheEntityBaseProcessor::class.java)
     }
 }
 
 class PanacheEntityBaseProcessorProvider : SymbolProcessorProvider {
     override fun create(environment: SymbolProcessorEnvironment): SymbolProcessor =
-        PanacheEntityBaseProcessor(environment.codeGenerator, environment.logger)
+        PanacheEntityBaseProcessor(environment.options, environment.codeGenerator, environment.logger)
 }

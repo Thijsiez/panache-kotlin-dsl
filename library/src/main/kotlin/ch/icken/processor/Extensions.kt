@@ -18,6 +18,8 @@ package ch.icken.processor
 
 import com.google.devtools.ksp.getAllSuperTypes
 import com.google.devtools.ksp.symbol.*
+import com.squareup.kotlinpoet.Annotatable
+import com.squareup.kotlinpoet.AnnotationSpec
 
 internal fun KSDeclaration.isClass(qualifiedClassName: String): Boolean =
     qualifiedName?.asString() == qualifiedClassName
@@ -50,3 +52,6 @@ internal inline fun <reified T : Enum<T>> KSAnnotated.getAnnotationEnumArgumentV
 
 internal val KSPropertyDeclaration.typeName: String
     get() = type.resolve().declaration.simpleName.asString()
+
+fun <T : Annotatable.Builder<T>> T.addAnnotationIf(annotationSpec: AnnotationSpec, condition: Boolean) =
+    apply { if (condition) addAnnotation(annotationSpec) }

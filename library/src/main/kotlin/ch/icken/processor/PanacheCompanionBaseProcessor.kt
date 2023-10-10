@@ -21,6 +21,8 @@ import ch.icken.processor.ClassNames.BooleanExpressionClassName
 import ch.icken.processor.ClassNames.JvmNameClassName
 import ch.icken.processor.ClassNames.OrQueryComponentClassName
 import ch.icken.processor.ClassNames.QueryComponentClassName
+import ch.icken.processor.GenerationOptions.ADD_GENERATED_ANNOTATION
+import ch.icken.processor.GenerationOptions.generatedAnnotation
 import ch.icken.processor.GenerationValues.AND
 import ch.icken.processor.GenerationValues.AND_GROUP
 import ch.icken.processor.GenerationValues.COLUMN_NAME_OBJECT_SUFFIX
@@ -48,12 +50,15 @@ import com.squareup.kotlinpoet.ksp.toClassName
 import com.squareup.kotlinpoet.ksp.writeTo
 
 class PanacheCompanionBaseProcessor(
+    private val options: Map<String, String>,
     private val codeGenerator: CodeGenerator,
     private val logger: KSPLogger
 ) : SymbolProcessor {
     override fun process(resolver: Resolver): List<KSAnnotated> {
         val (valid, invalid) = resolver.getSymbolsWithAnnotation(JakartaPersistenceEntity)
             .partition(KSAnnotated::validate)
+
+        val addGeneratedAnnotation = options[ADD_GENERATED_ANNOTATION].toBoolean()
 
         valid.filterIsInstance<KSClassDeclaration>()
             .filter { it.isSubclass(HibernatePanacheEntityBase) }
@@ -66,13 +71,14 @@ class PanacheCompanionBaseProcessor(
             }
             .groupBy { it.packageName.asString() }
             .forEach { (packageName, ksClasses) ->
-                createQueryBuilderExtensions(packageName, ksClasses)
+                createQueryBuilderExtensions(packageName, ksClasses, addGeneratedAnnotation)
             }
 
         return invalid
     }
 
-    private fun createQueryBuilderExtensions(originalPackageName: String, ksClasses: List<KSClassDeclaration>) {
+    private fun createQueryBuilderExtensions(originalPackageName: String, ksClasses: List<KSClassDeclaration>,
+                                             addGeneratedAnnotation: Boolean) {
         val packageName = originalPackageName + GENERATED_PACKAGE_SUFFIX
         logger.info("Generating $packageName.$EXTENSIONS_FILE")
 
@@ -108,7 +114,6 @@ class PanacheCompanionBaseProcessor(
                 .addStatement("return %M($EXPRESSION_PARAM_NAME(%T))",
                     MemberName(QueryComponentClassName.packageName, WHERE), objectClassName)
                 .addAnnotation(jvmNameAnnotation("$WHERE$objectName"))
-                .build()
             val whereGroup = FunSpec.builder(WHERE_GROUP)
                 .receiver(whereReceiver)
                 .addParameter(EXPRESSION_PARAM_NAME, expressionParameterType)
@@ -117,7 +122,6 @@ class PanacheCompanionBaseProcessor(
                 .addStatement("return %M($EXPRESSION_PARAM_NAME(%T), $GROUP_COMPONENT_PARAM_NAME)",
                     MemberName(QueryComponentClassName.packageName, WHERE_GROUP), objectClassName)
                 .addAnnotation(jvmNameAnnotation("$WHERE_GROUP$objectName"))
-                .build()
 
             val and = FunSpec.builder(AND)
                 .addModifiers(KModifier.INLINE)
@@ -126,7 +130,6 @@ class PanacheCompanionBaseProcessor(
                 .returns(AndQueryComponentClassName.plusParameter(className).plusParameter(idClassName))
                 .addStatement("return $AND($EXPRESSION_PARAM_NAME(%T))", objectClassName)
                 .addAnnotation(jvmNameAnnotation("$AND$objectName"))
-                .build()
             val andGroup = FunSpec.builder(AND_GROUP)
                 .receiver(queryComponentType)
                 .addParameter(EXPRESSION_PARAM_NAME, expressionParameterType)
@@ -135,7 +138,6 @@ class PanacheCompanionBaseProcessor(
                 .addStatement("return $AND_GROUP($EXPRESSION_PARAM_NAME(%T), $GROUP_COMPONENT_PARAM_NAME)",
                     objectClassName)
                 .addAnnotation(jvmNameAnnotation("$AND_GROUP$objectName"))
-                .build()
 
             val or = FunSpec.builder(OR)
                 .addModifiers(KModifier.INLINE)
@@ -144,7 +146,6 @@ class PanacheCompanionBaseProcessor(
                 .returns(OrQueryComponentClassName.plusParameter(className).plusParameter(idClassName))
                 .addStatement("return $OR($EXPRESSION_PARAM_NAME(%T))", objectClassName)
                 .addAnnotation(jvmNameAnnotation("$OR$objectName"))
-                .build()
             val orGroup = FunSpec.builder(OR_GROUP)
                 .receiver(queryComponentType)
                 .addParameter(EXPRESSION_PARAM_NAME, expressionParameterType)
@@ -153,14 +154,18 @@ class PanacheCompanionBaseProcessor(
                 .addStatement("return $OR_GROUP($EXPRESSION_PARAM_NAME(%T), $GROUP_COMPONENT_PARAM_NAME)",
                     objectClassName)
                 .addAnnotation(jvmNameAnnotation("$OR_GROUP$objectName"))
-                .build()
 
             listOf(where, whereGroup, and, andGroup, or, orGroup)
         }
 
         FileSpec.builder(packageName, EXTENSIONS_FILE)
-            .apply { funSpecs.forEach(::addFunction) }
+            .apply {
+                funSpecs.onEach { it.addAnnotationIf(GeneratedAnnotation, addGeneratedAnnotation) }
+                    .map(FunSpec.Builder::build)
+                    .forEach(::addFunction)
+            }
             .addAnnotation(FileSuppress)
+            .addAnnotationIf(GeneratedAnnotation, addGeneratedAnnotation)
             .build()
             .writeTo(codeGenerator, Dependencies(false))
     }
@@ -169,9 +174,13 @@ class PanacheCompanionBaseProcessor(
         AnnotationSpec.builder(JvmNameClassName)
             .addMember("%S", name)
             .build()
+
+    companion object {
+        private val GeneratedAnnotation = generatedAnnotation(PanacheCompanionBaseProcessor::class.java)
+    }
 }
 
 class PanacheCompanionBaseProcessorProvider : SymbolProcessorProvider {
     override fun create(environment: SymbolProcessorEnvironment): SymbolProcessor =
-        PanacheCompanionBaseProcessor(environment.codeGenerator, environment.logger)
+        PanacheCompanionBaseProcessor(environment.options, environment.codeGenerator, environment.logger)
 }
