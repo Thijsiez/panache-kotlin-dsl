@@ -39,6 +39,7 @@ sealed class GroupQueryComponent<Entity : PanacheEntityBase, Id : Any> private c
         expression: BooleanExpression,
         groupComponent: QueryComponent<Entity, Id>.() -> QueryComponent<Entity, Id>
     ) : GroupQueryComponent<Entity, Id>(companion, previous, "AND", expression, groupComponent)
+
     class OrGroupQueryComponent<Entity : PanacheEntityBase, Id : Any> internal constructor(
         companion: PanacheCompanionBase<Entity, Id>,
         previous: QueryComponent<Entity, Id>,

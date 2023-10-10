@@ -32,6 +32,7 @@ sealed class LogicalQueryComponent<Entity : PanacheEntityBase, Id : Any> private
         previous: QueryComponent<Entity, Id>,
         expression: BooleanExpression
     ) : LogicalQueryComponent<Entity, Id>(companion, previous, "AND", expression)
+
     class OrQueryComponent<Entity : PanacheEntityBase, Id : Any> internal constructor(
         companion: PanacheCompanionBase<Entity, Id>,
         previous: QueryComponent<Entity, Id>,

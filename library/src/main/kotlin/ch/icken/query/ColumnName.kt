@@ -45,6 +45,7 @@ open class ColumnName<T : Any?>(internal val name: String) {
     class EnumTypeOrdinal<E : Enum<E>>(name: String) : ColumnName<E>(name) {
         override fun hql(value: E) = value.ordinal.toString()
     }
+
     class EnumTypeString<E : Enum<E>>(name: String) : ColumnName<E>(name) {
         override fun hql(value: E) = "'${value.name}'"
     }

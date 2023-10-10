@@ -16,10 +16,12 @@
 
 plugins {
     kotlin("jvm")
+    jacoco
 }
 
 allprojects {
     apply(plugin = "kotlin")
+    apply(plugin = "jacoco")
 
     group = "ch.icken"
     version = "0.1.0-SNAPSHOT"
@@ -35,13 +37,19 @@ configure(subprojects) {
 
         implementation(kotlin("stdlib"))
         implementation(platform("io.quarkus.platform:quarkus-bom:$quarkusVersion"))
+        implementation("io.quarkus:quarkus-hibernate-orm-panache-kotlin")
         testImplementation(kotlin("test"))
+        testImplementation("io.quarkus:quarkus-junit5")
     }
 
-    //TODO
-//    kotlin {
-//        jvmToolchain(11)
-//    }
+    tasks.test {
+        useJUnitPlatform()
+        finalizedBy(tasks.jacocoTestReport)
+    }
+
+    kotlin {
+        jvmToolchain(11)
+    }
 }
 
 project.afterEvaluate {

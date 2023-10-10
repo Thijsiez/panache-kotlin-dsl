@@ -22,12 +22,12 @@ plugins {
 }
 
 dependencies {
-    implementation("io.quarkus:quarkus-hibernate-orm-panache-kotlin")
     implementation(project(":library"))
     ksp(project(":library"))
-    testImplementation("io.quarkus:quarkus-junit5")
 }
 
-tasks.test {
-    useJUnitPlatform()
+tasks.jacocoTestReport {
+    dependsOn(":library:test")
+    sourceSets(sourceSets["main"], project(":library").sourceSets["main"])
+    executionData(project(":library").tasks.jacocoTestReport)
 }
