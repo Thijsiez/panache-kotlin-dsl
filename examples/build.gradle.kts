@@ -29,9 +29,3 @@ dependencies {
 ksp {
     arg("addGeneratedAnnotation", "false")
 }
-
-tasks.jacocoTestReport {
-    dependsOn(":library:test")
-    sourceSets(sourceSets["main"], project(":library").sourceSets["main"])
-    executionData(project(":library").tasks.jacocoTestReport)
-}

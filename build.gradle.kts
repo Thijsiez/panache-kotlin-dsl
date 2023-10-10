@@ -17,6 +17,13 @@
 plugins {
     kotlin("jvm")
     jacoco
+    `jvm-test-suite`
+    `jacoco-report-aggregation`
+}
+
+dependencies {
+    implementation(project(":library"))
+    implementation(project(":examples"))
 }
 
 allprojects {
@@ -50,6 +57,10 @@ configure(subprojects) {
     kotlin {
         jvmToolchain(11)
     }
+}
+
+tasks.test {
+    finalizedBy(tasks.testCodeCoverageReport)
 }
 
 project.afterEvaluate {
