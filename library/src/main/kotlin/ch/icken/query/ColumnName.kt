@@ -36,7 +36,7 @@ open class ColumnName<T : Any?>(internal val name: String) {
     protected open fun hql(value: T): String = when (value) {
         null -> "NULL"
         is Boolean -> value.toString().uppercase()
-        //TODO Float, Double
+        //Int, Long, Float, and Double are covered by the else clause
         is String -> "'$value'"
         //TODO LocalDate, LocalDateTime
         else -> value.toString()
