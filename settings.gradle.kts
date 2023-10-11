@@ -18,6 +18,7 @@ pluginManagement {
     val quarkusVersion: String by settings
     val kotlinVersion: String by settings
     val kspVersion: String by settings
+    val sonarqubeVersion: String by settings
 
     repositories {
         mavenCentral()
@@ -30,6 +31,7 @@ pluginManagement {
         kotlin("plugin.allopen") version kotlinVersion
         kotlin("plugin.jpa") version kotlinVersion
         id("com.google.devtools.ksp") version kspVersion
+        id("org.sonarqube") version sonarqubeVersion
     }
 }
 

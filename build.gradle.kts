@@ -19,6 +19,7 @@ plugins {
     jacoco
     `jvm-test-suite`
     `jacoco-report-aggregation`
+    id("org.sonarqube")
 }
 
 dependencies {
@@ -71,5 +72,12 @@ project.afterEvaluate {
     getTasksByName("quarkusGenerateCodeDev", true).forEach { task ->
         task.setDependsOn(task.dependsOn.filterIsInstance<Provider<Task>>()
             .filterNot { it.get().name == "processResources" })
+    }
+}
+
+sonar {
+    properties {
+        property("sonar.projectKey", "Thijsiez_panache-kotlin-dsl_AYsggGcmXmm3_FAoLWCF")
+        property("sonar.projectName", "panache-kotlin-dsl")
     }
 }
