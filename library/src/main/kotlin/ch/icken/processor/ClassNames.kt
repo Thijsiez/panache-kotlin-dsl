@@ -26,8 +26,6 @@ internal object ClassNames {
     val AndQueryComponentClassName = LogicalQueryComponent.AndQueryComponent::class.asClassName()
     val BooleanExpressionClassName = BooleanExpression::class.asClassName()
     val ColumnNameClassName = ColumnName::class.asClassName()
-    val EnumTypeOrdinalClassName = ColumnName.EnumTypeOrdinal::class.asClassName()
-    val EnumTypeStringClassName = ColumnName.EnumTypeString::class.asClassName()
     val GeneratedClassName = Generated::class.asClassName()
     val JvmNameClassName = JvmName::class.asClassName()
     val OrQueryComponentClassName = LogicalQueryComponent.OrQueryComponent::class.asClassName()

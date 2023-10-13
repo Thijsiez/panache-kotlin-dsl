@@ -16,43 +16,111 @@
 
 package ch.icken.query
 
-open class ColumnName<T : Any?>(internal val name: String) {
-    infix fun eq(value: T) = BooleanExpression.EqualTo(name, hql(value))
-    infix fun neq(value: T) = BooleanExpression.NotEqualTo(name, hql(value))
-    infix fun lt(value: T) = BooleanExpression.LessThan(name, hql(value))
-    infix fun gt(value: T) = BooleanExpression.GreaterThan(name, hql(value))
-    infix fun lte(value: T) = BooleanExpression.LessThanOrEqualTo(name, hql(value))
-    infix fun gte(value: T) = BooleanExpression.GreaterThanOrEqualTo(name, hql(value))
+import ch.icken.query.BooleanExpression.BetweenExpression.Between
+import ch.icken.query.BooleanExpression.BetweenExpression.NotBetween
+import ch.icken.query.BooleanExpression.BooleanValueExpression.*
+import ch.icken.query.BooleanExpression.IsExpression.IsNotNull
+import ch.icken.query.BooleanExpression.IsExpression.IsNull
 
-    fun between(min: T, maxInclusive: T) = BooleanExpression.Between(name, hql(min), hql(maxInclusive))
-    fun notBetween(min: T, maxInclusive: T) = BooleanExpression.NotBetween(name, hql(min), hql(maxInclusive))
+@Suppress("unused")//for the generic type
+class ColumnName<T : Any?>(internal val name: String)
 
-    infix fun `in`(values: Collection<T>) = BooleanExpression.In(name, values.map { hql(it) })
-    infix fun notIn(values: Collection<T>) = BooleanExpression.NotIn(name, values.map { hql(it) })
+//region eq
+private fun eq(name: String, value: Any?) = if (value == null) IsNull(name) else EqualTo(name, value)
+@JvmName("eq")
+infix fun <T : Any> ColumnName<T>.eq(value: T) = eq(name, value)
+@JvmName("eqNullable")
+infix fun <T : Any> ColumnName<T?>.eq(value: T?) = eq(name, value)
+//endregion
+//region neq
+private fun neq(name: String, value: Any?) = if (value == null) IsNotNull(name) else NotEqualTo(name, value)
+@JvmName("neq")
+infix fun <T : Any> ColumnName<T>.neq(value: T) = neq(name, value)
+@JvmName("neqNullable")
+infix fun <T : Any> ColumnName<T?>.neq(value: T?) = neq(name, value)
+//endregion
+//region lt
+private fun lt(name: String, value: Any) = LessThan(name, value)
+@JvmName("lt")
+infix fun <T : Any> ColumnName<T>.lt(value: T) = lt(name, value)
+@JvmName("ltNullable")
+infix fun <T : Any> ColumnName<T?>.lt(value: T) = lt(name, value)
+//endregion
+//region gt
+private fun gt(name: String, value: Any) = GreaterThan(name, value)
+@JvmName("gt")
+infix fun <T : Any> ColumnName<T>.gt(value: T) = gt(name, value)
+@JvmName("gtNullable")
+infix fun <T : Any> ColumnName<T?>.gt(value: T) = gt(name, value)
+//endregion
+//region lte
+private fun lte(name: String, value: Any) = LessThanOrEqualTo(name, value)
+@JvmName("lte")
+infix fun <T : Any> ColumnName<T>.lte(value: T) = lte(name, value)
+@JvmName("lteNullable")
+infix fun <T : Any> ColumnName<T?>.lte(value: T) = lte(name, value)
+//endregion
+//region gte
+private fun gte(name: String, value: Any) = GreaterThanOrEqualTo(name, value)
+@JvmName("gte")
+infix fun <T : Any> ColumnName<T>.gte(value: T) = gte(name, value)
+@JvmName("gteNullable")
+infix fun <T : Any> ColumnName<T?>.gte(value: T) = gte(name, value)
+//endregion
 
-    /**
-     * Convert to Hibernate query language format
-     */
-    protected open fun hql(value: T): String = when (value) {
-        null -> "NULL"
-        is Boolean -> value.toString().uppercase()
-        //Int, Long, Float, and Double are covered by the else clause
-        is String -> "'$value'"
-        //TODO LocalDate, LocalDateTime
-        else -> value.toString()
-    }
+//region in
+private fun `in`(name: String, values: Collection<Any>) = In(name, values)
+@JvmName("in")
+infix fun <T : Any> ColumnName<T>.`in`(values: Collection<T>) = `in`(name, values)
+@JvmName("inNullable")
+infix fun <T : Any> ColumnName<T?>.`in`(values: Collection<T>) = `in`(name, values)
+//endregion
+//region notIn
+private fun notIn(name: String, values: Collection<Any>) = NotIn(name, values)
+@JvmName("notIn")
+infix fun <T : Any> ColumnName<T>.notIn(values: Collection<T>) = notIn(name, values)
+@JvmName("notInNullable")
+infix fun <T : Any> ColumnName<T?>.notIn(values: Collection<T>) = notIn(name, values)
+//endregion
 
-    class EnumTypeOrdinal<E : Enum<E>>(name: String) : ColumnName<E>(name) {
-        override fun hql(value: E) = value.ordinal.toString()
-    }
+//region like
+private fun like(name: String, expression: String?) =
+    if (expression == null) IsNull(name) else Like(name, expression)
+@JvmName("like")
+infix fun ColumnName<String>.like(expression: String) = like(name, expression)
+@JvmName("likeNullable")
+infix fun ColumnName<String?>.like(expression: String?) = like(name, expression)
+//endregion
+//region notLike
+private fun notLike(name: String, expression: String?) =
+    if (expression == null) IsNotNull(name) else NotLike(name, expression)
+@JvmName("notLike")
+infix fun ColumnName<String>.notLike(expression: String) = notLike(name, expression)
+@JvmName("notLikeNullable")
+infix fun ColumnName<String?>.notLike(expression: String?) = notLike(name, expression)
+//endregion
 
-    class EnumTypeString<E : Enum<E>>(name: String) : ColumnName<E>(name) {
-        override fun hql(value: E) = "'${value.name}'"
-    }
+//region between
+private fun between(name: String, min: Any?, maxIncl: Any?) = when {
+    min != null && maxIncl != null -> Between(name, min, maxIncl)
+    min != null && maxIncl == null -> GreaterThanOrEqualTo(name, min)
+    min == null && maxIncl != null -> LessThanOrEqualTo(name, maxIncl)
+    else -> IsNull(name)
 }
-
-fun <T> ColumnName<T?>.isNull() = BooleanExpression.IsNull(name)
-fun <T> ColumnName<T?>.isNotNull() = BooleanExpression.IsNotNull(name)
-
-infix fun ColumnName<String?>.like(expression: String) = BooleanExpression.Like(name, expression)
-infix fun ColumnName<String?>.notLike(expression: String) = BooleanExpression.NotLike(name, expression)
+@JvmName("between")
+fun <T : Any> ColumnName<T>.between(min: T, maxIncl: T) = between(name, min, maxIncl)
+@JvmName("betweenNullable")
+fun <T : Any> ColumnName<T?>.between(min: T?, maxIncl: T?) = between(name, min, maxIncl)
+//endregion
+//region notBetween
+private fun notBetween(name: String, min: Any?, maxIncl: Any?) = when {
+    min != null && maxIncl != null -> NotBetween(name, min, maxIncl)
+    min != null && maxIncl == null -> LessThan(name, min)
+    min == null && maxIncl != null -> GreaterThan(name, maxIncl)
+    else -> IsNotNull(name)
+}
+@JvmName("notBetween")
+fun <T : Any> ColumnName<T>.notBetween(min: T, maxIncl: T) = notBetween(name, min, maxIncl)
+@JvmName("notBetweenNullable")
+fun <T : Any> ColumnName<T?>.notBetween(min: T?, maxIncl: T?) = notBetween(name, min, maxIncl)
+//endregion

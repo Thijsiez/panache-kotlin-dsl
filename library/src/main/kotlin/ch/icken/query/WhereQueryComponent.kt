@@ -31,7 +31,11 @@ class WhereGroupQueryComponent<Entity : PanacheEntityBase, Id : Any> internal co
 ) : QueryComponent<Entity, Id>(companion) {
     private val initialComponent = InitialQueryComponent(companion, expression)
 
-    override fun compile() = "(${groupComponent.invoke(initialComponent).compile()})"
+    override fun compile(): Compiled {
+        val compiledGroup = groupComponent.invoke(initialComponent).compile()
+        return Compiled("(${compiledGroup.query})", compiledGroup.parameters)
+
+    }
 }
 
 fun <Entity : PanacheEntityBase, Id : Any> PanacheCompanionBase<Entity, Id>.where(expression: BooleanExpression) =

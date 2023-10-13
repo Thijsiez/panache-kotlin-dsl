@@ -25,7 +25,14 @@ sealed class LogicalQueryComponent<Entity : PanacheEntityBase, Id : Any> private
     private val operator: String,
     private val expression: BooleanExpression
 ) : QueryComponent<Entity, Id>(companion) {
-    override fun compile() = "${previous.compile()} $operator ${expression.compile()}"
+    override fun compile(): Compiled {
+        val compiledPrevious = previous.compile()
+        val compiledExpression = expression.compile()
+        return Compiled(
+            query = "${compiledPrevious.query} $operator ${compiledExpression.expression}",
+            parameters = compiledPrevious.parameters + compiledExpression.parameters
+        )
+    }
 
     class AndQueryComponent<Entity : PanacheEntityBase, Id : Any> internal constructor(
         companion: PanacheCompanionBase<Entity, Id>,

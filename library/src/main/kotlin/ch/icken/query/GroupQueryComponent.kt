@@ -28,9 +28,13 @@ sealed class GroupQueryComponent<Entity : PanacheEntityBase, Id : Any> private c
 ) : QueryComponent<Entity, Id>(companion) {
     private val initialComponent = InitialQueryComponent(companion, expression)
 
-    override fun compile(): String {
+    override fun compile(): Compiled {
+        val compiledPrevious = previous.compile()
         val compiledGroup = groupComponent.invoke(initialComponent).compile()
-        return "${previous.compile()} $operator ($compiledGroup)"
+        return Compiled(
+            query = "${compiledPrevious.query} $operator (${compiledGroup.query})",
+            parameters = compiledPrevious.parameters + compiledGroup.parameters
+        )
     }
 
     class AndGroupQueryComponent<Entity : PanacheEntityBase, Id : Any> internal constructor(

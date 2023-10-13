@@ -16,6 +16,10 @@
 
 package ch.icken.query
 
+import ch.icken.query.GroupQueryComponent.AndGroupQueryComponent
+import ch.icken.query.GroupQueryComponent.OrGroupQueryComponent
+import ch.icken.query.LogicalQueryComponent.AndQueryComponent
+import ch.icken.query.LogicalQueryComponent.OrQueryComponent
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
 import io.quarkus.panache.common.Sort
@@ -23,34 +27,37 @@ import io.quarkus.panache.common.Sort
 abstract class QueryComponent<Entity : PanacheEntityBase, Id : Any> internal constructor(
     private val companion: PanacheCompanionBase<Entity, Id>
 ) {
-    abstract fun compile(): String
+    abstract fun compile(): Compiled
+    data class Compiled internal constructor(val query: String, val parameters: Map<String, Any>)
 
     //region Intermediate operations
-    fun and(expression: BooleanExpression) = LogicalQueryComponent.AndQueryComponent(companion, this, expression)
-    fun or(expression: BooleanExpression) = LogicalQueryComponent.OrQueryComponent(companion, this, expression)
+    fun and(expression: BooleanExpression) = AndQueryComponent(companion, this, expression)
+    fun or(expression: BooleanExpression) = OrQueryComponent(companion, this, expression)
 
     fun andGroup(expression: BooleanExpression,
                  groupComponent: QueryComponent<Entity, Id>.() -> QueryComponent<Entity, Id>) =
-        GroupQueryComponent.AndGroupQueryComponent(companion, this, expression, groupComponent)
+        AndGroupQueryComponent(companion, this, expression, groupComponent)
     fun orGroup(expression: BooleanExpression,
                 groupComponent: QueryComponent<Entity, Id>.() -> QueryComponent<Entity, Id>) =
-        GroupQueryComponent.OrGroupQueryComponent(companion, this, expression, groupComponent)
+        OrGroupQueryComponent(companion, this, expression, groupComponent)
     //endregion
 
     //region Terminal operations
-    fun count() = companion.count(compile())
-    fun delete() = companion.delete(compile())
-    fun find() = companion.find(compile())
-    fun find(sort: Sort) = companion.find(compile(), sort)
-    fun stream() = companion.stream(compile())
-    fun stream(sort: Sort) = companion.stream(compile(), sort)
-    fun update() = companion.update(compile())
+    fun count() = with(compile()) { companion.count(query, parameters) }
+    fun delete() = with(compile()) { companion.delete(query, parameters) }
+    fun find() = with(compile()) { companion.find(query, parameters) }
+    fun find(sort: Sort) = with(compile()) { companion.find(query, sort, parameters) }
+    fun stream() = with(compile()) { companion.stream(query, parameters) }
+    fun stream(sort: Sort) = with(compile()) { companion.stream(query, sort, parameters) }
 
     fun getSingle() = find().singleResult()
     fun getSingleSafe() = find().singleResultSafe()
     fun getMultiple() = find().list()
     fun getMultiple(sort: Sort) = find(sort).list()
 
-    fun printQuery() = println("WHERE ${compile()}")
+    fun print() = with(compile()) {
+        println("[HQL Query] $query")
+        println("[Parameters] ${parameters.entries.joinToString()}")
+    }
     //endregion
 }

@@ -23,5 +23,8 @@ open class InitialQueryComponent<Entity : PanacheEntityBase, Id : Any> internal 
     companion: PanacheCompanionBase<Entity, Id>,
     private val expression: BooleanExpression
 ) : QueryComponent<Entity, Id>(companion) {
-    override fun compile() = expression.compile()
+    override fun compile(): Compiled = expression.compile().toQueryComponent()
+
+    private fun BooleanExpression.Compiled.toQueryComponent() =
+        Compiled(expression, parameters)
 }

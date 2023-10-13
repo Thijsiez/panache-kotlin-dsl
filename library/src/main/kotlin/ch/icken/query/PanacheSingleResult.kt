@@ -20,7 +20,7 @@ import io.quarkus.hibernate.orm.panache.kotlin.PanacheQuery
 
 sealed class PanacheSingleResult<T> {
     data object NoResult : PanacheSingleResult<Nothing>()
-    class Result<Entity>(val value: Entity) : PanacheSingleResult<Entity>()
+    data class Result<Entity>(val value: Entity) : PanacheSingleResult<Entity>()
     data object NotUnique : PanacheSingleResult<Nothing>()
 }
 
