@@ -28,8 +28,7 @@ internal object GenerationValues {
     const val EXTENSIONS_FILE = "QueryComponentExtensions"
     const val EXPRESSION_PARAM_NAME = "expression"
     const val GROUP_COMPONENT_PARAM_NAME = "groupComponent"
-
-    const val COMPANION_OBJECT = "Companion"
+    const val SORT_PARAM_NAME = "sort"
 
     const val WHERE = "where"
     const val AND = "and"
@@ -39,6 +38,18 @@ internal object GenerationValues {
     const val WHERE_GROUP = "$WHERE$GROUP"
     const val AND_GROUP = "$AND$GROUP"
     const val OR_GROUP = "$OR$GROUP"
+
+    const val COUNT = "count"
+    const val DELETE = "delete"
+    const val FIND = "find"
+    const val FIND_SORTED = "findSorted"
+    const val STREAM = "stream"
+    const val STREAM_SORTED = "streamSorted"
+
+    const val SINGLE = "single"
+    const val SINGLE_SAFE = "singleSafe"
+    const val MULTIPLE = "multiple"
+    const val MULTIPLE_SORTED = "multipleSorted"
 
     val FileSuppress = AnnotationSpec.builder(SuppressClassName)
         .addMember("%S", "RedundantVisibilityModifier")

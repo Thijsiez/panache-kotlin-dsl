@@ -32,11 +32,11 @@ abstract class QueryComponent<Entity : PanacheEntityBase, Id : Any> internal con
 
     //region Intermediate operations
     fun and(expression: BooleanExpression) = AndQueryComponent(companion, this, expression)
-    fun or(expression: BooleanExpression) = OrQueryComponent(companion, this, expression)
-
     fun andGroup(expression: BooleanExpression,
                  groupComponent: QueryComponent<Entity, Id>.() -> QueryComponent<Entity, Id>) =
         AndGroupQueryComponent(companion, this, expression, groupComponent)
+
+    fun or(expression: BooleanExpression) = OrQueryComponent(companion, this, expression)
     fun orGroup(expression: BooleanExpression,
                 groupComponent: QueryComponent<Entity, Id>.() -> QueryComponent<Entity, Id>) =
         OrGroupQueryComponent(companion, this, expression, groupComponent)
@@ -54,10 +54,5 @@ abstract class QueryComponent<Entity : PanacheEntityBase, Id : Any> internal con
     fun getSingleSafe() = find().singleResultSafe()
     fun getMultiple() = find().list()
     fun getMultiple(sort: Sort) = find(sort).list()
-
-    fun print() = with(compile()) {
-        println("[HQL Query] $query")
-        println("[Parameters] ${parameters.entries.joinToString()}")
-    }
     //endregion
 }
