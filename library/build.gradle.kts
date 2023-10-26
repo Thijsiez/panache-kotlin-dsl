@@ -17,8 +17,11 @@
 dependencies {
     val kspVersion: String by project
     val kotlinPoetVersion: String by project
+    val compileTestingVersion: String by project
 
     implementation("com.google.devtools.ksp:symbol-processing-api:$kspVersion")
     implementation("com.squareup:kotlinpoet:$kotlinPoetVersion")
     implementation("com.squareup:kotlinpoet-ksp:$kotlinPoetVersion")
+    testImplementation("com.github.tschuchortdev:kotlin-compile-testing:$compileTestingVersion")
+    testImplementation("com.github.tschuchortdev:kotlin-compile-testing-ksp:$compileTestingVersion")
 }

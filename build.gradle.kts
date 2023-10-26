@@ -42,12 +42,15 @@ allprojects {
 configure(subprojects) {
     dependencies {
         val quarkusVersion: String by project
+        val mockitoKotlinVersion: String by project
 
         implementation(kotlin("stdlib"))
         implementation(platform("io.quarkus.platform:quarkus-bom:$quarkusVersion"))
         implementation("io.quarkus:quarkus-hibernate-orm-panache-kotlin")
         testImplementation(kotlin("test"))
         testImplementation("io.quarkus:quarkus-junit5")
+        testImplementation("io.quarkus:quarkus-junit5-mockito")
+        testImplementation("org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion")
     }
 
     tasks.test {
