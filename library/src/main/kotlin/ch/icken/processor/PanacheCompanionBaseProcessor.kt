@@ -93,7 +93,7 @@ class PanacheCompanionBaseProcessor(
         return invalid
     }
 
-    private fun createQueryBuilderExtensions(originalPackageName: String, ksClasses: List<KSClassDeclaration>,
+    internal fun createQueryBuilderExtensions(originalPackageName: String, ksClasses: List<KSClassDeclaration>,
                                              addGeneratedAnnotation: Boolean) {
         val packageName = originalPackageName + GENERATED_PACKAGE_SUFFIX
         logger.info("Generating $packageName.$EXTENSIONS_FILE")
@@ -177,7 +177,7 @@ class PanacheCompanionBaseProcessor(
                 .addAnnotation(jvmNameAnnotation("$OR_GROUP$objectName"))
             //endregion
 
-            //region
+            //region count, delete, find, stream
             val count = FunSpec.builder(COUNT)
                 .addModifiers(KModifier.INLINE)
                 .receiver(whereReceiver)

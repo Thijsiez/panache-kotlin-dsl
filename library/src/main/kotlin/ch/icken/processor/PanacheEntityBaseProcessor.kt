@@ -62,7 +62,7 @@ class PanacheEntityBaseProcessor(
         return invalid
     }
 
-    private fun createColumnNamesObject(ksClass: KSClassDeclaration, ksProperties: List<KSPropertyDeclaration>,
+    internal fun createColumnNamesObject(ksClass: KSClassDeclaration, ksProperties: List<KSPropertyDeclaration>,
                                         addGeneratedAnnotation: Boolean) {
         val packageName = ksClass.packageName.asString() + GENERATED_PACKAGE_SUFFIX
         val objectName = ksClass.simpleName.asString() + COLUMN_NAME_OBJECT_SUFFIX

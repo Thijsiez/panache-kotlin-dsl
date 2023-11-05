@@ -42,15 +42,12 @@ allprojects {
 configure(subprojects) {
     dependencies {
         val quarkusVersion: String by project
-        val mockitoKotlinVersion: String by project
+        val mockkVersion: String by project
 
-        implementation(kotlin("stdlib"))
         implementation(platform("io.quarkus.platform:quarkus-bom:$quarkusVersion"))
         implementation("io.quarkus:quarkus-hibernate-orm-panache-kotlin")
-        testImplementation(kotlin("test"))
         testImplementation("io.quarkus:quarkus-junit5")
-        testImplementation("io.quarkus:quarkus-junit5-mockito")
-        testImplementation("org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion")
+        testImplementation("io.mockk:mockk:$mockkVersion")
     }
 
     tasks.test {
@@ -63,6 +60,10 @@ configure(subprojects) {
     }
 }
 
+tasks.testCodeCoverageReport {
+    dependsOn(project(":library").tasks.jacocoTestReport)
+    dependsOn(project(":examples").tasks.jacocoTestReport)
+}
 tasks.test {
     finalizedBy(tasks.testCodeCoverageReport)
 }
