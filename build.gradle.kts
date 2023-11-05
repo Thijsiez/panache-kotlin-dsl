@@ -50,6 +50,11 @@ configure(subprojects) {
         testImplementation("io.mockk:mockk:$mockkVersion")
     }
 
+    tasks.jacocoTestReport {
+        reports {
+            xml.required = true
+        }
+    }
     tasks.test {
         useJUnitPlatform()
         finalizedBy(tasks.jacocoTestReport)
@@ -63,6 +68,10 @@ configure(subprojects) {
 tasks.testCodeCoverageReport {
     dependsOn(project(":library").tasks.jacocoTestReport)
     dependsOn(project(":examples").tasks.jacocoTestReport)
+
+    reports {
+        xml.required = true
+    }
 }
 tasks.test {
     finalizedBy(tasks.testCodeCoverageReport)
