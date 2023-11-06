@@ -16,6 +16,7 @@
 
 package ch.icken.processor
 
+import ch.icken.processor.ClassNames.StringClassName
 import ch.icken.processor.GenerationOptions.ADD_GENERATED_ANNOTATION
 import ch.icken.processor.QualifiedNames.HibernatePanacheEntityBase
 import ch.icken.processor.QualifiedNames.JakartaPersistenceColumn
@@ -24,15 +25,13 @@ import ch.icken.processor.QualifiedNames.JakartaPersistenceJoinColumn
 import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.processing.Resolver
-import com.google.devtools.ksp.symbol.KSClassDeclaration
-import com.google.devtools.ksp.symbol.KSFunctionDeclaration
-import com.google.devtools.ksp.symbol.KSPropertyDeclaration
+import com.google.devtools.ksp.symbol.*
 import com.google.devtools.ksp.validate
+import com.squareup.kotlinpoet.ksp.toClassName
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 
@@ -42,16 +41,14 @@ class PanacheEntityBaseTests : TestCommon() {
     @MockK
     private lateinit var resolver: Resolver
 
-    private lateinit var processor: PanacheEntityBaseProcessor
-
-    @BeforeEach
-    fun beforeEach() {
-        processor = spyk(PanacheEntityBaseProcessor(
-            options = mapOf(ADD_GENERATED_ANNOTATION to "false"),
-            codeGenerator = mockk<CodeGenerator>(),
-            logger = mockk<KSPLogger>()
-        ))
-    }
+    private val codeGenerator = mockk<CodeGenerator>(relaxed = true)
+    private val processor = spyk(PanacheEntityBaseProcessor(
+        options = mapOf(ADD_GENERATED_ANNOTATION to "false"),
+        codeGenerator = codeGenerator,
+        logger = mockk<KSPLogger>().also {
+            every { it.info(any()) } just Runs
+        }
+    ))
 
     //region process
     @Test
@@ -193,7 +190,9 @@ class PanacheEntityBaseTests : TestCommon() {
         val invalid = processor.process(resolver)
 
         // Then
-        verify(exactly = 0) { processor.createColumnNamesObject(any(), any(), any()) }
+        verify(exactly = 0) {
+            processor.createColumnNamesObject(any(), any(), any())
+        }
         assertEquals(0, invalid.size)
     }
 
@@ -210,7 +209,9 @@ class PanacheEntityBaseTests : TestCommon() {
         val invalid = processor.process(resolver)
 
         // Then
-        verify(exactly = 0) { processor.createColumnNamesObject(any(), any(), any()) }
+        verify(exactly = 0) {
+            processor.createColumnNamesObject(any(), any(), any())
+        }
         assertEquals(0, invalid.size)
     }
 
@@ -227,8 +228,61 @@ class PanacheEntityBaseTests : TestCommon() {
         val invalid = processor.process(resolver)
 
         // Then
-        verify(exactly = 0) { processor.createColumnNamesObject(any(), any(), any()) }
+        verify(exactly = 0) {
+            processor.createColumnNamesObject(any(), any(), any())
+        }
         assertEquals(1, invalid.size)
+    }
+    //endregion
+
+    //region createColumnNamesObject
+    @Test
+    fun testCreateColumnNamesObject() {
+
+        // Given
+        val packageName = "ch.icken.model"
+        val classPackageName = mockk<KSName>()
+        every { classPackageName.asString() } returns packageName
+
+        val classSimpleName = mockk<KSName>()
+        every { classSimpleName.asString() } returns "Employee"
+
+        val ksClass = mockk<KSClassDeclaration>()
+        every { ksClass.packageName } returns classPackageName
+        every { ksClass.simpleName } returns classSimpleName
+
+        val firstNameSimpleName = mockk<KSName>()
+        every { firstNameSimpleName.asString() } returns "firstName"
+
+        val firstNameType = mockk<KSType>()
+        every { firstNameType.toClassName() } returns StringClassName
+        every { firstNameType.isMarkedNullable } returns false
+
+        val firstNameTypeReference = mockk<KSTypeReference>()
+        every { firstNameTypeReference.resolve() } returns firstNameType
+
+        val firstName = mockk<KSPropertyDeclaration>()
+        every { firstName.simpleName } returns firstNameSimpleName
+        every { firstName.hasAnnotation(eq(JakartaPersistenceJoinColumn)) } returns false
+        every { firstName.type } returns firstNameTypeReference
+
+        val departmentSimpleName = mockk<KSName>()
+        every { departmentSimpleName.asString() } returns "department"
+
+        val department = mockk<KSPropertyDeclaration>()
+        every { department.simpleName } returns departmentSimpleName
+        every { department.hasAnnotation(eq(JakartaPersistenceJoinColumn)) } returns true
+        every { department.typeName } returns "Department"
+
+        val ksProperties = listOf(firstName, department)
+
+        // When
+        processor.createColumnNamesObject(ksClass, ksProperties, true)
+
+        // Then
+        verify(exactly = 1) {
+            codeGenerator.createNewFile(any(), any(), any())
+        }
     }
     //endregion
 }

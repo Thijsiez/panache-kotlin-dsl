@@ -84,19 +84,19 @@ class PanacheEntityBaseProcessor(
                 primaryConstructor(constructorBuilder.build())
 
                 // Generate properties
-                ksProperties.forEach { ksPropertyDeclaration ->
-                    val propertyName = ksPropertyDeclaration.simpleName.asString()
-                    val isJoinColumn = ksPropertyDeclaration.hasAnnotation(JakartaPersistenceJoinColumn)
+                ksProperties.forEach { ksProperty ->
+                    val propertyName = ksProperty.simpleName.asString()
+                    val isJoinColumn = ksProperty.hasAnnotation(JakartaPersistenceJoinColumn)
 
                     val propertyBuilder = if (isJoinColumn) {
-                        val joinObjectName = ksPropertyDeclaration.typeName + COLUMN_NAME_OBJECT_SUFFIX
+                        val joinObjectName = ksProperty.typeName + COLUMN_NAME_OBJECT_SUFFIX
                         val joinBaseClassName = joinObjectName + COLUMN_NAME_BASE_CLASS_SUFFIX
                         val joinBaseClass = ClassName(packageName, joinBaseClassName)
 
                         PropertySpec.builder(propertyName, joinBaseClass)
                             .initializer("%T(%S)", joinBaseClass, "$propertyName.")
                     } else {
-                        val ksPropertyType = ksPropertyDeclaration.type.resolve()
+                        val ksPropertyType = ksProperty.type.resolve()
                         val columnNameParameterType = ksPropertyType.toClassName()
                             .copy(nullable = ksPropertyType.isMarkedNullable)
 

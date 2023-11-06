@@ -18,6 +18,7 @@ package ch.icken.processor
 
 import com.google.devtools.ksp.symbol.*
 import com.google.devtools.ksp.validate
+import com.squareup.kotlinpoet.ksp.toClassName
 import io.mockk.mockkStatic
 import org.junit.jupiter.api.BeforeAll
 
@@ -29,8 +30,11 @@ abstract class TestCommon {
             mockkStatic(KSAnnotated::hasAnnotation)
             mockkStatic(KSAnnotation::isClass)
             mockkStatic(KSClassDeclaration::isSubclass)
+            mockkStatic(KSClassDeclaration::toClassName)
             mockkStatic(KSDeclaration::isClass)
             mockkStatic(KSNode::validate)
+            mockkStatic(KSPropertyDeclaration::typeName)
+            mockkStatic(KSType::toClassName)
         }
     }
 }

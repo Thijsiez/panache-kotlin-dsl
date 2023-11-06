@@ -16,22 +16,23 @@
 
 package ch.icken.processor
 
+import ch.icken.processor.ClassNames.LongClassName
 import ch.icken.processor.GenerationOptions.ADD_GENERATED_ANNOTATION
 import ch.icken.processor.QualifiedNames.HibernatePanacheCompanionBase
 import ch.icken.processor.QualifiedNames.HibernatePanacheEntityBase
 import ch.icken.processor.QualifiedNames.JakartaPersistenceEntity
+import ch.icken.processor.QualifiedNames.JakartaPersistenceId
 import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.processing.Resolver
-import com.google.devtools.ksp.symbol.KSClassDeclaration
-import com.google.devtools.ksp.symbol.KSFunctionDeclaration
-import com.google.devtools.ksp.symbol.KSName
+import com.google.devtools.ksp.symbol.*
 import com.google.devtools.ksp.validate
+import com.squareup.kotlinpoet.ClassName
+import com.squareup.kotlinpoet.ksp.toClassName
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 
@@ -41,16 +42,14 @@ class PanacheCompanionBaseTests : TestCommon() {
     @MockK
     private lateinit var resolver: Resolver
 
-    private lateinit var processor: PanacheCompanionBaseProcessor
-
-    @BeforeEach
-    fun beforeEach() {
-        processor = spyk(PanacheCompanionBaseProcessor(
-            options = mapOf(ADD_GENERATED_ANNOTATION to "false"),
-            codeGenerator = mockk<CodeGenerator>(),
-            logger = mockk<KSPLogger>()
-        ))
-    }
+    private val codeGenerator = mockk<CodeGenerator>(relaxed = true)
+    private val processor = spyk(PanacheCompanionBaseProcessor(
+        options = mapOf(ADD_GENERATED_ANNOTATION to "false"),
+        codeGenerator = codeGenerator,
+        logger = mockk<KSPLogger>().also {
+            every { it.info(any()) } just Runs
+        }
+    ))
 
     //region process
     @Test
@@ -111,7 +110,9 @@ class PanacheCompanionBaseTests : TestCommon() {
         val invalid = processor.process(resolver)
 
         // Then
-        verify(exactly = 0) { processor.createQueryBuilderExtensions(any(), any(), any()) }
+        verify(exactly = 0) {
+            processor.createQueryBuilderExtensions(any(), any(), any())
+        }
         assertEquals(0, invalid.size)
     }
 
@@ -133,7 +134,9 @@ class PanacheCompanionBaseTests : TestCommon() {
         val invalid = processor.process(resolver)
 
         // Then
-        verify(exactly = 0) { processor.createQueryBuilderExtensions(any(), any(), any()) }
+        verify(exactly = 0) {
+            processor.createQueryBuilderExtensions(any(), any(), any())
+        }
         assertEquals(0, invalid.size)
     }
 
@@ -154,7 +157,9 @@ class PanacheCompanionBaseTests : TestCommon() {
         val invalid = processor.process(resolver)
 
         // Then
-        verify(exactly = 0) { processor.createQueryBuilderExtensions(any(), any(), any()) }
+        verify(exactly = 0) {
+            processor.createQueryBuilderExtensions(any(), any(), any())
+        }
         assertEquals(0, invalid.size)
     }
 
@@ -173,7 +178,9 @@ class PanacheCompanionBaseTests : TestCommon() {
         val invalid = processor.process(resolver)
 
         // Then
-        verify(exactly = 0) { processor.createQueryBuilderExtensions(any(), any(), any()) }
+        verify(exactly = 0) {
+            processor.createQueryBuilderExtensions(any(), any(), any())
+        }
         assertEquals(0, invalid.size)
     }
 
@@ -191,7 +198,9 @@ class PanacheCompanionBaseTests : TestCommon() {
         val invalid = processor.process(resolver)
 
         // Then
-        verify(exactly = 0) { processor.createQueryBuilderExtensions(any(), any(), any()) }
+        verify(exactly = 0) {
+            processor.createQueryBuilderExtensions(any(), any(), any())
+        }
         assertEquals(0, invalid.size)
     }
 
@@ -208,7 +217,9 @@ class PanacheCompanionBaseTests : TestCommon() {
         val invalid = processor.process(resolver)
 
         // Then
-        verify(exactly = 0) { processor.createQueryBuilderExtensions(any(), any(), any()) }
+        verify(exactly = 0) {
+            processor.createQueryBuilderExtensions(any(), any(), any())
+        }
         assertEquals(0, invalid.size)
     }
 
@@ -225,8 +236,49 @@ class PanacheCompanionBaseTests : TestCommon() {
         val invalid = processor.process(resolver)
 
         // Then
-        verify(exactly = 0) { processor.createQueryBuilderExtensions(any(), any(), any()) }
+        verify(exactly = 0) {
+            processor.createQueryBuilderExtensions(any(), any(), any())
+        }
         assertEquals(1, invalid.size)
+    }
+    //endregion
+
+    //region createQueryBuilderExtensions
+    @Test
+    fun testCreateQueryBuilderExtensions() {
+
+        // Given
+        val packageName = "ch.icken.model"
+        val simpleName = "Employee"
+        val className = ClassName(packageName, simpleName)
+
+        val classSimpleName = mockk<KSName>()
+        every { classSimpleName.asString() } returns simpleName
+
+        val idPropertyType = mockk<KSType>()
+        every { idPropertyType.toClassName() } returns LongClassName
+
+        val idPropertyTypeReference = mockk<KSTypeReference>()
+        every { idPropertyTypeReference.resolve() } returns idPropertyType
+
+        val idProperty = mockk<KSPropertyDeclaration>()
+        every { idProperty.hasAnnotation(eq(JakartaPersistenceId)) } returns true
+        every { idProperty.type } returns idPropertyTypeReference
+
+        val ksClass = mockk<KSClassDeclaration>()
+        every { ksClass.toClassName() } returns className
+        every { ksClass.simpleName } returns classSimpleName
+        every { ksClass.getAllProperties() } returns sequenceOf(idProperty)
+
+        val ksClasses = listOf(ksClass)
+
+        // When
+        processor.createQueryBuilderExtensions(packageName, ksClasses, false)
+
+        // Then
+        verify(exactly = 1) {
+            codeGenerator.createNewFile(any(), any(), any())
+        }
     }
     //endregion
 }
