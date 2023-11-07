@@ -14,23 +14,4 @@
  * limitations under the License.
  */
 
-plugins {
-    id("io.quarkus")
-    kotlin("plugin.allopen")
-    kotlin("plugin.jpa")
-    id("com.google.devtools.ksp")
-}
-
-dependencies {
-    implementation(project(":library"))
-    ksp(project(":library"))
-    testImplementation("io.quarkus:quarkus-jdbc-h2")
-}
-
-allOpen {
-    annotation("jakarta.persistence.Entity")
-}
-
-ksp {
-    arg("addGeneratedAnnotation", "false")
-}
+package ch.icken
