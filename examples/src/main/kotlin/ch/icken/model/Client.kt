@@ -30,7 +30,7 @@ class Client(
 ) : PanacheEntity() {
 
     @OneToMany(cascade = [CascadeType.ALL], mappedBy = "client", orphanRemoval = true)
-    val assignments = HashSet<Assignment>()
+    val assignments: MutableSet<Assignment> = HashSet()
 
     operator fun plusAssign(assignment: Assignment) {
         assignments.add(assignment)

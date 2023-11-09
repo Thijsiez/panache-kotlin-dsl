@@ -30,7 +30,7 @@ class Department(
 ) : PanacheEntity() {
 
     @OneToMany(cascade = [CascadeType.ALL], mappedBy = "department", orphanRemoval = true)
-    val employees = HashSet<Employee>()
+    val employees: MutableSet<Employee> = HashSet()
 
     operator fun plusAssign(employee: Employee) {
         employees.add(employee)

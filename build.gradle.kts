@@ -51,6 +51,7 @@ configure(subprojects) {
     }
 
     tasks.jacocoTestReport {
+        finalizedBy(tasks.jacocoTestCoverageVerification)
         reports {
             xml.required = true
         }
@@ -68,6 +69,7 @@ configure(subprojects) {
 tasks.testCodeCoverageReport {
     dependsOn(project(":library").tasks.jacocoTestReport)
     dependsOn(project(":examples").tasks.jacocoTestReport)
+    finalizedBy(tasks.jacocoTestCoverageVerification)
 
     reports {
         xml.required = true

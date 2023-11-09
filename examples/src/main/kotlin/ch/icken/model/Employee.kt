@@ -19,7 +19,7 @@ package ch.icken.model
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanion
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntity
 import jakarta.persistence.*
-import java.time.LocalDateTime
+import java.time.LocalDate
 
 @Entity
 @Table(name = "EMPLOYEE")
@@ -39,7 +39,7 @@ class Employee(
     var gender: Gender,
 
     @Column(name = "BIRTH_DATE", nullable = false, updatable = false)
-    var birthDate: LocalDateTime,
+    var birthDate: LocalDate,
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "DEPARTMENT_ID", nullable = false)

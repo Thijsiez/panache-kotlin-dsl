@@ -29,7 +29,7 @@ sealed class BooleanExpression private constructor(
     )
 
     companion object {
-        private const val CHARS = "0123456789" +
+        private const val CHARS = //"0123456789" +
                 "abcdefghijklmnopqrstuvwxyz" +
                 "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 

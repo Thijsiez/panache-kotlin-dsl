@@ -32,5 +32,5 @@ allOpen {
 }
 
 ksp {
-    arg("addGeneratedAnnotation", "false")
+    arg("addGeneratedAnnotation", "true")
 }
