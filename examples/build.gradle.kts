@@ -34,3 +34,7 @@ allOpen {
 ksp {
     arg("addGeneratedAnnotation", "true")
 }
+
+tasks.jacocoTestReport {
+    sourceSets(project(":library").sourceSets.getByName("main"))
+}

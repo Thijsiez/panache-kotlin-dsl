@@ -17,8 +17,6 @@
 plugins {
     kotlin("jvm")
     jacoco
-    `jvm-test-suite`
-    `jacoco-report-aggregation`
     id("org.sonarqube")
 }
 
@@ -64,19 +62,6 @@ configure(subprojects) {
     kotlin {
         jvmToolchain(11)
     }
-}
-
-tasks.testCodeCoverageReport {
-    dependsOn(project(":library").tasks.jacocoTestReport)
-    dependsOn(project(":examples").tasks.jacocoTestReport)
-    finalizedBy(tasks.jacocoTestCoverageVerification)
-
-    reports {
-        xml.required = true
-    }
-}
-tasks.test {
-    finalizedBy(tasks.testCodeCoverageReport)
 }
 
 project.afterEvaluate {
