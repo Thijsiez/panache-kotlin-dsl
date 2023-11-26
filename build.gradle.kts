@@ -16,13 +16,8 @@
 
 plugins {
     kotlin("jvm")
-    jacoco
     id("org.sonarqube")
-}
-
-dependencies {
-    implementation(project(":library"))
-    implementation(project(":examples"))
+    jacoco
 }
 
 allprojects {
@@ -49,8 +44,10 @@ configure(subprojects) {
     }
 
     tasks.jacocoTestReport {
+        dependsOn(tasks.test)
         finalizedBy(tasks.jacocoTestCoverageVerification)
         reports {
+            html.required = true
             xml.required = true
         }
     }
@@ -62,6 +59,30 @@ configure(subprojects) {
     kotlin {
         jvmToolchain(11)
     }
+}
+
+val mergeReportsTaskName = "merged"
+tasks.register<JacocoReport>(mergeReportsTaskName) {
+    dependsOn(project(":library").tasks.jacocoTestReport)
+    dependsOn(project(":examples").tasks.jacocoTestReport)
+
+    executionData.setFrom(
+        fileTree(project.layout.projectDirectory)
+            .apply { include("**/jacoco/*.exec") }
+    )
+    sourceSets(
+        project(":library").sourceSets["main"],
+        project(":examples").sourceSets["main"]
+    )
+
+    reports {
+        html.required = true
+        xml.required = true
+    }
+}
+tasks.test {
+    useJUnitPlatform()
+    finalizedBy(tasks[mergeReportsTaskName])
 }
 
 project.afterEvaluate {

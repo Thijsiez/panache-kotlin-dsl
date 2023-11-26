@@ -36,5 +36,5 @@ ksp {
 }
 
 tasks.jacocoTestReport {
-    sourceSets(project(":library").sourceSets.getByName("main"))
+    sourceSets(project(":library").sourceSets["main"])
 }
