@@ -61,30 +61,12 @@ configure(subprojects) {
     }
 }
 
-val mergeReportsTaskName = "merged"
-tasks.register<JacocoReport>(mergeReportsTaskName) {
-    dependsOn(project(":library").tasks.jacocoTestReport)
-    dependsOn(project(":examples").tasks.jacocoTestReport)
-
-    executionData.setFrom(
-        fileTree(project.layout.projectDirectory)
-            .apply { include("**/jacoco/*.exec") }
-    )
-    sourceSets(
-        project(":library").sourceSets["main"],
-        project(":examples").sourceSets["main"]
-    )
-
-    reports {
-        html.required = true
-        xml.required = true
-    }
-}
 tasks.test {
     useJUnitPlatform()
-    finalizedBy(tasks[mergeReportsTaskName])
 }
 
+//Fixes issue with circular task dependency,
+//see https://github.com/quarkusio/quarkus/issues/29698#issuecomment-1671861607
 project.afterEvaluate {
     getTasksByName("quarkusGenerateCode", true).forEach { task ->
         task.setDependsOn(task.dependsOn.filterIsInstance<Provider<Task>>()
