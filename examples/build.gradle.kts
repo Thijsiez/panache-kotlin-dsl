@@ -35,6 +35,11 @@ ksp {
     arg("addGeneratedAnnotation", "true")
 }
 
-tasks.jacocoTestReport {
-    sourceSets(project(":library").sourceSets["main"])
+tasks.compileKotlin {
+    dependsOn(tasks.compileQuarkusGeneratedSourcesJava)
+}
+tasks.configureEach {
+    if (name == "kspKotlin") {
+        dependsOn(tasks.compileQuarkusGeneratedSourcesJava)
+    }
 }

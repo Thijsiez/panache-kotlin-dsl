@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Thijs Koppen
+ * Copyright 2023-2024 Thijs Koppen
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ pluginManagement {
     val quarkusVersion: String by settings
     val kotlinVersion: String by settings
     val kspVersion: String by settings
+    val koverVersion: String by settings
     val sonarqubeVersion: String by settings
 
     repositories {
@@ -31,6 +32,7 @@ pluginManagement {
         kotlin("plugin.allopen") version kotlinVersion
         kotlin("plugin.jpa") version kotlinVersion
         id("com.google.devtools.ksp") version kspVersion
+        id("org.jetbrains.kotlinx.kover") version koverVersion
         id("org.sonarqube") version sonarqubeVersion
     }
 }

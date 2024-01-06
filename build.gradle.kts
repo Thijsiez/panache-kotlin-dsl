@@ -16,13 +16,18 @@
 
 plugins {
     kotlin("jvm")
+    id("org.jetbrains.kotlinx.kover")
     id("org.sonarqube")
-    jacoco
+}
+
+dependencies {
+    kover(project(":examples"))
+    kover(project(":library"))
 }
 
 allprojects {
     apply(plugin = "kotlin")
-    apply(plugin = "jacoco")
+    apply(plugin = "org.jetbrains.kotlinx.kover")
 
     group = "ch.icken"
     version = "0.1.0-SNAPSHOT"
@@ -46,12 +51,6 @@ configure(subprojects) {
     tasks.test {
         useJUnitPlatform()
     }
-    tasks.jacocoTestReport {
-        reports {
-            html.required = true
-            xml.required = true
-        }
-    }
 
     kotlin {
         jvmToolchain(11)
@@ -60,6 +59,17 @@ configure(subprojects) {
 
 tasks.test {
     useJUnitPlatform()
+}
+
+koverReport {
+    filters {
+        includes {
+            packages(
+                "ch.icken.processor",
+                "ch.icken.query"
+            )
+        }
+    }
 }
 
 //Fixes issue with circular task dependency,
@@ -72,12 +82,5 @@ project.afterEvaluate {
     getTasksByName("quarkusGenerateCodeDev", true).forEach { task ->
         task.setDependsOn(task.dependsOn.filterIsInstance<Provider<Task>>()
             .filterNot { it.get().name == "processResources" })
-    }
-}
-
-sonar {
-    properties {
-        property("sonar.projectKey", "Thijsiez_panache-kotlin-dsl_AYsggGcmXmm3_FAoLWCF")
-        property("sonar.projectName", "panache-kotlin-dsl")
     }
 }
