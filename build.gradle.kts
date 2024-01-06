@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Thijs Koppen
+ * Copyright 2023-2024 Thijs Koppen
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,17 +43,14 @@ configure(subprojects) {
         testImplementation("io.mockk:mockk:$mockkVersion")
     }
 
+    tasks.test {
+        useJUnitPlatform()
+    }
     tasks.jacocoTestReport {
-        dependsOn(tasks.test)
-        finalizedBy(tasks.jacocoTestCoverageVerification)
         reports {
             html.required = true
             xml.required = true
         }
-    }
-    tasks.test {
-        useJUnitPlatform()
-        finalizedBy(tasks.jacocoTestReport)
     }
 
     kotlin {

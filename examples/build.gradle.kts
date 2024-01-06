@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Thijs Koppen
+ * Copyright 2023-2024 Thijs Koppen
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ plugins {
 dependencies {
     implementation(project(":library"))
     ksp(project(":library"))
-    testImplementation("io.quarkus:quarkus-jdbc-h2")
+    implementation("io.quarkus:quarkus-jdbc-h2")
 }
 
 allOpen {
