@@ -84,3 +84,11 @@ project.afterEvaluate {
             .filterNot { it.get().name == "processResources" })
     }
 }
+
+sonar {
+    properties {
+        property("sonar.projectKey", "Thijsiez_panache-kotlin-dsl_AYsggGcmXmm3_FAoLWCF")
+        property("sonar.projectName", "panache-kotlin-dsl")
+        property("sonar.coverage.jacoco.xmlReportPaths", "build/reports/kover/report.xml")
+    }
+}
