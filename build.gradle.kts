@@ -61,17 +61,6 @@ tasks.test {
     useJUnitPlatform()
 }
 
-koverReport {
-    filters {
-        includes {
-            packages(
-                "ch.icken.processor",
-                "ch.icken.query"
-            )
-        }
-    }
-}
-
 //Fixes issue with circular task dependency,
 //see https://github.com/quarkusio/quarkus/issues/29698#issuecomment-1671861607
 project.afterEvaluate {
@@ -89,6 +78,6 @@ sonar {
     properties {
         property("sonar.projectKey", "Thijsiez_panache-kotlin-dsl_AYsggGcmXmm3_FAoLWCF")
         property("sonar.projectName", "panache-kotlin-dsl")
-        property("sonar.coverage.jacoco.xmlReportPaths", "build/reports/kover/report.xml")
+        property("sonar.coverage.jacoco.xmlReportPaths", "**/build/reports/kover/report.xml")
     }
 }

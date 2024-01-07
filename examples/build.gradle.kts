@@ -25,6 +25,7 @@ dependencies {
     implementation(project(":library"))
     ksp(project(":library"))
     implementation("io.quarkus:quarkus-jdbc-h2")
+    kover(project(":library"))
 }
 
 allOpen {
