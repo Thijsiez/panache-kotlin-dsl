@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Thijs Koppen
+ * Copyright 2023-2024 Thijs Koppen
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,8 +100,8 @@ class PanacheCompanionBaseProcessor(
 
         val funSpecs = ksClasses.flatMap { ksClass ->
             val className = ksClass.toClassName()
-            val objectName = ksClass.simpleName.asString() + COLUMN_NAME_OBJECT_SUFFIX
-            val objectClassName = ClassName(packageName, objectName)
+            val classSimpleName = ksClass.simpleName.asString()
+            val objectClassName = ClassName(packageName, classSimpleName + COLUMN_NAME_OBJECT_SUFFIX)
 
             val idClassName = ksClass.getAllProperties()
                 .filter { it.hasAnnotation(JakartaPersistenceId) }
@@ -130,7 +130,7 @@ class PanacheCompanionBaseProcessor(
                 .returns(queryComponentType)
                 .addStatement("return %M($EXPRESSION_PARAM_NAME(%T))",
                     MemberName(QueryComponentClassName.packageName, WHERE), objectClassName)
-                .addAnnotation(jvmNameAnnotation("$WHERE$objectName"))
+                .addAnnotation(jvmNameAnnotation("$WHERE$classSimpleName"))
             val whereGroup = FunSpec.builder(WHERE_GROUP)
                 .receiver(whereReceiver)
                 .addParameter(EXPRESSION_PARAM_NAME, expressionParameterType)
@@ -138,7 +138,7 @@ class PanacheCompanionBaseProcessor(
                 .returns(queryComponentType)
                 .addStatement("return %M($EXPRESSION_PARAM_NAME(%T), $GROUP_COMPONENT_PARAM_NAME)",
                     MemberName(QueryComponentClassName.packageName, WHERE_GROUP), objectClassName)
-                .addAnnotation(jvmNameAnnotation("$WHERE_GROUP$objectName"))
+                .addAnnotation(jvmNameAnnotation("$WHERE_GROUP$classSimpleName"))
             //endregion
 
             //region and
@@ -148,7 +148,7 @@ class PanacheCompanionBaseProcessor(
                 .addParameter(EXPRESSION_PARAM_NAME, expressionParameterType)
                 .returns(AndQueryComponentClassName.plusParameter(className).plusParameter(idClassName))
                 .addStatement("return $AND($EXPRESSION_PARAM_NAME(%T))", objectClassName)
-                .addAnnotation(jvmNameAnnotation("$AND$objectName"))
+                .addAnnotation(jvmNameAnnotation("$AND$classSimpleName"))
             val andGroup = FunSpec.builder(AND_GROUP)
                 .receiver(queryComponentType)
                 .addParameter(EXPRESSION_PARAM_NAME, expressionParameterType)
@@ -156,7 +156,7 @@ class PanacheCompanionBaseProcessor(
                 .returns(queryComponentType)
                 .addStatement("return $AND_GROUP($EXPRESSION_PARAM_NAME(%T), $GROUP_COMPONENT_PARAM_NAME)",
                     objectClassName)
-                .addAnnotation(jvmNameAnnotation("$AND_GROUP$objectName"))
+                .addAnnotation(jvmNameAnnotation("$AND_GROUP$classSimpleName"))
             //endregion
 
             //region or
@@ -166,7 +166,7 @@ class PanacheCompanionBaseProcessor(
                 .addParameter(EXPRESSION_PARAM_NAME, expressionParameterType)
                 .returns(OrQueryComponentClassName.plusParameter(className).plusParameter(idClassName))
                 .addStatement("return $OR($EXPRESSION_PARAM_NAME(%T))", objectClassName)
-                .addAnnotation(jvmNameAnnotation("$OR$objectName"))
+                .addAnnotation(jvmNameAnnotation("$OR$classSimpleName"))
             val orGroup = FunSpec.builder(OR_GROUP)
                 .receiver(queryComponentType)
                 .addParameter(EXPRESSION_PARAM_NAME, expressionParameterType)
@@ -174,7 +174,7 @@ class PanacheCompanionBaseProcessor(
                 .returns(queryComponentType)
                 .addStatement("return $OR_GROUP($EXPRESSION_PARAM_NAME(%T), $GROUP_COMPONENT_PARAM_NAME)",
                     objectClassName)
-                .addAnnotation(jvmNameAnnotation("$OR_GROUP$objectName"))
+                .addAnnotation(jvmNameAnnotation("$OR_GROUP$classSimpleName"))
             //endregion
 
             //region count, delete, find, stream
@@ -184,7 +184,7 @@ class PanacheCompanionBaseProcessor(
                 .addParameter(EXPRESSION_PARAM_NAME, expressionParameterType)
                 .returns(LongClassName)
                 .addStatement("return $WHERE($EXPRESSION_PARAM_NAME).$COUNT()")
-                .addAnnotation(jvmNameAnnotation("$COUNT$objectName"))
+                .addAnnotation(jvmNameAnnotation("$COUNT$classSimpleName"))
 
             val delete = FunSpec.builder(DELETE)
                 .addModifiers(KModifier.INLINE)
@@ -192,7 +192,7 @@ class PanacheCompanionBaseProcessor(
                 .addParameter(EXPRESSION_PARAM_NAME, expressionParameterType)
                 .returns(LongClassName)
                 .addStatement("return $WHERE($EXPRESSION_PARAM_NAME).$DELETE()")
-                .addAnnotation(jvmNameAnnotation("$DELETE$objectName"))
+                .addAnnotation(jvmNameAnnotation("$DELETE$classSimpleName"))
 
             val findReturns = PanacheQueryClassName.plusParameter(className)
             val find = FunSpec.builder(FIND)
@@ -201,7 +201,7 @@ class PanacheCompanionBaseProcessor(
                 .addParameter(EXPRESSION_PARAM_NAME, expressionParameterType)
                 .returns(findReturns)
                 .addStatement("return $WHERE($EXPRESSION_PARAM_NAME).$FIND()")
-                .addAnnotation(jvmNameAnnotation("$FIND$objectName"))
+                .addAnnotation(jvmNameAnnotation("$FIND$classSimpleName"))
             val findSorted = FunSpec.builder(FIND)
                 .addModifiers(KModifier.INLINE)
                 .receiver(whereReceiver)
@@ -209,7 +209,7 @@ class PanacheCompanionBaseProcessor(
                 .addParameter(EXPRESSION_PARAM_NAME, expressionParameterType)
                 .returns(findReturns)
                 .addStatement("return $WHERE($EXPRESSION_PARAM_NAME).$FIND($SORT_PARAM_NAME)")
-                .addAnnotation(jvmNameAnnotation("$FIND_SORTED$objectName"))
+                .addAnnotation(jvmNameAnnotation("$FIND_SORTED$classSimpleName"))
 
             val streamReturn = StreamClassName.plusParameter(className)
             val stream = FunSpec.builder(STREAM)
@@ -218,7 +218,7 @@ class PanacheCompanionBaseProcessor(
                 .addParameter(EXPRESSION_PARAM_NAME, expressionParameterType)
                 .returns(streamReturn)
                 .addStatement("return $WHERE($EXPRESSION_PARAM_NAME).$STREAM()")
-                .addAnnotation(jvmNameAnnotation("$STREAM$objectName"))
+                .addAnnotation(jvmNameAnnotation("$STREAM$classSimpleName"))
             val streamSorted = FunSpec.builder(STREAM)
                 .addModifiers(KModifier.INLINE)
                 .receiver(whereReceiver)
@@ -226,7 +226,7 @@ class PanacheCompanionBaseProcessor(
                 .addParameter(EXPRESSION_PARAM_NAME, expressionParameterType)
                 .returns(streamReturn)
                 .addStatement("return $WHERE($EXPRESSION_PARAM_NAME).$STREAM($SORT_PARAM_NAME)")
-                .addAnnotation(jvmNameAnnotation("$STREAM_SORTED$objectName"))
+                .addAnnotation(jvmNameAnnotation("$STREAM_SORTED$classSimpleName"))
             //endregion
 
             //region single
@@ -236,14 +236,14 @@ class PanacheCompanionBaseProcessor(
                 .addParameter(EXPRESSION_PARAM_NAME, expressionParameterType)
                 .returns(className)
                 .addStatement("return $WHERE($EXPRESSION_PARAM_NAME).getSingle()")
-                .addAnnotation(jvmNameAnnotation("$SINGLE$objectName"))
+                .addAnnotation(jvmNameAnnotation("$SINGLE$classSimpleName"))
             val singleSafe = FunSpec.builder(SINGLE_SAFE)
                 .addModifiers(KModifier.INLINE)
                 .receiver(whereReceiver)
                 .addParameter(EXPRESSION_PARAM_NAME, expressionParameterType)
                 .returns(PanacheSingleResultClassName.plusParameter(WildcardTypeName.producerOf(className)))
                 .addStatement("return $WHERE($EXPRESSION_PARAM_NAME).getSingleSafe()")
-                .addAnnotation(jvmNameAnnotation("$SINGLE_SAFE$objectName"))
+                .addAnnotation(jvmNameAnnotation("$SINGLE_SAFE$classSimpleName"))
             //endregion
 
             //region multiple
@@ -254,7 +254,7 @@ class PanacheCompanionBaseProcessor(
                 .addParameter(EXPRESSION_PARAM_NAME, expressionParameterType)
                 .returns(multipleReturns)
                 .addStatement("return $WHERE($EXPRESSION_PARAM_NAME).getMultiple()")
-                .addAnnotation(jvmNameAnnotation("$MULTIPLE$objectName"))
+                .addAnnotation(jvmNameAnnotation("$MULTIPLE$classSimpleName"))
             val multipleSorted = FunSpec.builder(MULTIPLE)
                 .addModifiers(KModifier.INLINE)
                 .receiver(whereReceiver)
@@ -262,7 +262,7 @@ class PanacheCompanionBaseProcessor(
                 .addParameter(EXPRESSION_PARAM_NAME, expressionParameterType)
                 .returns(multipleReturns)
                 .addStatement("return $WHERE($EXPRESSION_PARAM_NAME).getMultiple($SORT_PARAM_NAME)")
-                .addAnnotation(jvmNameAnnotation("$MULTIPLE_SORTED$objectName"))
+                .addAnnotation(jvmNameAnnotation("$MULTIPLE_SORTED$classSimpleName"))
             //endregion
 
             listOf(where, whereGroup, and, andGroup, or, orGroup,
