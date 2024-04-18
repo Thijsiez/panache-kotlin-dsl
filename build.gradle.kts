@@ -53,7 +53,7 @@ configure(subprojects) {
     }
 
     kotlin {
-        jvmToolchain(11)
+        jvmToolchain(17)
     }
 }
 
