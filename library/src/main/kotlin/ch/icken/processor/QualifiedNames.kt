@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Thijs Koppen
+ * Copyright 2023-2024 Thijs Koppen
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,16 +18,16 @@ package ch.icken.processor
 
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.Id
-import jakarta.persistence.JoinColumn
+import jakarta.persistence.*
 
 internal object QualifiedNames {
     val HibernatePanacheCompanionBase: String = PanacheCompanionBase::class.java.name
     val HibernatePanacheEntityBase: String = PanacheEntityBase::class.java.name
-    val JakartaPersistenceColumn: String = Column::class.java.name
     val JakartaPersistenceEntity: String = Entity::class.java.name
     val JakartaPersistenceId: String = Id::class.java.name
     val JakartaPersistenceJoinColumn: String = JoinColumn::class.java.name
+    val JakartaPersistenceManyToMany: String = ManyToMany::class.java.name
+    val JakartaPersistenceOneToMany: String = OneToMany::class.java.name
+    val JakartaPersistenceOneToOne: String = OneToOne::class.java.name
+    val JakartaPersistenceTransient: String = Transient::class.java.name
 }

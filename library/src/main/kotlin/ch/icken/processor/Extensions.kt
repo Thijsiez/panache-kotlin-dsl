@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Thijs Koppen
+ * Copyright 2023-2024 Thijs Koppen
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,14 +25,22 @@ internal fun KSDeclaration.isClass(qualifiedClassName: String): Boolean =
     qualifiedName?.asString() == qualifiedClassName
 
 internal fun KSClassDeclaration.isSubclass(qualifiedSuperclassName: String): Boolean =
-    getAllSuperTypes().map { it.declaration }
-        .any { it.isClass(qualifiedSuperclassName) }
+    getAllSuperTypes().map { it.declaration }.any { it.isClass(qualifiedSuperclassName) }
 
-internal fun KSAnnotation.isClass(qualifiedAnnotationName: String): Boolean =
-    annotationType.resolve().declaration.isClass(qualifiedAnnotationName)
+internal fun KSAnnotation.isClass(qualifiedAnnotationClassName: String): Boolean =
+    annotationType.resolve().declaration.isClass(qualifiedAnnotationClassName)
 
-internal fun KSAnnotated.hasAnnotation(qualifiedAnnotationName: String): Boolean =
-    annotations.any { it.isClass(qualifiedAnnotationName) }
+internal fun KSAnnotated.hasAnnotation(qualifiedAnnotationClassName: String): Boolean =
+    annotations.any { it.isClass(qualifiedAnnotationClassName) }
+
+internal fun KSAnnotated.annotation(qualifiedAnnotationClassName: String): KSAnnotation? =
+    annotations.filter { it.isClass(qualifiedAnnotationClassName) }.singleOrNull()
+
+internal fun KSAnnotation?.nonDefaultParameter(parameterName: String): Boolean {
+    if (this == null) return false
+    return defaultArguments.find { it.name?.asString() == parameterName }?.value !=
+            arguments.find { it.name?.asString() == parameterName }?.value
+}
 
 internal val KSPropertyDeclaration.typeName: String
     get() = type.resolve().declaration.simpleName.asString()

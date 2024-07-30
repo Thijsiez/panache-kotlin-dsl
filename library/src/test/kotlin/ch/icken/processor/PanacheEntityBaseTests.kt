@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Thijs Koppen
+ * Copyright 2023-2024 Thijs Koppen
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,11 @@ package ch.icken.processor
 
 import ch.icken.processor.ClassNames.StringClassName
 import ch.icken.processor.GenerationOptions.ADD_GENERATED_ANNOTATION
+import ch.icken.processor.PanacheEntityBaseProcessor.Companion.MAPPED_BY
 import ch.icken.processor.QualifiedNames.HibernatePanacheEntityBase
-import ch.icken.processor.QualifiedNames.JakartaPersistenceColumn
 import ch.icken.processor.QualifiedNames.JakartaPersistenceEntity
 import ch.icken.processor.QualifiedNames.JakartaPersistenceJoinColumn
+import ch.icken.processor.QualifiedNames.JakartaPersistenceTransient
 import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.processing.Resolver
@@ -56,7 +57,8 @@ class PanacheEntityBaseTests : TestCommon() {
 
         // Given
         val columnProperty = mockk<KSPropertyDeclaration>()
-        every { columnProperty.hasAnnotation(eq(JakartaPersistenceColumn)) } returns true
+        every { columnProperty.hasAnnotation(eq(JakartaPersistenceTransient)) } returns false
+        every { columnProperty.annotation(any()).nonDefaultParameter(eq(MAPPED_BY)) } returns false
 
         val validClass = mockk<KSClassDeclaration>()
         every { validClass.validate(any()) } returns true
@@ -85,46 +87,11 @@ class PanacheEntityBaseTests : TestCommon() {
     }
 
     @Test
-    fun testProcessValidWithJoinColumn() {
+    fun testProcessValidWithTransientProperty() {
 
         // Given
         val columnProperty = mockk<KSPropertyDeclaration>()
-        every { columnProperty.hasAnnotation(eq(JakartaPersistenceColumn)) } returns false
-        every { columnProperty.hasAnnotation(eq(JakartaPersistenceJoinColumn)) } returns true
-
-        val validClass = mockk<KSClassDeclaration>()
-        every { validClass.validate(any()) } returns true
-        every { validClass.isSubclass(eq(HibernatePanacheEntityBase)) } returns true
-        every { validClass.getAllProperties() } returns sequenceOf(columnProperty)
-
-        every { resolver.getSymbolsWithAnnotation(eq(JakartaPersistenceEntity)) } returns sequenceOf(validClass)
-
-        every { processor.createColumnNamesObject(any(), any(), any()) } just Runs
-
-        // When
-        val invalid = processor.process(resolver)
-
-        // Then
-        verify(exactly = 1) {
-            processor.createColumnNamesObject(
-                ksClass = eq(validClass),
-                ksProperties = withArg {
-                    assertEquals(1, it.size)
-                    assertEquals(columnProperty, it[0])
-                },
-                addGeneratedAnnotation = eq(false)
-            )
-        }
-        assertEquals(0, invalid.size)
-    }
-
-    @Test
-    fun testProcessValidWithPropertyNotColumnOrJoinColumn() {
-
-        // Given
-        val columnProperty = mockk<KSPropertyDeclaration>()
-        every { columnProperty.hasAnnotation(eq(JakartaPersistenceColumn)) } returns false
-        every { columnProperty.hasAnnotation(eq(JakartaPersistenceJoinColumn)) } returns false
+        every { columnProperty.hasAnnotation(eq(JakartaPersistenceTransient)) } returns true
 
         val validClass = mockk<KSClassDeclaration>()
         every { validClass.validate(any()) } returns true

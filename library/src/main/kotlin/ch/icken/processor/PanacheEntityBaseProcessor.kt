@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Thijs Koppen
+ * Copyright 2023-2024 Thijs Koppen
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package ch.icken.processor
 
-import ch.icken.processor.ClassNames.ColumnNameClassName
+import ch.icken.processor.ClassNames.ColumnClassName
 import ch.icken.processor.ClassNames.StringClassName
 import ch.icken.processor.GenerationOptions.ADD_GENERATED_ANNOTATION
 import ch.icken.processor.GenerationOptions.generatedAnnotation
@@ -26,9 +26,12 @@ import ch.icken.processor.GenerationValues.COLUMN_NAME_OBJECT_SUFFIX
 import ch.icken.processor.GenerationValues.FileSuppress
 import ch.icken.processor.GenerationValues.GENERATED_PACKAGE_SUFFIX
 import ch.icken.processor.QualifiedNames.HibernatePanacheEntityBase
-import ch.icken.processor.QualifiedNames.JakartaPersistenceColumn
 import ch.icken.processor.QualifiedNames.JakartaPersistenceEntity
 import ch.icken.processor.QualifiedNames.JakartaPersistenceJoinColumn
+import ch.icken.processor.QualifiedNames.JakartaPersistenceManyToMany
+import ch.icken.processor.QualifiedNames.JakartaPersistenceOneToMany
+import ch.icken.processor.QualifiedNames.JakartaPersistenceOneToOne
+import ch.icken.processor.QualifiedNames.JakartaPersistenceTransient
 import com.google.devtools.ksp.processing.*
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
@@ -53,9 +56,12 @@ class PanacheEntityBaseProcessor(
         valid.filterIsInstance<KSClassDeclaration>()
             .filter { it.isSubclass(HibernatePanacheEntityBase) }
             .forEach { ksClassDeclaration ->
-                val columnProperties = ksClassDeclaration.getAllProperties().filter {
-                    it.hasAnnotation(JakartaPersistenceColumn) || it.hasAnnotation(JakartaPersistenceJoinColumn)
-                }
+                val columnProperties = ksClassDeclaration.getAllProperties()
+                    .filterNot { it.hasAnnotation(JakartaPersistenceTransient) }
+                    .filterNot { it.annotation(JakartaPersistenceManyToMany).nonDefaultParameter(MAPPED_BY) }
+                    .filterNot { it.annotation(JakartaPersistenceOneToMany).nonDefaultParameter(MAPPED_BY) }
+                    .filterNot { it.annotation(JakartaPersistenceOneToOne).nonDefaultParameter(MAPPED_BY) }
+
                 createColumnNamesObject(ksClassDeclaration, columnProperties.toList(), addGeneratedAnnotation)
             }
 
@@ -100,8 +106,8 @@ class PanacheEntityBaseProcessor(
                         val columnNameParameterType = ksPropertyType.toClassName()
                             .copy(nullable = ksPropertyType.isMarkedNullable)
 
-                        PropertySpec.builder(propertyName, ColumnNameClassName.plusParameter(columnNameParameterType))
-                            .initializer("%T(%P)", ColumnNameClassName,
+                        PropertySpec.builder(propertyName, ColumnClassName.plusParameter(columnNameParameterType))
+                            .initializer("%T(%P)", ColumnClassName,
                                 "\${${COLUMN_NAME_BASE_CLASS_PARAM_NAME}.orEmpty()}$propertyName")
                     }.addAnnotationIf(GeneratedAnnotation, addGeneratedAnnotation)
 
@@ -125,6 +131,8 @@ class PanacheEntityBaseProcessor(
     }
 
     companion object {
+        internal const val MAPPED_BY = "mappedBy"
+
         private val GeneratedAnnotation = generatedAnnotation(PanacheEntityBaseProcessor::class.java)
     }
 }

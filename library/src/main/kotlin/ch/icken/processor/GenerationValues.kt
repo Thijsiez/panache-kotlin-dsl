@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Thijs Koppen
+ * Copyright 2023-2024 Thijs Koppen
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ internal object GenerationValues {
     const val COLUMN_NAME_BASE_CLASS_SUFFIX = "Base"
     const val COLUMN_NAME_BASE_CLASS_PARAM_NAME = "parent"
 
-    const val EXTENSIONS_FILE = "QueryComponentExtensions"
+    const val EXTENSIONS_FILE = "PanacheCompanionBaseExtensions"
     const val EXPRESSION_PARAM_NAME = "expression"
     const val GROUP_COMPONENT_PARAM_NAME = "groupComponent"
     const val SORT_PARAM_NAME = "sort"

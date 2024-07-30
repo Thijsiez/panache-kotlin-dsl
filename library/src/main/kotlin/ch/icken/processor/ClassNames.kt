@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Thijs Koppen
+ * Copyright 2023-2024 Thijs Koppen
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import java.util.stream.Stream
 internal object ClassNames {
     val AndQueryComponentClassName = LogicalQueryComponent.AndQueryComponent::class.asClassName()
     val BooleanExpressionClassName = BooleanExpression::class.asClassName()
-    val ColumnNameClassName = ColumnName::class.asClassName()
+    val ColumnClassName = Column::class.asClassName()
     val GeneratedClassName = Generated::class.asClassName()
     val JvmNameClassName = JvmName::class.asClassName()
     val ListClassName = List::class.asClassName()

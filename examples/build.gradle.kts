@@ -36,11 +36,25 @@ ksp {
     arg("addGeneratedAnnotation", "true")
 }
 
+//Fixes issue with task execution order
 tasks.compileKotlin {
     dependsOn(tasks.compileQuarkusGeneratedSourcesJava)
 }
 tasks.configureEach {
     if (name == "kspKotlin") {
         dependsOn(tasks.compileQuarkusGeneratedSourcesJava)
+    }
+}
+
+//Fixes issue with circular task dependency,
+//see https://github.com/quarkusio/quarkus/issues/29698#issuecomment-1671861607
+project.afterEvaluate {
+    getTasksByName("quarkusGenerateCode", true).forEach { task ->
+        task.setDependsOn(task.dependsOn.filterIsInstance<Provider<Task>>()
+            .filterNot { it.get().name == "processResources" })
+    }
+    getTasksByName("quarkusGenerateCodeDev", true).forEach { task ->
+        task.setDependsOn(task.dependsOn.filterIsInstance<Provider<Task>>()
+            .filterNot { it.get().name == "processResources" })
     }
 }
