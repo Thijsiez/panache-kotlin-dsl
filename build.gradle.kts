@@ -63,7 +63,7 @@ tasks.test {
 
 sonar {
     properties {
-        property("sonar.projectKey", "Thijsiez_panache-kotlin-dsl_AYsggGcmXmm3_FAoLWCF")
+        property("sonar.projectKey", "Thijsiez_panache-kotlin-dsl_760170ef-68c7-43b0-880d-cf1034afe3c6")
         property("sonar.projectName", "panache-kotlin-dsl")
         property("sonar.coverage.jacoco.xmlReportPaths", "**/build/reports/kover/report.xml")
     }
