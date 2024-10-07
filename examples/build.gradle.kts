@@ -60,7 +60,7 @@ ksp {
 kover {
     reports {
         filters {
-            //Exclude non-library coverage
+            //Exclude non-library classes/packages
             excludes {
                 classes("ch.icken.ExamplesKt")
                 packages("ch.icken.model")
@@ -73,6 +73,9 @@ sonar {
         property("sonar.projectKey", "Thijsiez_panache-kotlin-dsl_760170ef-68c7-43b0-880d-cf1034afe3c6")
         property("sonar.projectName", "panache-kotlin-dsl")
         property("sonar.coverage.jacoco.xmlReportPaths", "**/build/reports/kover/report.xml")
+        //Exclude non-library classes/packages
+        property("sonar.coverage.exclusions", "**/ch/icken/model/*,**/ch/icken/Examples.kt")
+        property("sonar.exclusions", "**/ch/icken/model/*,**/ch/icken/Examples.kt")
     }
 }
 
