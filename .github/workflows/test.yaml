@@ -17,12 +17,8 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
-      - name: Move into examples directory
-        run: cd examples
-      - name: Make gradlew executable
-        run: chmod +x gradlew
       - name: Run tests with Gradle wrapper
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-        run: ./gradlew koverXmlReport sonar --no-daemon --continue --info
+        run: cd examples && chmod +x gradlew && ./gradlew koverXmlReport sonar --no-daemon --continue --info
