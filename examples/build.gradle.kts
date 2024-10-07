@@ -16,24 +16,76 @@
 
 plugins {
     id("io.quarkus")
+    kotlin("jvm")
     kotlin("plugin.allopen")
     kotlin("plugin.jpa")
     id("com.google.devtools.ksp")
+    id("org.jetbrains.kotlinx.kover")
+    id("org.sonarqube")
+}
+
+group = "ch.icken"
+version = "0.1.0-SNAPSHOT"
+
+repositories {
+    mavenCentral()
 }
 
 dependencies {
-    implementation(project(":library"))
-    ksp(project(":library"))
+    val quarkusVersion: String by project
+
+    implementation(platform("io.quarkus.platform:quarkus-bom:$quarkusVersion"))
     implementation("io.quarkus:quarkus-jdbc-h2")
-    kover(project(":library"))
+    implementation("io.quarkus:quarkus-hibernate-orm-panache-kotlin")
+    implementation(project(":panache-kotlin-dsl"))
+    ksp(project(":panache-kotlin-dsl"))
+
+    testImplementation("io.quarkus:quarkus-junit5")
+    kover(project(":panache-kotlin-dsl"))
 }
 
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+kotlin {
+    jvmToolchain(17)
+}
 allOpen {
     annotation("jakarta.persistence.Entity")
 }
-
 ksp {
     arg("addGeneratedAnnotation", "true")
+}
+kover {
+    reports {
+        filters {
+            //Exclude non-library coverage
+            excludes {
+                classes("ch.icken.ExamplesKt")
+                packages("ch.icken.model")
+            }
+        }
+    }
+}
+sonar {
+    properties {
+        property("sonar.projectKey", "Thijsiez_panache-kotlin-dsl_760170ef-68c7-43b0-880d-cf1034afe3c6")
+        property("sonar.projectName", "panache-kotlin-dsl")
+        property("sonar.coverage.jacoco.xmlReportPaths", "**/build/reports/kover/report.xml")
+    }
+}
+
+//Basic Quarkus Gradle setup
+tasks {
+    test {
+        systemProperty("java.util.logging.manager", "org.jboss.logmanager.LogManager")
+        useJUnitPlatform()
+    }
+    withType<JavaCompile> {
+        options.compilerArgs.add("-parameters")
+        options.encoding = "UTF-8"
+    }
 }
 
 //Fixes issue with task execution order
@@ -57,4 +109,9 @@ project.afterEvaluate {
         task.setDependsOn(task.dependsOn.filterIsInstance<Provider<Task>>()
             .filterNot { it.get().name == "processResources" })
     }
+}
+
+//Disable Quarkus native builds triggered by Kover
+tasks.quarkusAppPartsBuild {
+    isEnabled = false
 }

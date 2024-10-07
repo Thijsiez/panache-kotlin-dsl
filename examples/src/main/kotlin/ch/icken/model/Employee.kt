@@ -23,7 +23,7 @@ import java.time.LocalDate
 
 @Entity
 @Table(name = "EMPLOYEE")
-class Employee(
+data class Employee(
 
     @Column(name = "EMPLOYEE_NO", unique = true, nullable = false, updatable = false)
     val employeeNumber: Int,
@@ -46,12 +46,12 @@ class Employee(
     var department: Department,
 
     @Column(name = "SALARY", nullable = false)
-    var salary: Double
-
-) : PanacheEntity() {
+    var salary: Double,
 
     @OneToOne(cascade = [CascadeType.ALL], mappedBy = "employee", orphanRemoval = true)
     var assignment: Assignment? = null
+
+) : PanacheEntity() {
 
     companion object : PanacheCompanion<Employee>
 

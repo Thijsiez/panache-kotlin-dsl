@@ -22,15 +22,15 @@ import jakarta.persistence.*
 
 @Entity
 @Table(name = "CLIENT")
-class Client(
+data class Client(
 
     @Column(name = "NAME", unique = true, nullable = false)
-    var name: String
-
-) : PanacheEntity() {
+    var name: String,
 
     @OneToMany(cascade = [CascadeType.ALL], mappedBy = "client", orphanRemoval = true)
     val assignments: MutableSet<Assignment> = HashSet()
+
+) : PanacheEntity() {
 
     operator fun plusAssign(assignment: Assignment) {
         assignments.add(assignment)

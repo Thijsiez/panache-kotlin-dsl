@@ -15,8 +15,11 @@
  */
 
 pluginManagement {
+    val quarkusVersion: String by settings
     val kotlinVersion: String by settings
+    val kspVersion: String by settings
     val koverVersion: String by settings
+    val sonarqubeVersion: String by settings
 
     repositories {
         mavenCentral()
@@ -24,9 +27,17 @@ pluginManagement {
     }
 
     plugins {
+        id("io.quarkus") version quarkusVersion
         kotlin("jvm") version kotlinVersion
+        kotlin("plugin.allopen") version kotlinVersion
+        kotlin("plugin.jpa") version kotlinVersion
+        id("com.google.devtools.ksp") version kspVersion
         id("org.jetbrains.kotlinx.kover") version koverVersion
+        id("org.sonarqube") version sonarqubeVersion
     }
+
+    include(":panache-kotlin-dsl")
+    project(":panache-kotlin-dsl").projectDir = file("..")
 }
 
-rootProject.name = "panache-kotlin-dsl"
+rootProject.name = "examples"

@@ -17,54 +17,44 @@
 plugins {
     kotlin("jvm")
     id("org.jetbrains.kotlinx.kover")
-    id("org.sonarqube")
+}
+
+group = "ch.icken"
+version = "0.1.0-SNAPSHOT"
+
+repositories {
+    mavenCentral()
 }
 
 dependencies {
-    kover(project(":examples"))
-    kover(project(":library"))
+    val quarkusVersion: String by project
+    val kspVersion: String by project
+    val kotlinPoetVersion: String by project
+    val mockkVersion: String by project
+    val compileTestingVersion: String by project
+
+    implementation(platform("io.quarkus.platform:quarkus-bom:$quarkusVersion"))
+    implementation("io.quarkus:quarkus-hibernate-orm-panache-kotlin")
+    implementation("com.google.devtools.ksp:symbol-processing-api:$kspVersion")
+    implementation("com.squareup:kotlinpoet:$kotlinPoetVersion")
+    implementation("com.squareup:kotlinpoet-ksp:$kotlinPoetVersion")
+
+    testImplementation("io.quarkus:quarkus-junit5")
+    testImplementation("io.mockk:mockk:$mockkVersion")
+    testImplementation("com.github.tschuchortdev:kotlin-compile-testing:$compileTestingVersion")
+    testImplementation("com.github.tschuchortdev:kotlin-compile-testing-ksp:$compileTestingVersion")
 }
 
-allprojects {
-    apply(plugin = "kotlin")
-    apply(plugin = "org.jetbrains.kotlinx.kover")
-
-    group = "ch.icken"
-    version = "0.1.0-SNAPSHOT"
-
-    repositories {
-        mavenCentral()
-    }
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+kotlin {
+    jvmToolchain(17)
 }
 
-configure(subprojects) {
-    dependencies {
-        val quarkusVersion: String by project
-        val mockkVersion: String by project
-
-        implementation(platform("io.quarkus.platform:quarkus-bom:$quarkusVersion"))
-        implementation("io.quarkus:quarkus-hibernate-orm-panache-kotlin")
-        testImplementation("io.quarkus:quarkus-junit5")
-        testImplementation("io.mockk:mockk:$mockkVersion")
-    }
-
-    tasks.test {
+tasks {
+    test {
         useJUnitPlatform()
-    }
-
-    kotlin {
-        jvmToolchain(17)
-    }
-}
-
-tasks.test {
-    useJUnitPlatform()
-}
-
-sonar {
-    properties {
-        property("sonar.projectKey", "Thijsiez_panache-kotlin-dsl_760170ef-68c7-43b0-880d-cf1034afe3c6")
-        property("sonar.projectName", "panache-kotlin-dsl")
-        property("sonar.coverage.jacoco.xmlReportPaths", "**/build/reports/kover/report.xml")
     }
 }

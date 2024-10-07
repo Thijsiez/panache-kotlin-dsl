@@ -17,6 +17,8 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
+      - name: Move into examples directory
+        run: cd examples
       - name: Make gradlew executable
         run: chmod +x gradlew
       - name: Run tests with Gradle wrapper

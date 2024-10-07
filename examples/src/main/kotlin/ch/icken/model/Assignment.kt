@@ -22,7 +22,7 @@ import jakarta.persistence.*
 
 @Entity
 @Table(name = "ASSIGNMENT")
-class Assignment(
+data class Assignment(
 
     @OneToOne(optional = false)
     @JoinColumn(name = "EMPLOYEE_ID", unique = true, nullable = false)
@@ -33,12 +33,12 @@ class Assignment(
     val client: Client,
 
     @Column(name = "ROLE", nullable = false)
-    var role: String
-
-) : PanacheEntity() {
+    var role: String,
 
     @Column(name = "DESCRIPTION")
     var description: String? = null
+
+) : PanacheEntity() {
 
     companion object : PanacheCompanion<Assignment>
 }
