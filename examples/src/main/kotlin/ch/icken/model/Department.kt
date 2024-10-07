@@ -32,12 +32,5 @@ data class Department(
 
 ) : PanacheEntity() {
 
-    operator fun plusAssign(employee: Employee) {
-        employees.add(employee)
-    }
-    operator fun minusAssign(employee: Employee) {
-        employees.remove(employee)
-    }
-
     companion object : PanacheCompanion<Department>
 }

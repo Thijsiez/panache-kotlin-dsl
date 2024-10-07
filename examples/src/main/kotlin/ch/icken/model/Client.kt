@@ -32,12 +32,5 @@ data class Client(
 
 ) : PanacheEntity() {
 
-    operator fun plusAssign(assignment: Assignment) {
-        assignments.add(assignment)
-    }
-    operator fun minusAssign(assignment: Assignment) {
-        assignments.remove(assignment)
-    }
-
     companion object : PanacheCompanion<Client>
 }
