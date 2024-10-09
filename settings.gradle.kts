@@ -15,15 +15,15 @@
  */
 
 pluginManagement {
-    val kotlinVersion: String by settings
-    val koverVersion: String by settings
-
     repositories {
         mavenCentral()
         gradlePluginPortal()
     }
 
     plugins {
+        val kotlinVersion: String by settings
+        val koverVersion: String by settings
+
         kotlin("jvm") version kotlinVersion
         id("org.jetbrains.kotlinx.kover") version koverVersion
     }

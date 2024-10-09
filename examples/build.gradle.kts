@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     id("io.quarkus")
     kotlin("jvm")
@@ -49,10 +51,17 @@ java {
     targetCompatibility = JavaVersion.VERSION_17
 }
 kotlin {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_17)
+        javaParameters.set(true)
+    }
     jvmToolchain(17)
 }
 allOpen {
+    annotation("jakarta.enterprise.context.ApplicationScoped")
     annotation("jakarta.persistence.Entity")
+    annotation("jakarta.ws.rs.Path")
+    annotation("io.quarkus.test.junit.QuarkusTest")
 }
 ksp {
     arg("addGeneratedAnnotation", "true")
@@ -84,10 +93,6 @@ tasks {
     test {
         systemProperty("java.util.logging.manager", "org.jboss.logmanager.LogManager")
         useJUnitPlatform()
-    }
-    withType<JavaCompile> {
-        options.compilerArgs.add("-parameters")
-        options.encoding = "UTF-8"
     }
 }
 

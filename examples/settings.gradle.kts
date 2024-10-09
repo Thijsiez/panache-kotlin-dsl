@@ -15,18 +15,18 @@
  */
 
 pluginManagement {
-    val quarkusVersion: String by settings
-    val kotlinVersion: String by settings
-    val kspVersion: String by settings
-    val koverVersion: String by settings
-    val sonarqubeVersion: String by settings
-
     repositories {
         mavenCentral()
         gradlePluginPortal()
     }
 
     plugins {
+        val quarkusVersion: String by settings
+        val kotlinVersion: String by settings
+        val kspVersion: String by settings
+        val koverVersion: String by settings
+        val sonarqubeVersion: String by settings
+
         id("io.quarkus") version quarkusVersion
         kotlin("jvm") version kotlinVersion
         kotlin("plugin.allopen") version kotlinVersion
