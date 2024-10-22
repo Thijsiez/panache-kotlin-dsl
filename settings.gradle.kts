@@ -23,10 +23,13 @@ pluginManagement {
     plugins {
         val kotlinVersion: String by settings
         val koverVersion: String by settings
+        val mavenPublishVersion: String by settings
 
         kotlin("jvm") version kotlinVersion
         id("org.jetbrains.kotlinx.kover") version koverVersion
+        id("com.vanniktech.maven.publish") version mavenPublishVersion
     }
 }
 
-rootProject.name = "panache-kotlin-dsl"
+val artifactId: String by settings
+rootProject.name = artifactId

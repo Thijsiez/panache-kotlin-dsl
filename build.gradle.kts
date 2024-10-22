@@ -14,13 +14,19 @@
  * limitations under the License.
  */
 
+import com.vanniktech.maven.publish.SonatypeHost
+
 plugins {
     kotlin("jvm")
     id("org.jetbrains.kotlinx.kover")
+    id("com.vanniktech.maven.publish")
 }
 
-group = "ch.icken"
-version = "0.1.0-SNAPSHOT"
+val groupId: String by project
+setGroup(groupId)
+val artifactId: String by project
+val version: String by project
+setVersion(version)
 
 repositories {
     mavenCentral()
@@ -51,6 +57,40 @@ java {
 }
 kotlin {
     jvmToolchain(17)
+}
+mavenPublishing {
+    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL, false)
+
+    signAllPublications()
+
+    coordinates(groupId, artifactId, version)
+
+    pom {
+        name = artifactId
+        description = "A dynamic, type-safe way to write your queries"
+        url = "https://icken.ch/panache-kotlin-dsl"
+
+        licenses {
+            license {
+                name = "The Apache License, Version 2.0"
+                url = "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+        }
+
+        developers {
+            developer {
+                id = "Thijsiez"
+                name = "Thijs Koppen"
+                email = "thijs.koppen@gmail.com"
+            }
+        }
+
+        scm {
+            url = "https://github.com/Thijsiez/panache-kotlin-dsl"
+            connection = "scm:git:https://github.com/Thijsiez/panache-kotlin-dsl"
+            developerConnection = "scm:git:https://github.com/Thijsiez/panache-kotlin-dsl"
+        }
+    }
 }
 
 tasks {

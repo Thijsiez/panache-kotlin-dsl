@@ -26,9 +26,6 @@ plugins {
     id("org.sonarqube")
 }
 
-group = "ch.icken"
-version = "0.1.0-SNAPSHOT"
-
 repositories {
     mavenCentral()
 }
