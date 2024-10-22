@@ -26,6 +26,7 @@ pluginManagement {
         val kspVersion: String by settings
         val koverVersion: String by settings
         val sonarqubeVersion: String by settings
+        val mavenPublishVersion: String by settings
 
         id("io.quarkus") version quarkusVersion
         kotlin("jvm") version kotlinVersion
@@ -34,6 +35,7 @@ pluginManagement {
         id("com.google.devtools.ksp") version kspVersion
         id("org.jetbrains.kotlinx.kover") version koverVersion
         id("org.sonarqube") version sonarqubeVersion
+        id("com.vanniktech.maven.publish") version mavenPublishVersion
     }
 
     include(":panache-kotlin-dsl")
