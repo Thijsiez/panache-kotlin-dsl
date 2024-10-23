@@ -16,13 +16,16 @@
 
 package ch.icken.processor
 
+import ch.icken.processor.ClassNames.ListClassName
 import ch.icken.processor.ClassNames.StringClassName
 import ch.icken.processor.GenerationOptions.ADD_GENERATED_ANNOTATION
 import ch.icken.processor.PanacheEntityBaseProcessor.Companion.MAPPED_BY
+import ch.icken.processor.PanacheEntityBaseProcessor.Companion.TYPE
 import ch.icken.processor.QualifiedNames.HibernatePanacheEntityBase
 import ch.icken.processor.QualifiedNames.JakartaPersistenceEntity
 import ch.icken.processor.QualifiedNames.JakartaPersistenceJoinColumn
 import ch.icken.processor.QualifiedNames.JakartaPersistenceTransient
+import ch.icken.processor.QualifiedNames.ProcessorColumnType
 import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.processing.Resolver
@@ -58,7 +61,7 @@ class PanacheEntityBaseTests : TestCommon() {
         // Given
         val columnProperty = mockk<KSPropertyDeclaration>()
         every { columnProperty.hasAnnotation(eq(JakartaPersistenceTransient)) } returns false
-        every { columnProperty.annotation(any()).nonDefaultParameter(eq(MAPPED_BY)) } returns false
+        every { columnProperty.annotation(any()).hasNonDefaultParameter(eq(MAPPED_BY)) } returns false
 
         val validClass = mockk<KSClassDeclaration>()
         every { validClass.validate(any()) } returns true
@@ -67,14 +70,14 @@ class PanacheEntityBaseTests : TestCommon() {
 
         every { resolver.getSymbolsWithAnnotation(eq(JakartaPersistenceEntity)) } returns sequenceOf(validClass)
 
-        every { processor.createColumnNamesObject(any(), any(), any()) } just Runs
+        every { processor.createColumnsObject(any(), any(), any()) } just Runs
 
         // When
         val invalid = processor.process(resolver)
 
         // Then
         verify(exactly = 1) {
-            processor.createColumnNamesObject(
+            processor.createColumnsObject(
                 ksClass = eq(validClass),
                 ksProperties = withArg {
                     assertEquals(1, it.size)
@@ -100,14 +103,14 @@ class PanacheEntityBaseTests : TestCommon() {
 
         every { resolver.getSymbolsWithAnnotation(eq(JakartaPersistenceEntity)) } returns sequenceOf(validClass)
 
-        every { processor.createColumnNamesObject(any(), any(), any()) } just Runs
+        every { processor.createColumnsObject(any(), any(), any()) } just Runs
 
         // When
         val invalid = processor.process(resolver)
 
         // Then
         verify(exactly = 1) {
-            processor.createColumnNamesObject(
+            processor.createColumnsObject(
                 ksClass = eq(validClass),
                 ksProperties = match { it.isEmpty() },
                 addGeneratedAnnotation = eq(false)
@@ -127,14 +130,14 @@ class PanacheEntityBaseTests : TestCommon() {
 
         every { resolver.getSymbolsWithAnnotation(eq(JakartaPersistenceEntity)) } returns sequenceOf(validClass)
 
-        every { processor.createColumnNamesObject(any(), any(), any()) } just Runs
+        every { processor.createColumnsObject(any(), any(), any()) } just Runs
 
         // When
         val invalid = processor.process(resolver)
 
         // Then
         verify(exactly = 1) {
-            processor.createColumnNamesObject(
+            processor.createColumnsObject(
                 ksClass = eq(validClass),
                 ksProperties = match { it.isEmpty() },
                 addGeneratedAnnotation = eq(false)
@@ -158,7 +161,7 @@ class PanacheEntityBaseTests : TestCommon() {
 
         // Then
         verify(exactly = 0) {
-            processor.createColumnNamesObject(any(), any(), any())
+            processor.createColumnsObject(any(), any(), any())
         }
         assertEquals(0, invalid.size)
     }
@@ -177,7 +180,7 @@ class PanacheEntityBaseTests : TestCommon() {
 
         // Then
         verify(exactly = 0) {
-            processor.createColumnNamesObject(any(), any(), any())
+            processor.createColumnsObject(any(), any(), any())
         }
         assertEquals(0, invalid.size)
     }
@@ -196,15 +199,15 @@ class PanacheEntityBaseTests : TestCommon() {
 
         // Then
         verify(exactly = 0) {
-            processor.createColumnNamesObject(any(), any(), any())
+            processor.createColumnsObject(any(), any(), any())
         }
         assertEquals(1, invalid.size)
     }
     //endregion
 
-    //region createColumnNamesObject
+    //region createColumnsObject
     @Test
-    fun testCreateColumnNamesObject() {
+    fun testCreateColumnsObject() {
 
         // Given
         val packageName = "ch.icken.model"
@@ -218,6 +221,7 @@ class PanacheEntityBaseTests : TestCommon() {
         every { ksClass.packageName } returns classPackageName
         every { ksClass.simpleName } returns classSimpleName
 
+        //region firstName
         val firstNameSimpleName = mockk<KSName>()
         every { firstNameSimpleName.asString() } returns "firstName"
 
@@ -232,7 +236,41 @@ class PanacheEntityBaseTests : TestCommon() {
         every { firstName.simpleName } returns firstNameSimpleName
         every { firstName.hasAnnotation(eq(JakartaPersistenceJoinColumn)) } returns false
         every { firstName.type } returns firstNameTypeReference
+        every { firstName.annotation(eq(ProcessorColumnType)) } returns null
+        //endregion
 
+        //region lastName
+        val lastNameSimpleName = mockk<KSName>()
+        every { lastNameSimpleName.asString() } returns "lastName"
+
+        val lastNameType = mockk<KSType>()
+        every { lastNameType.toClassName() } returns ListClassName
+        every { lastNameType.isMarkedNullable } returns false
+
+        val lastNameTypeReference = mockk<KSTypeReference>()
+        every { lastNameTypeReference.resolve() } returns lastNameType
+
+        val lastNameColumnTypeParameterName = mockk<KSName>()
+        every { lastNameColumnTypeParameterName.asString() } returns TYPE
+
+        val lastnameColumnTypeParameterValue = mockk<KSType>()
+        every { lastnameColumnTypeParameterValue.toClassName() } returns StringClassName
+
+        val lastNameColumnTypeParameter = mockk<KSValueArgument>()
+        every { lastNameColumnTypeParameter.name } returns lastNameColumnTypeParameterName
+        every { lastNameColumnTypeParameter.value } returns lastnameColumnTypeParameterValue
+
+        val lastNameColumnType = mockk<KSAnnotation>()
+        every { lastNameColumnType.arguments } returns listOf(lastNameColumnTypeParameter)
+
+        val lastName = mockk<KSPropertyDeclaration>()
+        every { lastName.simpleName } returns lastNameSimpleName
+        every { lastName.hasAnnotation(eq(JakartaPersistenceJoinColumn)) } returns false
+        every { lastName.type } returns lastNameTypeReference
+        every { lastName.annotation(eq(ProcessorColumnType)) } returns lastNameColumnType
+        //endregion
+
+        //region department
         val departmentSimpleName = mockk<KSName>()
         every { departmentSimpleName.asString() } returns "department"
 
@@ -240,11 +278,12 @@ class PanacheEntityBaseTests : TestCommon() {
         every { department.simpleName } returns departmentSimpleName
         every { department.hasAnnotation(eq(JakartaPersistenceJoinColumn)) } returns true
         every { department.typeName } returns "Department"
+        //endregion
 
         val ksProperties = listOf(firstName, department)
 
         // When
-        processor.createColumnNamesObject(ksClass, ksProperties, true)
+        processor.createColumnsObject(ksClass, ksProperties, true)
 
         // Then
         verify(exactly = 1) {

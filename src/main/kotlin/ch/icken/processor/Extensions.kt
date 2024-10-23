@@ -36,11 +36,10 @@ internal fun KSAnnotated.hasAnnotation(qualifiedAnnotationClassName: String): Bo
 internal fun KSAnnotated.annotation(qualifiedAnnotationClassName: String): KSAnnotation? =
     annotations.filter { it.isClass(qualifiedAnnotationClassName) }.singleOrNull()
 
-internal fun KSAnnotation?.nonDefaultParameter(parameterName: String): Boolean {
-    if (this == null) return false
-    return defaultArguments.find { it.name?.asString() == parameterName }?.value !=
-            arguments.find { it.name?.asString() == parameterName }?.value
-}
+internal operator fun List<KSValueArgument>.get(name: String): Any? = find { it.name?.asString() == name }?.value
+
+internal fun KSAnnotation?.hasNonDefaultParameter(parameterName: String): Boolean =
+    this != null && defaultArguments[parameterName] != arguments[parameterName]
 
 internal val KSPropertyDeclaration.typeName: String
     get() = type.resolve().declaration.simpleName.asString()

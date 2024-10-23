@@ -30,4 +30,5 @@ internal object QualifiedNames {
     val JakartaPersistenceOneToMany: String = OneToMany::class.java.name
     val JakartaPersistenceOneToOne: String = OneToOne::class.java.name
     val JakartaPersistenceTransient: String = Transient::class.java.name
+    val ProcessorColumnType: String = ColumnType::class.java.name
 }
