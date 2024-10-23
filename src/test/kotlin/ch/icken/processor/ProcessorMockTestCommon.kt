@@ -22,7 +22,7 @@ import com.squareup.kotlinpoet.ksp.toClassName
 import io.mockk.mockkStatic
 import org.junit.jupiter.api.BeforeAll
 
-abstract class TestCommon {
+abstract class ProcessorMockTestCommon {
     companion object {
         @JvmStatic
         @BeforeAll

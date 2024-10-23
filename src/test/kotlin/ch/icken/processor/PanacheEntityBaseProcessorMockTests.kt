@@ -40,7 +40,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 
 @ExtendWith(MockKExtension::class)
-class PanacheEntityBaseTests : TestCommon() {
+class PanacheEntityBaseProcessorMockTests : ProcessorMockTestCommon() {
 
     @MockK
     private lateinit var resolver: Resolver

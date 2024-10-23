@@ -47,7 +47,6 @@ dependencies {
 
     testImplementation("io.quarkus:quarkus-junit5")
     testImplementation("io.mockk:mockk:$mockkVersion")
-    testImplementation("com.github.tschuchortdev:kotlin-compile-testing:$compileTestingVersion")
     testImplementation("com.github.tschuchortdev:kotlin-compile-testing-ksp:$compileTestingVersion")
 }
 
@@ -60,11 +59,9 @@ kotlin {
 }
 mavenPublishing {
     publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL, false)
-
     signAllPublications()
 
     coordinates(groupId, artifactId, version)
-
     pom {
         name = artifactId
         description = "A dynamic, type-safe way to write your queries"

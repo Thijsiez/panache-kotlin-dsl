@@ -10,6 +10,13 @@
 # panache-kotlin-dsl
 A dynamic, type-safe way to write your queries
 
+## Requirements
+- Quarkus version `3.9.2` or newer
+- Kotlin version `1.9.23` or newer
+- KSP version `1.9.23-1.0.20` or newer
+  - Your KSP version needs to match your Kotlin version. This is a strict requirement!
+  - For example, when your Kotlin version is `2.0.21`, your KSP version needs to be built for and start with the same version, such as `2.0.21-1.0.25`
+
 ## Features
 ### Queries
 - Supports the following expressions in a type-safe and null-safe way for all columns
@@ -30,5 +37,6 @@ Allows you to handle no/multiple results with a `when (result) { ... }` block in
 - Code generation does not handle fields of generic types (e.g. `List<E>`, `Set<E>`, etc.), but as far as I'm aware this is difficult to get working with Hibernate anyway. Consider using a JPA `@Converter` in combination with `@ColumnType`
 
 ## Planned Features
+These features will be added some time in the future. Please do submit an issue if you'd like these sooner rather than later :)
 - DSL for sorting expressions
 - DSL for UPDATE queries
