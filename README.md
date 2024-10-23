@@ -16,6 +16,8 @@ A dynamic, type-safe way to write your queries
   - `eq`, `neq`, `lt`, `gt`, `lte`, `gte`, `in`, `notIn`, `between`, and `notBetween`
 - Supports `like` and `notLike` expressions in a null-safe way for String columns
 - Supports `and`/`andGroup` and `or`/`orGroup` expressions for building up a query
+- Adds the `PanacheSingleResult<T>` sealed class and `singleResultSafe()` extension function to return a single result without throwing exceptions.
+Allows you to handle no/multiple results with a `when (result) { ... }` block instead of try-catching
 ### Code Generation
 - Generate `Column<T>`s for non-transient and non-mapped fields in classes annotated `@Entity` and extending `PanacheEntity`/`PanacheEntityBase`
 - Generate query entry point extension functions for classes with companion objects extending `PanacheCompanion`/`PanacheCompanionBase`
