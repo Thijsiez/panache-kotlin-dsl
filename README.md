@@ -10,12 +10,21 @@
 # panache-kotlin-dsl
 A dynamic, type-safe way to write your queries
 
+[Changelog](CHANGELOG.md) | [Contributing](CONTRIBUTING.md)
+
+## Getting Started
+TODO
+
 ## Requirements
 - Quarkus version `3.9.2` or newer
+  - Dependency `io.quarkus:quarkus-hibernate-orm-panache-kotlin` is required
 - Kotlin version `1.9.23` or newer
 - KSP version `1.9.23-1.0.20` or newer
-  - Your KSP version needs to match your Kotlin version. This is a strict requirement!
-  - For example, when your Kotlin version is `2.0.21`, your KSP version needs to be built for and start with the same version, such as `2.0.21-1.0.25`
+  - Your KSP version needs to match your Kotlin version. This is a strict requirement!  
+    For example, when your Kotlin version is `2.0.21`, your KSP version needs to be built for and start with the same version, such as `2.0.21-1.0.25`
+
+## Examples
+TODO
 
 ## Features
 ### Queries
@@ -30,7 +39,7 @@ Allows you to handle no/multiple results with a `when (result) { ... }` block in
 - Generate query entry point extension functions for classes with companion objects extending `PanacheCompanion`/`PanacheCompanionBase`
   - `where`/`whereGroup`, `count`, `delete`, `find`, `stream`, `single`, `singleSafe`, and `multiple`
 - Allows for overriding the generated `Column<T>`'s type parameter using `@ColumnType`
-  - Especially useful when using JPA `@Converter` when the field's type is different to the column's type
+  - Especially useful when using a JPA `@Converter` when the field's type is different to the column's type
 - Optionally annotate generated code with `@Generated` so it can more easily be excluded from test coverage reporting
 
 ## Known Issues
