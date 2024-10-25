@@ -253,12 +253,9 @@ class PanacheEntityBaseProcessorMockTests : ProcessorMockTestCommon() {
         val lastNameColumnTypeParameterName = mockk<KSName>()
         every { lastNameColumnTypeParameterName.asString() } returns TYPE
 
-        val lastnameColumnTypeParameterValue = mockk<KSType>()
-        every { lastnameColumnTypeParameterValue.toClassName() } returns StringClassName
-
         val lastNameColumnTypeParameter = mockk<KSValueArgument>()
         every { lastNameColumnTypeParameter.name } returns lastNameColumnTypeParameterName
-        every { lastNameColumnTypeParameter.value } returns lastnameColumnTypeParameterValue
+        every { lastNameColumnTypeParameter.value } returns null
 
         val lastNameColumnType = mockk<KSAnnotation>()
         every { lastNameColumnType.arguments } returns listOf(lastNameColumnTypeParameter)
