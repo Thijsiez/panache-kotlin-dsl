@@ -16,10 +16,13 @@
 
 package ch.icken.processor
 
+import ch.icken.processor.QualifiedNames.ProcessorColumnType
 import com.google.devtools.ksp.getAllSuperTypes
 import com.google.devtools.ksp.symbol.*
 import com.squareup.kotlinpoet.Annotatable
 import com.squareup.kotlinpoet.AnnotationSpec
+import com.squareup.kotlinpoet.ClassName
+import com.squareup.kotlinpoet.ksp.toClassName
 
 internal fun KSDeclaration.isClass(qualifiedClassName: String): Boolean =
     qualifiedName?.asString() == qualifiedClassName
@@ -36,13 +39,16 @@ internal fun KSAnnotated.hasAnnotation(qualifiedAnnotationClassName: String): Bo
 internal fun KSAnnotated.annotation(qualifiedAnnotationClassName: String): KSAnnotation? =
     annotations.filter { it.isClass(qualifiedAnnotationClassName) }.singleOrNull()
 
-internal operator fun List<KSValueArgument>.get(name: String): Any? = find { it.name?.asString() == name }?.value
+private operator fun List<KSValueArgument>.get(name: String): Any? = find { it.name?.asString() == name }?.value
 
 internal fun KSAnnotation?.hasNonDefaultParameter(parameterName: String): Boolean =
     this != null && defaultArguments[parameterName] != arguments[parameterName]
 
 internal val KSPropertyDeclaration.typeName: String
     get() = type.resolve().declaration.simpleName.asString()
+
+internal val KSPropertyDeclaration.columnTypeClassName: ClassName?
+    get() = (annotation(ProcessorColumnType)?.arguments?.get(ColumnType.TYPE) as? KSType)?.toClassName()
 
 fun <T : Annotatable.Builder<T>> T.addAnnotationIf(annotationSpec: AnnotationSpec, condition: Boolean) =
     apply { if (condition) addAnnotation(annotationSpec) }

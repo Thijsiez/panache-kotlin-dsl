@@ -20,7 +20,6 @@ import ch.icken.processor.ClassNames.ListClassName
 import ch.icken.processor.ClassNames.StringClassName
 import ch.icken.processor.GenerationOptions.ADD_GENERATED_ANNOTATION
 import ch.icken.processor.PanacheEntityBaseProcessor.Companion.MAPPED_BY
-import ch.icken.processor.PanacheEntityBaseProcessor.Companion.TYPE
 import ch.icken.processor.QualifiedNames.HibernatePanacheEntityBase
 import ch.icken.processor.QualifiedNames.JakartaPersistenceEntity
 import ch.icken.processor.QualifiedNames.JakartaPersistenceJoinColumn
@@ -251,7 +250,7 @@ class PanacheEntityBaseProcessorMockTests : ProcessorMockTestCommon() {
         every { lastNameTypeReference.resolve() } returns lastNameType
 
         val lastNameColumnTypeParameterName = mockk<KSName>()
-        every { lastNameColumnTypeParameterName.asString() } returns TYPE
+        every { lastNameColumnTypeParameterName.asString() } returns ColumnType.TYPE
 
         val lastNameColumnTypeParameter = mockk<KSValueArgument>()
         every { lastNameColumnTypeParameter.name } returns lastNameColumnTypeParameterName

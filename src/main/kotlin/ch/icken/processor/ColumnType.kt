@@ -26,4 +26,8 @@ import kotlin.reflect.KClass
 @Target(PROPERTY)
 annotation class ColumnType(
     val type: KClass<*>
-)
+) {
+    companion object {
+        internal const val TYPE = "type"
+    }
+}

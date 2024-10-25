@@ -32,12 +32,10 @@ import ch.icken.processor.QualifiedNames.JakartaPersistenceManyToMany
 import ch.icken.processor.QualifiedNames.JakartaPersistenceOneToMany
 import ch.icken.processor.QualifiedNames.JakartaPersistenceOneToOne
 import ch.icken.processor.QualifiedNames.JakartaPersistenceTransient
-import ch.icken.processor.QualifiedNames.ProcessorColumnType
 import com.google.devtools.ksp.processing.*
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
-import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.validate
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.plusParameter
@@ -105,11 +103,8 @@ class PanacheEntityBaseProcessor(
                             .initializer("%T(%S)", joinBaseClass, "$propertyName.")
                     } else {
                         val ksPropertyType = ksProperty.type.resolve()
-                        val columnTypeParameter = (
-                                (ksProperty.annotation(ProcessorColumnType)
-                                    ?.arguments?.get(TYPE) as? KSType)
-                                    ?.toClassName() ?: ksPropertyType.toClassName()
-                                ).copy(nullable = ksPropertyType.isMarkedNullable)
+                        val columnTypeParameter = (ksProperty.columnTypeClassName ?: ksPropertyType.toClassName())
+                            .copy(nullable = ksPropertyType.isMarkedNullable)
 
                         PropertySpec.builder(propertyName, ColumnClassName.plusParameter(columnTypeParameter))
                             .initializer("%T(%P)", ColumnClassName,
@@ -137,7 +132,6 @@ class PanacheEntityBaseProcessor(
 
     companion object {
         internal const val MAPPED_BY = "mappedBy"
-        internal const val TYPE = "type"
 
         private val GeneratedAnnotation = generatedAnnotation(PanacheEntityBaseProcessor::class.java)
     }
