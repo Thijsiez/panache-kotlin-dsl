@@ -32,11 +32,13 @@ abstract class QueryComponent<Entity : PanacheEntityBase, Id : Any> internal con
 
     //region Intermediate operations
     fun and(expression: BooleanExpression) = AndQueryComponent(companion, this, expression)
+    @Suppress("unused")
     fun andGroup(expression: BooleanExpression,
                  groupComponent: QueryComponent<Entity, Id>.() -> QueryComponent<Entity, Id>) =
         AndGroupQueryComponent(companion, this, expression, groupComponent)
 
     fun or(expression: BooleanExpression) = OrQueryComponent(companion, this, expression)
+    @Suppress("unused")
     fun orGroup(expression: BooleanExpression,
                 groupComponent: QueryComponent<Entity, Id>.() -> QueryComponent<Entity, Id>) =
         OrGroupQueryComponent(companion, this, expression, groupComponent)
@@ -45,7 +47,9 @@ abstract class QueryComponent<Entity : PanacheEntityBase, Id : Any> internal con
     //region Terminal operations
     fun count() = with(compile()) { companion.count(query, parameters) }
     fun delete() = with(compile()) { companion.delete(query, parameters) }
+    @Suppress("MemberVisibilityCanBePrivate")
     fun find() = with(compile()) { companion.find(query, parameters) }
+    @Suppress("MemberVisibilityCanBePrivate")
     fun find(sort: Sort) = with(compile()) { companion.find(query, sort, parameters) }
     fun stream() = with(compile()) { companion.stream(query, parameters) }
     fun stream(sort: Sort) = with(compile()) { companion.stream(query, sort, parameters) }

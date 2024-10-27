@@ -16,7 +16,9 @@
 
 package ch.icken.processor
 
-import com.google.devtools.ksp.symbol.*
+import com.google.devtools.ksp.symbol.KSClassDeclaration
+import com.google.devtools.ksp.symbol.KSNode
+import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.validate
 import com.squareup.kotlinpoet.ksp.toClassName
 import io.mockk.mockkStatic
@@ -27,13 +29,9 @@ abstract class ProcessorMockTestCommon {
         @JvmStatic
         @BeforeAll
         fun beforeAll() {
-            mockkStatic(KSAnnotated::hasAnnotation)
-            mockkStatic(KSAnnotation::isClass)
             mockkStatic(KSClassDeclaration::isSubclass)
             mockkStatic(KSClassDeclaration::toClassName)
-            mockkStatic(KSDeclaration::isClass)
             mockkStatic(KSNode::validate)
-            mockkStatic(KSPropertyDeclaration::typeName)
             mockkStatic(KSType::toClassName)
         }
     }

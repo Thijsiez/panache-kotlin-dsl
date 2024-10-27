@@ -16,12 +16,12 @@
 
 package ch.icken.processor
 
-import ch.icken.processor.ClassNames.LongClassName
-import ch.icken.processor.GenerationOptions.ADD_GENERATED_ANNOTATION
-import ch.icken.processor.QualifiedNames.HibernatePanacheCompanionBase
-import ch.icken.processor.QualifiedNames.HibernatePanacheEntityBase
-import ch.icken.processor.QualifiedNames.JakartaPersistenceEntity
-import ch.icken.processor.QualifiedNames.JakartaPersistenceId
+import ch.icken.processor.ProcessorCommon.Companion.HibernatePanacheCompanionBase
+import ch.icken.processor.ProcessorCommon.Companion.HibernatePanacheEntityBase
+import ch.icken.processor.ProcessorCommon.Companion.JakartaPersistenceEntity
+import ch.icken.processor.ProcessorCommon.Companion.JakartaPersistenceId
+import ch.icken.processor.ProcessorCommon.Companion.LongClassName
+import ch.icken.processor.ProcessorCommon.Companion.OPTION_ADD_GENERATED_ANNOTATION
 import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.processing.Resolver
@@ -44,7 +44,7 @@ class PanacheCompanionBaseProcessorMockTests : ProcessorMockTestCommon() {
 
     private val codeGenerator = mockk<CodeGenerator>(relaxed = true)
     private val processor = spyk(PanacheCompanionBaseProcessor(
-        options = mapOf(ADD_GENERATED_ANNOTATION to "false"),
+        options = mapOf(OPTION_ADD_GENERATED_ANNOTATION to "false"),
         codeGenerator = codeGenerator,
         logger = mockk<KSPLogger>().also {
             every { it.info(any()) } just Runs
@@ -72,20 +72,15 @@ class PanacheCompanionBaseProcessorMockTests : ProcessorMockTestCommon() {
 
         every { resolver.getSymbolsWithAnnotation(eq(JakartaPersistenceEntity)) } returns sequenceOf(validClass)
 
-        every { processor.createQueryBuilderExtensions(any(), any(), any()) } just Runs
+        every { processor.createEntityExtensions(any()) } just Runs
 
         // When
         val invalid = processor.process(resolver)
 
         // Then
         verify(exactly = 1) {
-            processor.createQueryBuilderExtensions(
-                originalPackageName = eq(qualifiedPackageName),
-                ksClasses = withArg {
-                    assertEquals(1, it.size)
-                    assertEquals(validClass, it[0])
-                },
-                addGeneratedAnnotation = eq(false)
+            processor.createEntityExtensions(
+                ksClass = eq(validClass)
             )
         }
         assertEquals(0, invalid.size)
@@ -111,7 +106,7 @@ class PanacheCompanionBaseProcessorMockTests : ProcessorMockTestCommon() {
 
         // Then
         verify(exactly = 0) {
-            processor.createQueryBuilderExtensions(any(), any(), any())
+            processor.createEntityExtensions(any())
         }
         assertEquals(0, invalid.size)
     }
@@ -135,7 +130,7 @@ class PanacheCompanionBaseProcessorMockTests : ProcessorMockTestCommon() {
 
         // Then
         verify(exactly = 0) {
-            processor.createQueryBuilderExtensions(any(), any(), any())
+            processor.createEntityExtensions(any())
         }
         assertEquals(0, invalid.size)
     }
@@ -158,7 +153,7 @@ class PanacheCompanionBaseProcessorMockTests : ProcessorMockTestCommon() {
 
         // Then
         verify(exactly = 0) {
-            processor.createQueryBuilderExtensions(any(), any(), any())
+            processor.createEntityExtensions(any())
         }
         assertEquals(0, invalid.size)
     }
@@ -179,7 +174,7 @@ class PanacheCompanionBaseProcessorMockTests : ProcessorMockTestCommon() {
 
         // Then
         verify(exactly = 0) {
-            processor.createQueryBuilderExtensions(any(), any(), any())
+            processor.createEntityExtensions(any())
         }
         assertEquals(0, invalid.size)
     }
@@ -199,7 +194,7 @@ class PanacheCompanionBaseProcessorMockTests : ProcessorMockTestCommon() {
 
         // Then
         verify(exactly = 0) {
-            processor.createQueryBuilderExtensions(any(), any(), any())
+            processor.createEntityExtensions(any())
         }
         assertEquals(0, invalid.size)
     }
@@ -218,7 +213,7 @@ class PanacheCompanionBaseProcessorMockTests : ProcessorMockTestCommon() {
 
         // Then
         verify(exactly = 0) {
-            processor.createQueryBuilderExtensions(any(), any(), any())
+            processor.createEntityExtensions(any())
         }
         assertEquals(0, invalid.size)
     }
@@ -237,7 +232,7 @@ class PanacheCompanionBaseProcessorMockTests : ProcessorMockTestCommon() {
 
         // Then
         verify(exactly = 0) {
-            processor.createQueryBuilderExtensions(any(), any(), any())
+            processor.createEntityExtensions(any())
         }
         assertEquals(1, invalid.size)
     }
@@ -245,12 +240,15 @@ class PanacheCompanionBaseProcessorMockTests : ProcessorMockTestCommon() {
 
     //region createQueryBuilderExtensions
     @Test
-    fun testCreateQueryBuilderExtensions() {
+    fun testCreateEntityExtensions() {
 
         // Given
         val packageName = "ch.icken.model"
         val simpleName = "Employee"
         val className = ClassName(packageName, simpleName)
+
+        val packageSimpleName = mockk<KSName>()
+        every { packageSimpleName.asString() } returns packageName
 
         val classSimpleName = mockk<KSName>()
         every { classSimpleName.asString() } returns simpleName
@@ -267,13 +265,12 @@ class PanacheCompanionBaseProcessorMockTests : ProcessorMockTestCommon() {
 
         val ksClass = mockk<KSClassDeclaration>()
         every { ksClass.toClassName() } returns className
+        every { ksClass.packageName } returns packageSimpleName
         every { ksClass.simpleName } returns classSimpleName
         every { ksClass.getAllProperties() } returns sequenceOf(idProperty)
 
-        val ksClasses = listOf(ksClass)
-
         // When
-        processor.createQueryBuilderExtensions(packageName, ksClasses, false)
+        processor.createEntityExtensions(ksClass)
 
         // Then
         verify(exactly = 1) {

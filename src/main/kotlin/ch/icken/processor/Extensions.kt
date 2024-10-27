@@ -16,7 +16,8 @@
 
 package ch.icken.processor
 
-import ch.icken.processor.QualifiedNames.ProcessorColumnType
+import ch.icken.processor.ProcessorCommon.Companion.PARAM_NAME_TYPE
+import ch.icken.processor.ProcessorCommon.Companion.ProcessorColumnType
 import com.google.devtools.ksp.getAllSuperTypes
 import com.google.devtools.ksp.symbol.*
 import com.squareup.kotlinpoet.Annotatable
@@ -24,13 +25,13 @@ import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.ksp.toClassName
 
-internal fun KSDeclaration.isClass(qualifiedClassName: String): Boolean =
+private fun KSDeclaration.isClass(qualifiedClassName: String): Boolean =
     qualifiedName?.asString() == qualifiedClassName
 
 internal fun KSClassDeclaration.isSubclass(qualifiedSuperclassName: String): Boolean =
     getAllSuperTypes().map { it.declaration }.any { it.isClass(qualifiedSuperclassName) }
 
-internal fun KSAnnotation.isClass(qualifiedAnnotationClassName: String): Boolean =
+private fun KSAnnotation.isClass(qualifiedAnnotationClassName: String): Boolean =
     annotationType.resolve().declaration.isClass(qualifiedAnnotationClassName)
 
 internal fun KSAnnotated.hasAnnotation(qualifiedAnnotationClassName: String): Boolean =
@@ -41,14 +42,14 @@ internal fun KSAnnotated.annotation(qualifiedAnnotationClassName: String): KSAnn
 
 private operator fun List<KSValueArgument>.get(name: String): Any? = find { it.name?.asString() == name }?.value
 
-internal fun KSAnnotation?.hasNonDefaultParameter(parameterName: String): Boolean =
+internal fun KSAnnotation?.isParameterSet(parameterName: String): Boolean =
     this != null && defaultArguments[parameterName] != arguments[parameterName]
 
 internal val KSPropertyDeclaration.typeName: String
     get() = type.resolve().declaration.simpleName.asString()
 
 internal val KSPropertyDeclaration.columnTypeClassName: ClassName?
-    get() = (annotation(ProcessorColumnType)?.arguments?.get(ColumnType.TYPE) as? KSType)?.toClassName()
+    get() = (annotation(ProcessorColumnType)?.arguments?.get(PARAM_NAME_TYPE) as? KSType)?.toClassName()
 
-fun <T : Annotatable.Builder<T>> T.addAnnotationIf(annotationSpec: AnnotationSpec, condition: Boolean) =
+internal fun <T : Annotatable.Builder<T>> T.addAnnotationIf(annotationSpec: AnnotationSpec, condition: Boolean) =
     apply { if (condition) addAnnotation(annotationSpec) }

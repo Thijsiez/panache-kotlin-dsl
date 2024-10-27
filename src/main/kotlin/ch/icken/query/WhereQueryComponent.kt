@@ -38,9 +38,11 @@ class WhereGroupQueryComponent<Entity : PanacheEntityBase, Id : Any> internal co
     }
 }
 
+@Suppress("unused")
 fun <Entity : PanacheEntityBase, Id : Any> PanacheCompanionBase<Entity, Id>.where(expression: BooleanExpression) =
     WhereQueryComponent(this, expression)
 
+@Suppress("unused")
 fun <Entity : PanacheEntityBase, Id : Any> PanacheCompanionBase<Entity, Id>.whereGroup(
     expression: BooleanExpression,
     groupComponent: QueryComponent<Entity, Id>.() -> QueryComponent<Entity, Id>

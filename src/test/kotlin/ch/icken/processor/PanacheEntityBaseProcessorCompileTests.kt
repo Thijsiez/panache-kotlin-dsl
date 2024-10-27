@@ -39,6 +39,7 @@ class PanacheEntityBaseProcessorCompileTests : ProcessorCompileTestCommon() {
 
         // Then
         result.assertOk()
+        compilation.assertNumberOfFiles(0)
     }
 
     @Test
@@ -57,6 +58,7 @@ class PanacheEntityBaseProcessorCompileTests : ProcessorCompileTestCommon() {
 
         // Then
         result.assertOk()
+        compilation.assertNumberOfFiles(0)
     }
 
     @Test
@@ -76,10 +78,11 @@ class PanacheEntityBaseProcessorCompileTests : ProcessorCompileTestCommon() {
 
         // Then
         result.assertOk()
-        compilation.assertFileGenerated("EmployeeColumns.kt")
+        compilation.assertNumberOfFiles(1)
+        compilation.assertHasFile("EmployeeColumns.kt")
 
-        val employeeColumns = result.loadGeneratedClass("EmployeeColumns")
-        employeeColumns.assertNumberOfProperties(0)
+        val employeeColumns = result.loadClass("EmployeeColumns")
+        employeeColumns.assertNumberOfMemberProperties(0)
     }
 
     @Test
@@ -105,10 +108,11 @@ class PanacheEntityBaseProcessorCompileTests : ProcessorCompileTestCommon() {
 
         // Then
         result.assertOk()
-        compilation.assertFileGenerated("ProductColumns.kt")
+        compilation.assertNumberOfFiles(1)
+        compilation.assertHasFile("ProductColumns.kt")
 
-        val productColumns = result.loadGeneratedClass("ProductColumns")
-        productColumns.assertNumberOfProperties(0)
+        val productColumns = result.loadClass("ProductColumns")
+        productColumns.assertNumberOfMemberProperties(0)
     }
 
     @Test
@@ -151,17 +155,18 @@ class PanacheEntityBaseProcessorCompileTests : ProcessorCompileTestCommon() {
 
         // Then
         result.assertOk()
-        compilation.assertFileGenerated("PostColumns.kt")
-        compilation.assertFileGenerated("CommentColumns.kt")
+        compilation.assertNumberOfFiles(2)
+        compilation.assertHasFile("PostColumns.kt")
+        compilation.assertHasFile("CommentColumns.kt")
 
-        val postColumns = result.loadGeneratedClass("PostColumns")
-        postColumns.assertNumberOfProperties(1)
+        val postColumns = result.loadClass("PostColumns")
+        postColumns.assertNumberOfMemberProperties(1)
         postColumns.assertHasColumnOfType("id", Long::class)
 
-        val commentColumns = result.loadGeneratedClass("CommentColumns")
-        commentColumns.assertNumberOfProperties(2)
+        val commentColumns = result.loadClass("CommentColumns")
+        commentColumns.assertNumberOfMemberProperties(2)
         commentColumns.assertHasColumnOfType("id", Long::class)
-        commentColumns.assertHasPropertyOfType("post", "PostColumnsBase")
+        commentColumns.assertHasMemberPropertyOfType("post", "PostColumnsBase")
     }
 
     @Test
@@ -187,10 +192,11 @@ class PanacheEntityBaseProcessorCompileTests : ProcessorCompileTestCommon() {
 
         // Then
         result.assertOk()
-        compilation.assertFileGenerated("UserColumns.kt")
+        compilation.assertNumberOfFiles(1)
+        compilation.assertHasFile("UserColumns.kt")
 
-        val userColumns = result.loadGeneratedClass("UserColumns")
-        userColumns.assertNumberOfProperties(2)
+        val userColumns = result.loadClass("UserColumns")
+        userColumns.assertNumberOfMemberProperties(2)
         userColumns.assertHasColumnOfType("id", Long::class)
         userColumns.assertHasColumnOfType("username", CharSequence::class)
     }

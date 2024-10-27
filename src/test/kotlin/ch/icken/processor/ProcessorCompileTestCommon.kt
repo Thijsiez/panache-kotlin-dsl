@@ -27,9 +27,6 @@ import kotlin.reflect.full.memberProperties
 @OptIn(ExperimentalCompilerApi::class)
 abstract class ProcessorCompileTestCommon {
 
-    protected fun kotlinResource(resourceName: String, sourceFileName: String = resourceName) =
-        SourceFile.kotlin(sourceFileName, javaClass.classLoader.getResource(resourceName)?.readText() ?: "")
-
     protected fun compilation(vararg source: SourceFile) = KotlinCompilation().apply {
         inheritClassPath = true
         kspWithCompilation = true
@@ -46,18 +43,22 @@ abstract class ProcessorCompileTestCommon {
 
     protected fun KotlinCompilation.Result.assertOk() = assertEquals(KotlinCompilation.ExitCode.OK, exitCode)
 
-    protected fun KotlinCompilation.assertFileGenerated(fileName: String, outputDir: String = "generated") =
+    protected fun KotlinCompilation.assertNumberOfFiles(expectedNumberOfFiles: Int, outputDir: String = "generated") =
+        assertEquals(expectedNumberOfFiles, kspSourcesDir.resolve("kotlin").resolve(outputDir)
+            .listFiles()?.filter { it.isFile }?.size ?: 0)
+
+    protected fun KotlinCompilation.assertHasFile(fileName: String, outputDir: String = "generated") =
         assertTrue(kspSourcesDir.resolve("kotlin").resolve(outputDir).resolve(fileName).isFile)
 
-    protected fun KotlinCompilation.Result.loadGeneratedClass(className: String, outputPackage: String = "generated") =
-        this.classLoader.loadClass("$outputPackage.$className").kotlin
+    protected fun KotlinCompilation.Result.loadClass(className: String, outputPackage: String = "generated"): Class<*> =
+        this.classLoader.loadClass(if (outputPackage.isBlank()) className else "$outputPackage.$className")
 
-    protected fun KClass<*>.assertNumberOfProperties(expectedNumberOfProperties: Int) {
-        assertEquals(expectedNumberOfProperties, memberProperties.size)
+    protected fun Class<*>.assertNumberOfMemberProperties(expectedNumberOfProperties: Int) {
+        assertEquals(expectedNumberOfProperties, kotlin.memberProperties.size)
     }
 
-    protected fun KClass<*>.assertHasPropertyOfType(propertyName: String, expectedTypeName: String) {
-        val property = memberProperties.find { it.name == propertyName }
+    protected fun Class<*>.assertHasMemberPropertyOfType(propertyName: String, expectedTypeName: String) {
+        val property = kotlin.memberProperties.find { it.name == propertyName }
         assertNotNull(property)
 
         val returnType = property!!.returnType
@@ -68,8 +69,8 @@ abstract class ProcessorCompileTestCommon {
         }
     }
 
-    protected fun KClass<*>.assertHasColumnOfType(columnName: String, expectedType: KClass<*>) {
-        val property = memberProperties.find { it.name == columnName }
+    protected fun Class<*>.assertHasColumnOfType(columnName: String, expectedType: KClass<*>) {
+        val property = kotlin.memberProperties.find { it.name == columnName }
         assertNotNull(property)
 
         val returnType = property!!.returnType
@@ -90,5 +91,13 @@ abstract class ProcessorCompileTestCommon {
             assertTrue(classifier is KClass<*>)
             assertEquals(expectedType, classifier)
         }
+    }
+
+    protected fun Class<*>.assertNumberOfDeclaredMethods(expectedNumberOfMethods: Int) {
+        assertEquals(expectedNumberOfMethods, declaredMethods.size)
+    }
+
+    protected fun Class<*>.assertHasDeclaredMethodWithName(methodName: String) {
+        assertNotNull(declaredMethods.find { it.name == methodName })
     }
 }
