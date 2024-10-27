@@ -15,7 +15,26 @@ A dynamic, type-safe way to write your queries
 [Changelog](CHANGELOG.md) | [Contributing](CONTRIBUTING.md)
 
 ## Getting Started
-TODO
+Examples given use Gradle's Kotlin DSL  
+Add the KSP Gradle plugin to your build file
+```kotlin
+plugins {
+    id("com.google.devtools.ksp") version "2.0.21-1.0.25"
+}
+```
+Add this library to your build file and register it with KSP
+```kotlin
+dependencies {
+  implementation("ch.icken:panache-kotlin-dsl:0.0.2")
+  ksp("ch.icken:panache-kotlin-dsl:0.0.2")
+}
+```
+Optionally configure the behavior
+```kotlin
+ksp {
+  arg("addGeneratedAnnotation", "true")
+}
+```
 
 ## Requirements
 - Quarkus version `3.9.2` or newer
