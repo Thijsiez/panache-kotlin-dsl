@@ -19,14 +19,14 @@ Examples given use Gradle's Kotlin DSL
 Add the KSP Gradle plugin to your build file
 ```kotlin
 plugins {
-    id("com.google.devtools.ksp") version "2.0.21-1.0.25"
+    id("com.google.devtools.ksp") version "2.0.21-1.0.26"
 }
 ```
 Add this library to your build file and register it with KSP
 ```kotlin
 dependencies {
-  implementation("ch.icken:panache-kotlin-dsl:0.0.2")
-  ksp("ch.icken:panache-kotlin-dsl:0.0.2")
+  implementation("ch.icken:panache-kotlin-dsl:0.0.3")
+  ksp("ch.icken:panache-kotlin-dsl:0.0.3")
 }
 ```
 Optionally configure the behavior
