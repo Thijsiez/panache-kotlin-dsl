@@ -82,9 +82,9 @@ abstract class ProcessorCompileTestCommon {
 
         val arguments = returnType.arguments
         assertNotNull(arguments)
-        assertEquals(1, arguments.size)
+        assertEquals(2, arguments.size)
 
-        val type = arguments[0].type
+        val type = arguments[1].type
         assertNotNull(type)
         type!!.classifier.let { classifier ->
             assertNotNull(classifier)

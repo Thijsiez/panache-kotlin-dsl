@@ -19,31 +19,12 @@ package ch.icken.query
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
 
-class WhereQueryComponent<Entity : PanacheEntityBase, Id : Any> internal constructor(
+class WhereQueryComponent<Entity : PanacheEntityBase, Id : Any, Columns> internal constructor(
     companion: PanacheCompanionBase<Entity, Id>,
-    expression: BooleanExpression
-) : InitialQueryComponent<Entity, Id>(companion, expression)
-
-class WhereGroupQueryComponent<Entity : PanacheEntityBase, Id : Any> internal constructor(
-    companion: PanacheCompanionBase<Entity, Id>,
-    expression: BooleanExpression,
-    private val groupComponent: QueryComponent<Entity, Id>.() -> QueryComponent<Entity, Id>
-) : QueryComponent<Entity, Id>(companion) {
-    private val initialComponent = InitialQueryComponent(companion, expression)
-
-    override fun compile(): Compiled {
-        val compiledGroup = groupComponent.invoke(initialComponent).compile()
-        return Compiled("(${compiledGroup.query})", compiledGroup.parameters)
-
-    }
-}
+    expression: Expression<Columns>
+) : InitialQueryComponent<Entity, Id, Columns>(companion, expression)
 
 @Suppress("unused")
-fun <Entity : PanacheEntityBase, Id : Any> PanacheCompanionBase<Entity, Id>.where(expression: BooleanExpression) =
+fun <Entity : PanacheEntityBase, Id : Any, Columns>
+        PanacheCompanionBase<Entity, Id>.where(expression: Expression<Columns>) =
     WhereQueryComponent(this, expression)
-
-@Suppress("unused")
-fun <Entity : PanacheEntityBase, Id : Any> PanacheCompanionBase<Entity, Id>.whereGroup(
-    expression: BooleanExpression,
-    groupComponent: QueryComponent<Entity, Id>.() -> QueryComponent<Entity, Id>
-) = WhereGroupQueryComponent(this, expression, groupComponent)

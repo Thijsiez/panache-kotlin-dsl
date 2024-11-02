@@ -39,9 +39,9 @@ fun findAllSons() = Employee.find { lastName like "%son" }.list()
 // OR SALARY BETWEEN 75000.0 AND 85000.0
 //Then we take the average using Java 8 streams
 fun averageOfVerySpecificSalaryRanges() =
-    Employee
-        .whereGroup({ salary gt 50_000.0 }) {
-            and { salary lte 60_000.0 }
+    Employee.where {
+            salary.gt(50_000.0)
+                .and { salary lte 60_000.0 }
         }
         .or { salary.between(75_000.0, 85_000.0) }
         .stream()

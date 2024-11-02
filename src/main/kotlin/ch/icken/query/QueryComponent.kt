@@ -16,32 +16,21 @@
 
 package ch.icken.query
 
-import ch.icken.query.GroupQueryComponent.AndGroupQueryComponent
-import ch.icken.query.GroupQueryComponent.OrGroupQueryComponent
 import ch.icken.query.LogicalQueryComponent.AndQueryComponent
 import ch.icken.query.LogicalQueryComponent.OrQueryComponent
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
 import io.quarkus.panache.common.Sort
 
-abstract class QueryComponent<Entity : PanacheEntityBase, Id : Any> internal constructor(
+sealed class QueryComponent<Entity : PanacheEntityBase, Id : Any, Columns>(
     private val companion: PanacheCompanionBase<Entity, Id>
 ) {
-    abstract fun compile(): Compiled
+    internal abstract fun compile(): Compiled
     data class Compiled internal constructor(val query: String, val parameters: Map<String, Any>)
 
     //region Intermediate operations
-    fun and(expression: BooleanExpression) = AndQueryComponent(companion, this, expression)
-    @Suppress("unused")
-    fun andGroup(expression: BooleanExpression,
-                 groupComponent: QueryComponent<Entity, Id>.() -> QueryComponent<Entity, Id>) =
-        AndGroupQueryComponent(companion, this, expression, groupComponent)
-
-    fun or(expression: BooleanExpression) = OrQueryComponent(companion, this, expression)
-    @Suppress("unused")
-    fun orGroup(expression: BooleanExpression,
-                groupComponent: QueryComponent<Entity, Id>.() -> QueryComponent<Entity, Id>) =
-        OrGroupQueryComponent(companion, this, expression, groupComponent)
+    fun and(expression: Expression<Columns>) = AndQueryComponent(companion, this, expression)
+    fun or(expression: Expression<Columns>) = OrQueryComponent(companion, this, expression)
     //endregion
 
     //region Terminal operations

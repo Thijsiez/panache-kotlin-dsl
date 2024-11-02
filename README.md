@@ -77,14 +77,14 @@ TODO
 - Supports the following expressions in a type-safe and null-safe way for all columns
   - `eq`, `neq`, `lt`, `gt`, `lte`, `gte`, `in`, `notIn`, `between`, and `notBetween`
 - Supports `like` and `notLike` expressions in a null-safe way for String columns
-- Supports `and`/`andGroup` and `or`/`orGroup` expressions for building up a query
+- Supports `and` and `or` expressions for building up a query
 - Adds the `PanacheSingleResult<T>` sealed class and `singleResultSafe()` extension function to return a single result without throwing exceptions.
 Allows you to handle no/multiple results with a `when (result) { ... }` block instead of try-catching
 ### Code Generation
-- Generate `Column<T>`s for non-transient and non-mapped fields in classes annotated `@Entity` and extending `PanacheEntity`/`PanacheEntityBase`
+- Generate `Column`s for non-transient and non-mapped fields in classes annotated `@Entity` and extending `PanacheEntity`/`PanacheEntityBase`
 - Generate query entry point extension functions for classes with companion objects extending `PanacheCompanion`/`PanacheCompanionBase`
-  - `where`/`whereGroup`, `count`, `delete`, `find`, `stream`, `single`, `singleSafe`, and `multiple`
-- Allows for overriding the generated `Column<T>`'s type parameter using `@ColumnType`
+  - `where`, `count`, `delete`, `find`, `stream`, `single`, `singleSafe`, and `multiple`
+- Allows for overriding the generated `Column`'s type parameter using `@ColumnType`
   - Especially useful when using a JPA `@Converter` when the field's type is different to the column's type
 - Optionally annotate generated code with `@Generated` so it can more easily be excluded from test coverage reporting
 

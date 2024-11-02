@@ -52,8 +52,8 @@ abstract class ProcessorCommon(options: Map<String, String>) {
     companion object {
         //region Class Names
         val AndQueryComponentClassName = LogicalQueryComponent.AndQueryComponent::class.asClassName()
-        val BooleanExpressionClassName = BooleanExpression::class.asClassName()
         val ColumnClassName = Column::class.asClassName()
+        val ExpressionClassName = Expression::class.asClassName()
         val GeneratedClassName = Generated::class.asClassName()
         val JvmNameClassName = JvmName::class.asClassName()
         val ListClassName = List::class.asClassName()
@@ -76,21 +76,21 @@ abstract class ProcessorCommon(options: Map<String, String>) {
         //PanacheEntityBaseProcessor
         const val SUFFIX_OBJECT_COLUMNS = "Columns"
         const val SUFFIX_CLASS_COLUMNS_BASE = "Base"
+        const val TYPE_VARIABLE_NAME_COLUMNS = "Columns"
         const val PARAM_NAME_COLUMNS_BASE_CLASS = "parent"
 
         //PanacheCompanionBaseProcessor
         const val SUFFIX_FILE_EXTENSIONS = "Extensions"
+        const val CLASS_NAME_COMPANION = "Companion"
         const val PARAM_NAME_EXPRESSION = "expression"
-        const val PARAM_NAME_GROUP_COMPONENT = "groupComponent"
         const val PARAM_NAME_SORT = "sort"
 
-        private const val GROUP = "Group"
         const val FUNCTION_NAME_WHERE = "where"
-        const val FUNCTION_NAME_WHERE_GROUP = "$FUNCTION_NAME_WHERE$GROUP"
+        private const val EXPRESSION = "Expression"
         const val FUNCTION_NAME_AND = "and"
-        const val FUNCTION_NAME_AND_GROUP = "$FUNCTION_NAME_AND$GROUP"
+        const val FUNCTION_NAME_AND_EXPRESSION = "$FUNCTION_NAME_AND$EXPRESSION"
         const val FUNCTION_NAME_OR = "or"
-        const val FUNCTION_NAME_OR_GROUP = "$FUNCTION_NAME_OR$GROUP"
+        const val FUNCTION_NAME_OR_EXPRESSION = "$FUNCTION_NAME_OR$EXPRESSION"
 
         const val FUNCTION_NAME_COUNT = "count"
         const val FUNCTION_NAME_DELETE = "delete"

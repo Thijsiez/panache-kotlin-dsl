@@ -19,12 +19,11 @@ package ch.icken.query
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
 
-open class InitialQueryComponent<Entity : PanacheEntityBase, Id : Any> internal constructor(
+open class InitialQueryComponent<Entity : PanacheEntityBase, Id : Any, Columns> internal constructor(
     companion: PanacheCompanionBase<Entity, Id>,
-    private val expression: BooleanExpression
-) : QueryComponent<Entity, Id>(companion) {
+    private val expression: Expression<Columns>
+) : QueryComponent<Entity, Id, Columns>(companion) {
     override fun compile(): Compiled = expression.compile().toQueryComponent()
 
-    private fun BooleanExpression.Compiled.toQueryComponent() =
-        Compiled(expression, parameters)
+    private fun Expression.Compiled.toQueryComponent() = Compiled(expression, parameters)
 }

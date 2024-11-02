@@ -18,96 +18,89 @@ package ch.icken.query
 
 import kotlin.random.Random
 
-sealed class BooleanExpression private constructor(
+sealed class BooleanExpression<Columns> private constructor(
     protected val key: String,
     protected val operator: String
-) {
-    abstract fun compile(): Compiled
-    data class Compiled internal constructor(
-        val expression: String,
-        val parameters: Map<String, Any>
-    )
-
+) : Expression<Columns>() {
     companion object {
         private const val CHARS = //"0123456789" +
                 "abcdefghijklmnopqrstuvwxyz" +
                 "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
-        protected val uniqueParameterName: String
-            get() = (0 ..< 8)
-                .map { CHARS[Random.nextInt(CHARS.length)] }
-                .toCharArray().concatToString()
+        protected fun generateParameterName() = (0 ..< 8)
+            .map { CHARS[Random.nextInt(CHARS.length)] }
+            .toCharArray().concatToString()
     }
 
-    sealed class BooleanValueExpression private constructor(
+    sealed class BooleanValueExpression<Columns> private constructor(
         key: String,
         operator: String,
         private val value: Any
-    ) : BooleanExpression(key, operator) {
-        private val parameterName: String = uniqueParameterName
+    ) : BooleanExpression<Columns>(key, operator) {
+        private val parameterName: String = generateParameterName()
 
-        override fun compile() = Compiled(
+        override fun compileExpression() = Compiled(
             expression = "$key $operator :$parameterName",
             parameters = mapOf(parameterName to value)
         )
 
-        class EqualTo internal constructor(key: String, value: Any) :
-            BooleanValueExpression(key, "=", value)
-        class NotEqualTo internal constructor(key: String, value: Any) :
-            BooleanValueExpression(key, "!=", value)
-        class LessThan internal constructor(key: String, value: Any) :
-            BooleanValueExpression(key, "<", value)
-        class GreaterThan internal constructor(key: String, value: Any) :
-            BooleanValueExpression(key, ">", value)
-        class LessThanOrEqualTo internal constructor(key: String, value: Any) :
-            BooleanValueExpression(key, "<=", value)
-        class GreaterThanOrEqualTo internal constructor(key: String, value: Any) :
-            BooleanValueExpression(key, ">=", value)
+        class EqualTo<Columns> internal constructor(key: String, value: Any) :
+            BooleanValueExpression<Columns>(key, "=", value)
+        class NotEqualTo<Columns> internal constructor(key: String, value: Any) :
+            BooleanValueExpression<Columns>(key, "!=", value)
+        class LessThan<Columns> internal constructor(key: String, value: Any) :
+            BooleanValueExpression<Columns>(key, "<", value)
+        class GreaterThan<Columns> internal constructor(key: String, value: Any) :
+            BooleanValueExpression<Columns>(key, ">", value)
+        class LessThanOrEqualTo<Columns> internal constructor(key: String, value: Any) :
+            BooleanValueExpression<Columns>(key, "<=", value)
+        class GreaterThanOrEqualTo<Columns> internal constructor(key: String, value: Any) :
+            BooleanValueExpression<Columns>(key, ">=", value)
 
-        class In internal constructor(key: String, values: Collection<Any>) :
-            BooleanValueExpression(key, "IN", values)
-        class NotIn internal constructor(key: String, values: Collection<Any>) :
-            BooleanValueExpression(key, "NOT IN", values)
+        class In<Columns> internal constructor(key: String, values: Collection<Any>) :
+            BooleanValueExpression<Columns>(key, "IN", values)
+        class NotIn<Columns> internal constructor(key: String, values: Collection<Any>) :
+            BooleanValueExpression<Columns>(key, "NOT IN", values)
 
-        class Like internal constructor(key: String, expression: String) :
-            BooleanValueExpression(key, "LIKE", expression)
-        class NotLike internal constructor(key: String, expression: String) :
-            BooleanValueExpression(key, "NOT LIKE", expression)
+        class Like<Columns> internal constructor(key: String, expression: String) :
+            BooleanValueExpression<Columns>(key, "LIKE", expression)
+        class NotLike<Columns> internal constructor(key: String, expression: String) :
+            BooleanValueExpression<Columns>(key, "NOT LIKE", expression)
 
     }
 
-    sealed class BetweenExpression private constructor(
+    sealed class BetweenExpression<Columns> private constructor(
         key: String,
         operator: String,
         private val min: Any,
         private val maxIncl: Any
-    ) : BooleanExpression(key, operator) {
-        private val minParameterName: String = uniqueParameterName
-        private val maxInclParameterName: String = uniqueParameterName
+    ) : BooleanExpression<Columns>(key, operator) {
+        private val minParameterName: String = generateParameterName()
+        private val maxInclParameterName: String = generateParameterName()
 
-        override fun compile() = Compiled(
+        override fun compileExpression() = Compiled(
             expression = "$key $operator :$minParameterName AND :$maxInclParameterName",
             parameters = mapOf(minParameterName to min, maxInclParameterName to maxIncl)
         )
 
-        class Between internal constructor(key: String, min: Any, maxIncl: Any) :
-            BetweenExpression(key, "BETWEEN", min, maxIncl)
-        class NotBetween internal constructor(key: String, min: Any, maxIncl: Any) :
-            BetweenExpression(key, "NOT BETWEEN", min, maxIncl)
+        class Between<Columns> internal constructor(key: String, min: Any, maxIncl: Any) :
+            BetweenExpression<Columns>(key, "BETWEEN", min, maxIncl)
+        class NotBetween<Columns> internal constructor(key: String, min: Any, maxIncl: Any) :
+            BetweenExpression<Columns>(key, "NOT BETWEEN", min, maxIncl)
     }
 
-    sealed class IsExpression private constructor(
+    sealed class IsExpression<Columns> private constructor(
         key: String,
         operator: String
-    ) : BooleanExpression(key, operator) {
-        override fun compile() = Compiled(
+    ) : BooleanExpression<Columns>(key, operator) {
+        override fun compileExpression() = Compiled(
             expression = "$key $operator NULL",
             parameters = emptyMap()
         )
 
-        class IsNull internal constructor(key: String) :
-            IsExpression(key, "IS")
-        class IsNotNull internal constructor(key: String) :
-            IsExpression(key, "IS NOT")
+        class IsNull<Columns> internal constructor(key: String) :
+            IsExpression<Columns>(key, "IS")
+        class IsNotNull<Columns> internal constructor(key: String) :
+            IsExpression<Columns>(key, "IS NOT")
     }
 }

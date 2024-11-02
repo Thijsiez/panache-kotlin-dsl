@@ -19,12 +19,12 @@ package ch.icken.query
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
 
-sealed class LogicalQueryComponent<Entity : PanacheEntityBase, Id : Any> private constructor(
+sealed class LogicalQueryComponent<Entity : PanacheEntityBase, Id : Any, Columns> private constructor(
     companion: PanacheCompanionBase<Entity, Id>,
-    private val previous: QueryComponent<Entity, Id>,
+    private val previous: QueryComponent<Entity, Id, Columns>,
     private val operator: String,
-    private val expression: BooleanExpression
-) : QueryComponent<Entity, Id>(companion) {
+    private val expression: Expression<Columns>
+) : QueryComponent<Entity, Id, Columns>(companion) {
     override fun compile(): Compiled {
         val compiledPrevious = previous.compile()
         val compiledExpression = expression.compile()
@@ -34,15 +34,15 @@ sealed class LogicalQueryComponent<Entity : PanacheEntityBase, Id : Any> private
         )
     }
 
-    class AndQueryComponent<Entity : PanacheEntityBase, Id : Any> internal constructor(
+    class AndQueryComponent<Entity : PanacheEntityBase, Id : Any, Columns> internal constructor(
         companion: PanacheCompanionBase<Entity, Id>,
-        previous: QueryComponent<Entity, Id>,
-        expression: BooleanExpression
-    ) : LogicalQueryComponent<Entity, Id>(companion, previous, "AND", expression)
+        previous: QueryComponent<Entity, Id, Columns>,
+        expression: Expression<Columns>
+    ) : LogicalQueryComponent<Entity, Id, Columns>(companion, previous, "AND", expression)
 
-    class OrQueryComponent<Entity : PanacheEntityBase, Id : Any> internal constructor(
+    class OrQueryComponent<Entity : PanacheEntityBase, Id : Any, Columns> internal constructor(
         companion: PanacheCompanionBase<Entity, Id>,
-        previous: QueryComponent<Entity, Id>,
-        expression: BooleanExpression
-    ) : LogicalQueryComponent<Entity, Id>(companion, previous, "OR", expression)
+        previous: QueryComponent<Entity, Id, Columns>,
+        expression: Expression<Columns>
+    ) : LogicalQueryComponent<Entity, Id, Columns>(companion, previous, "OR", expression)
 }

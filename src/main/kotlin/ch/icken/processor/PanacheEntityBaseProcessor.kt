@@ -52,12 +52,14 @@ class PanacheEntityBaseProcessor(
     internal fun createColumnsObject(ksClass: KSClassDeclaration, ksProperties: List<KSPropertyDeclaration>) {
         val packageName = ksClass.packageName.asString() + SUFFIX_PACKAGE_GENERATED
         val objectName = ksClass.simpleName.asString() + SUFFIX_OBJECT_COLUMNS
-        val baseClassName = objectName + SUFFIX_CLASS_COLUMNS_BASE
         logger.info("Generating $packageName.$objectName (${ksProperties.size} columns)")
 
         // Generate base class
+        val baseClassName = objectName + SUFFIX_CLASS_COLUMNS_BASE
+        val baseClassColumnsTypeVariable = TypeVariableName(TYPE_VARIABLE_NAME_COLUMNS)
         val baseClassBuilder = TypeSpec.classBuilder(baseClassName)
             .addModifiers(KModifier.OPEN)
+            .addTypeVariable(baseClassColumnsTypeVariable)
             .addAnnotationIf(generatedAnnotation, addGeneratedAnnotation)
             .apply {
                 // Generate constructor
@@ -76,17 +78,19 @@ class PanacheEntityBaseProcessor(
 
                     val propertyBuilder = if (isJoinColumn) {
                         val joinObjectName = ksProperty.typeName + SUFFIX_OBJECT_COLUMNS
-                        val joinBaseClassName = joinObjectName + SUFFIX_CLASS_COLUMNS_BASE
-                        val joinBaseClass = ClassName(packageName, joinBaseClassName)
+                        val joinBaseClassType = ClassName(packageName, joinObjectName + SUFFIX_CLASS_COLUMNS_BASE)
+                            .plusParameter(baseClassColumnsTypeVariable)
 
-                        PropertySpec.builder(propertyName, joinBaseClass)
-                            .initializer("%T(%S)", joinBaseClass, "$propertyName.")
+                        PropertySpec.builder(propertyName, joinBaseClassType)
+                            .initializer("%T(%S)", joinBaseClassType, "$propertyName.")
                     } else {
                         val ksPropertyType = ksProperty.type.resolve()
                         val columnTypeParameter = (ksProperty.columnTypeClassName ?: ksPropertyType.toClassName())
                             .copy(nullable = ksPropertyType.isMarkedNullable)
+                        val columnType = ColumnClassName.plusParameter(baseClassColumnsTypeVariable)
+                            .plusParameter(columnTypeParameter)
 
-                        PropertySpec.builder(propertyName, ColumnClassName.plusParameter(columnTypeParameter))
+                        PropertySpec.builder(propertyName, columnType)
                             .initializer("%T(%P)", ColumnClassName,
                                 "\${${PARAM_NAME_COLUMNS_BASE_CLASS}.orEmpty()}$propertyName")
                     }.addAnnotationIf(generatedAnnotation, addGeneratedAnnotation)
@@ -97,7 +101,8 @@ class PanacheEntityBaseProcessor(
 
         // Generate implementation
         val objectBuilder = TypeSpec.objectBuilder(objectName)
-            .superclass(ClassName(packageName, baseClassName))
+            .superclass(ClassName(packageName, baseClassName)
+                .plusParameter(ClassName(packageName, objectName)))
             .addAnnotationIf(generatedAnnotation, addGeneratedAnnotation)
 
         // Generate actual source code file

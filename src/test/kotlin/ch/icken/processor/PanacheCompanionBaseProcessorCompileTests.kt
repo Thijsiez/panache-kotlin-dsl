@@ -47,9 +47,9 @@ class PanacheCompanionBaseProcessorCompileTests : ProcessorCompileTestCommon() {
         compilation.assertHasFile("EmployeeExtensions.kt")
 
         val employeeExtensions = result.loadClass("EmployeeExtensionsKt")
-        employeeExtensions.assertNumberOfDeclaredMethods(16)
+        employeeExtensions.assertNumberOfDeclaredMethods(15)
         employeeExtensions.assertHasDeclaredMethodWithName("andEmployee")
-        employeeExtensions.assertHasDeclaredMethodWithName("andGroupEmployee")
+        employeeExtensions.assertHasDeclaredMethodWithName("andExpressionEmployee")
         employeeExtensions.assertHasDeclaredMethodWithName("countEmployee")
         employeeExtensions.assertHasDeclaredMethodWithName("deleteEmployee")
         employeeExtensions.assertHasDeclaredMethodWithName("findEmployee")
@@ -57,12 +57,11 @@ class PanacheCompanionBaseProcessorCompileTests : ProcessorCompileTestCommon() {
         employeeExtensions.assertHasDeclaredMethodWithName("multipleEmployee")
         employeeExtensions.assertHasDeclaredMethodWithName("multipleSortedEmployee")
         employeeExtensions.assertHasDeclaredMethodWithName("orEmployee")
-        employeeExtensions.assertHasDeclaredMethodWithName("orGroupEmployee")
+        employeeExtensions.assertHasDeclaredMethodWithName("orExpressionEmployee")
         employeeExtensions.assertHasDeclaredMethodWithName("singleEmployee")
         employeeExtensions.assertHasDeclaredMethodWithName("singleSafeEmployee")
         employeeExtensions.assertHasDeclaredMethodWithName("streamEmployee")
         employeeExtensions.assertHasDeclaredMethodWithName("streamSortedEmployee")
         employeeExtensions.assertHasDeclaredMethodWithName("whereEmployee")
-        employeeExtensions.assertHasDeclaredMethodWithName("whereGroupEmployee")
     }
 }
