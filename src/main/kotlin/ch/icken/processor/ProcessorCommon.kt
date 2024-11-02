@@ -16,8 +16,12 @@
 
 package ch.icken.processor
 
-import ch.icken.query.*
 import ch.icken.query.Column
+import ch.icken.query.Expression
+import ch.icken.query.PanacheSingleResult
+import ch.icken.query.QueryComponent
+import ch.icken.query.QueryComponent.LogicalQueryComponent.AndQueryComponent
+import ch.icken.query.QueryComponent.LogicalQueryComponent.OrQueryComponent
 import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.asClassName
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase
@@ -51,14 +55,14 @@ abstract class ProcessorCommon(options: Map<String, String>) {
 
     companion object {
         //region Class Names
-        val AndQueryComponentClassName = LogicalQueryComponent.AndQueryComponent::class.asClassName()
+        val AndQueryComponentClassName = AndQueryComponent::class.asClassName()
         val ColumnClassName = Column::class.asClassName()
         val ExpressionClassName = Expression::class.asClassName()
         val GeneratedClassName = Generated::class.asClassName()
         val JvmNameClassName = JvmName::class.asClassName()
         val ListClassName = List::class.asClassName()
         val LongClassName = Long::class.asClassName()
-        val OrQueryComponentClassName = LogicalQueryComponent.OrQueryComponent::class.asClassName()
+        val OrQueryComponentClassName = OrQueryComponent::class.asClassName()
         val PanacheQueryClassName = PanacheQuery::class.asClassName()
         val PanacheSingleResultClassName = PanacheSingleResult::class.asClassName()
         val QueryComponentClassName = QueryComponent::class.asClassName()

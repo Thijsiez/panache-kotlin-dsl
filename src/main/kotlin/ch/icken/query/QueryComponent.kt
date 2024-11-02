@@ -16,29 +16,22 @@
 
 package ch.icken.query
 
-import ch.icken.query.LogicalQueryComponent.AndQueryComponent
-import ch.icken.query.LogicalQueryComponent.OrQueryComponent
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
 import io.quarkus.panache.common.Sort
 
-sealed class QueryComponent<Entity : PanacheEntityBase, Id : Any, Columns>(
+sealed class QueryComponent<Entity : PanacheEntityBase, Id : Any, Columns> private constructor(
     private val companion: PanacheCompanionBase<Entity, Id>
 ) {
-    internal abstract fun compile(): Compiled
-    data class Compiled internal constructor(val query: String, val parameters: Map<String, Any>)
-
     //region Intermediate operations
-    fun and(expression: Expression<Columns>) = AndQueryComponent(companion, this, expression)
-    fun or(expression: Expression<Columns>) = OrQueryComponent(companion, this, expression)
+    fun and(expression: Expression<Columns>) = LogicalQueryComponent.AndQueryComponent(companion, this, expression)
+    fun or(expression: Expression<Columns>) = LogicalQueryComponent.OrQueryComponent(companion, this, expression)
     //endregion
 
     //region Terminal operations
     fun count() = with(compile()) { companion.count(query, parameters) }
     fun delete() = with(compile()) { companion.delete(query, parameters) }
-    @Suppress("MemberVisibilityCanBePrivate")
     fun find() = with(compile()) { companion.find(query, parameters) }
-    @Suppress("MemberVisibilityCanBePrivate")
     fun find(sort: Sort) = with(compile()) { companion.find(query, sort, parameters) }
     fun stream() = with(compile()) { companion.stream(query, parameters) }
     fun stream(sort: Sort) = with(compile()) { companion.stream(query, sort, parameters) }
@@ -48,4 +41,55 @@ sealed class QueryComponent<Entity : PanacheEntityBase, Id : Any, Columns>(
     fun getMultiple() = find().list()
     fun getMultiple(sort: Sort) = find(sort).list()
     //endregion
+
+    //region compile
+    internal abstract fun compile(): Compiled
+    data class Compiled internal constructor(val query: String, val parameters: Map<String, Any>)
+    //endregion
+
+    sealed class InitialQueryComponent<Entity : PanacheEntityBase, Id : Any, Columns> private constructor(
+        companion: PanacheCompanionBase<Entity, Id>,
+        private val expression: Expression<Columns>
+    ) : QueryComponent<Entity, Id, Columns>(companion) {
+        override fun compile(): Compiled = expression.compile().let {
+            Compiled(it.expression, it.parameters)
+        }
+
+        class InitialWhereQueryComponent<Entity : PanacheEntityBase, Id : Any, Columns> internal constructor(
+            companion: PanacheCompanionBase<Entity, Id>,
+            expression: Expression<Columns>
+        ) : InitialQueryComponent<Entity, Id, Columns>(companion, expression)
+    }
+
+    sealed class LogicalQueryComponent<Entity : PanacheEntityBase, Id : Any, Columns> private constructor(
+        companion: PanacheCompanionBase<Entity, Id>,
+        private val previous: QueryComponent<Entity, Id, Columns>,
+        private val operator: String,
+        private val expression: Expression<Columns>
+    ) : QueryComponent<Entity, Id, Columns>(companion) {
+        override fun compile(): Compiled {
+            val compiledPrevious = previous.compile()
+            val compiledExpression = expression.compile()
+            return Compiled(
+                query = "${compiledPrevious.query} $operator ${compiledExpression.expression}",
+                parameters = compiledPrevious.parameters + compiledExpression.parameters
+            )
+        }
+
+        class AndQueryComponent<Entity : PanacheEntityBase, Id : Any, Columns> internal constructor(
+            companion: PanacheCompanionBase<Entity, Id>,
+            previous: QueryComponent<Entity, Id, Columns>,
+            expression: Expression<Columns>
+        ) : LogicalQueryComponent<Entity, Id, Columns>(companion, previous, "AND", expression)
+
+        class OrQueryComponent<Entity : PanacheEntityBase, Id : Any, Columns> internal constructor(
+            companion: PanacheCompanionBase<Entity, Id>,
+            previous: QueryComponent<Entity, Id, Columns>,
+            expression: Expression<Columns>
+        ) : LogicalQueryComponent<Entity, Id, Columns>(companion, previous, "OR", expression)
+    }
 }
+
+fun <Entity : PanacheEntityBase, Id : Any, Columns>
+        PanacheCompanionBase<Entity, Id>.where(expression: Expression<Columns>) =
+    QueryComponent.InitialQueryComponent.InitialWhereQueryComponent(this, expression)

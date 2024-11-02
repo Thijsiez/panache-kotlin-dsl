@@ -18,11 +18,11 @@
 
 package ch.icken.query
 
-import ch.icken.query.BooleanExpression.BetweenExpression.Between
-import ch.icken.query.BooleanExpression.BetweenExpression.NotBetween
-import ch.icken.query.BooleanExpression.BooleanValueExpression.*
-import ch.icken.query.BooleanExpression.IsExpression.IsNotNull
-import ch.icken.query.BooleanExpression.IsExpression.IsNull
+import ch.icken.query.Expression.BooleanExpression.BetweenExpression.Between
+import ch.icken.query.Expression.BooleanExpression.BetweenExpression.NotBetween
+import ch.icken.query.Expression.BooleanExpression.BooleanValueExpression.*
+import ch.icken.query.Expression.BooleanExpression.IsExpression.IsNotNull
+import ch.icken.query.Expression.BooleanExpression.IsExpression.IsNull
 
 class Column<Columns, T : Any?>(internal val name: String)
 
