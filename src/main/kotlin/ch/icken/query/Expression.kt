@@ -20,8 +20,8 @@ import kotlin.random.Random
 
 sealed class Expression<Columns> {
     //region Chaining operations
-    fun and(expression: Expression<Columns>) = LogicalExpression.AndExpression(this, expression)
-    fun or(expression: Expression<Columns>) = LogicalExpression.OrExpression(this, expression)
+    fun and(expression: Expression<Columns>): Expression<Columns> = LogicalExpression.AndExpression(this, expression)
+    fun or(expression: Expression<Columns>): Expression<Columns> = LogicalExpression.OrExpression(this, expression)
     //endregion
 
     //region compile

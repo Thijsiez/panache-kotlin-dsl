@@ -27,44 +27,44 @@ import ch.icken.query.Expression.BooleanExpression.IsExpression.IsNull
 class Column<Columns, T : Any?>(internal val name: String)
 
 //region eq
-private fun <Columns> eq(name: String, value: Any?) =
-    if (value == null) IsNull(name) else EqualTo<Columns>(name, value)
+private fun <Columns> eq(name: String, value: Any?): Expression<Columns> =
+    if (value == null) IsNull(name) else EqualTo(name, value)
 @JvmName("eq")
 infix fun <Columns, T : Any> Column<Columns, T>.eq(value: T) = eq<Columns>(name, value)
 @JvmName("eqNullable")
 infix fun <Columns, T : Any> Column<Columns, T?>.eq(value: T?) = eq<Columns>(name, value)
 //endregion
 //region neq
-private fun <Columns> neq(name: String, value: Any?) =
-    if (value == null) IsNotNull(name) else NotEqualTo<Columns>(name, value)
+private fun <Columns> neq(name: String, value: Any?): Expression<Columns> =
+    if (value == null) IsNotNull(name) else NotEqualTo(name, value)
 @JvmName("neq")
 infix fun <Columns, T : Any> Column<Columns, T>.neq(value: T) = neq<Columns>(name, value)
 @JvmName("neqNullable")
 infix fun <Columns, T : Any> Column<Columns, T?>.neq(value: T?) = neq<Columns>(name, value)
 //endregion
 //region lt
-private fun <Columns> lt(name: String, value: Any) = LessThan<Columns>(name, value)
+private fun <Columns> lt(name: String, value: Any): Expression<Columns> = LessThan(name, value)
 @JvmName("lt")
 infix fun <Columns, T : Any> Column<Columns, T>.lt(value: T) = lt<Columns>(name, value)
 @JvmName("ltNullable")
 infix fun <Columns, T : Any> Column<Columns, T?>.lt(value: T) = lt<Columns>(name, value)
 //endregion
 //region gt
-private fun <Columns> gt(name: String, value: Any) = GreaterThan<Columns>(name, value)
+private fun <Columns> gt(name: String, value: Any): Expression<Columns> = GreaterThan(name, value)
 @JvmName("gt")
 infix fun <Columns, T : Any> Column<Columns, T>.gt(value: T) = gt<Columns>(name, value)
 @JvmName("gtNullable")
 infix fun <Columns, T : Any> Column<Columns, T?>.gt(value: T) = gt<Columns>(name, value)
 //endregion
 //region lte
-private fun <Columns> lte(name: String, value: Any) = LessThanOrEqualTo<Columns>(name, value)
+private fun <Columns> lte(name: String, value: Any): Expression<Columns> = LessThanOrEqualTo(name, value)
 @JvmName("lte")
 infix fun <Columns, T : Any> Column<Columns, T>.lte(value: T) = lte<Columns>(name, value)
 @JvmName("lteNullable")
 infix fun <Columns, T : Any> Column<Columns, T?>.lte(value: T) = lte<Columns>(name, value)
 //endregion
 //region gte
-private fun <Columns> gte(name: String, value: Any) = GreaterThanOrEqualTo<Columns>(name, value)
+private fun <Columns> gte(name: String, value: Any): Expression<Columns> = GreaterThanOrEqualTo(name, value)
 @JvmName("gte")
 infix fun <Columns, T : Any> Column<Columns, T>.gte(value: T) = gte<Columns>(name, value)
 @JvmName("gteNullable")
@@ -72,14 +72,14 @@ infix fun <Columns, T : Any> Column<Columns, T?>.gte(value: T) = gte<Columns>(na
 //endregion
 
 //region in
-private fun <Columns> `in`(name: String, values: Collection<Any>) = In<Columns>(name, values)
+private fun <Columns> `in`(name: String, values: Collection<Any>): Expression<Columns> = In(name, values)
 @JvmName("in")
 infix fun <Columns, T : Any> Column<Columns, T>.`in`(values: Collection<T>) = `in`<Columns>(name, values)
 @JvmName("inNullable")
 infix fun <Columns, T : Any> Column<Columns, T?>.`in`(values: Collection<T>) = `in`<Columns>(name, values)
 //endregion
 //region notIn
-private fun <Columns> notIn(name: String, values: Collection<Any>) = NotIn<Columns>(name, values)
+private fun <Columns> notIn(name: String, values: Collection<Any>): Expression<Columns> = NotIn(name, values)
 @JvmName("notIn")
 infix fun <Columns, T : Any> Column<Columns, T>.notIn(values: Collection<T>) = notIn<Columns>(name, values)
 @JvmName("notInNullable")
@@ -87,16 +87,16 @@ infix fun <Columns, T : Any> Column<Columns, T?>.notIn(values: Collection<T>) = 
 //endregion
 
 //region like
-private fun <Columns> like(name: String, expression: String?) =
-    if (expression == null) IsNull(name) else Like<Columns>(name, expression)
+private fun <Columns> like(name: String, expression: String?): Expression<Columns> =
+    if (expression == null) IsNull(name) else Like(name, expression)
 @JvmName("like")
 infix fun <Columns> Column<Columns, String>.like(expression: String) = like<Columns>(name, expression)
 @JvmName("likeNullable")
 infix fun <Columns> Column<Columns, String?>.like(expression: String?) = like<Columns>(name, expression)
 //endregion
 //region notLike
-private fun <Columns> notLike(name: String, expression: String?) =
-    if (expression == null) IsNotNull(name) else NotLike<Columns>(name, expression)
+private fun <Columns> notLike(name: String, expression: String?): Expression<Columns> =
+    if (expression == null) IsNotNull(name) else NotLike(name, expression)
 @JvmName("notLike")
 infix fun <Columns> Column<Columns, String>.notLike(expression: String) = notLike<Columns>(name, expression)
 @JvmName("notLikeNullable")
@@ -104,8 +104,8 @@ infix fun <Columns> Column<Columns, String?>.notLike(expression: String?) = notL
 //endregion
 
 //region between
-private fun <Columns> between(name: String, min: Any?, maxIncl: Any?) = when {
-    min != null && maxIncl != null -> Between<Columns>(name, min, maxIncl)
+private fun <Columns> between(name: String, min: Any?, maxIncl: Any?): Expression<Columns> = when {
+    min != null && maxIncl != null -> Between(name, min, maxIncl)
     min != null && maxIncl == null -> GreaterThanOrEqualTo(name, min)
     min == null && maxIncl != null -> LessThanOrEqualTo(name, maxIncl)
     else -> IsNull(name)
@@ -116,8 +116,8 @@ fun <Columns, T : Any> Column<Columns, T>.between(min: T, maxIncl: T) = between<
 fun <Columns, T : Any> Column<Columns, T?>.between(min: T?, maxIncl: T?) = between<Columns>(name, min, maxIncl)
 //endregion
 //region notBetween
-private fun <Columns> notBetween(name: String, min: Any?, maxIncl: Any?) = when {
-    min != null && maxIncl != null -> NotBetween<Columns>(name, min, maxIncl)
+private fun <Columns> notBetween(name: String, min: Any?, maxIncl: Any?): Expression<Columns> = when {
+    min != null && maxIncl != null -> NotBetween(name, min, maxIncl)
     min != null && maxIncl == null -> LessThan(name, min)
     min == null && maxIncl != null -> GreaterThan(name, maxIncl)
     else -> IsNotNull(name)
