@@ -16,6 +16,11 @@
 
 package ch.icken.query
 
+import ch.icken.query.Component.QueryComponent
+import ch.icken.query.Component.QueryComponent.InitialQueryComponent
+import ch.icken.query.Component.UpdateComponent
+import ch.icken.query.Component.UpdateComponent.InitialUpdateComponent
+import ch.icken.query.Component.UpdateComponent.InitialUpdateComponent.Setter
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
 import io.quarkus.panache.common.Sort
@@ -25,7 +30,7 @@ sealed class Component<Entity : PanacheEntityBase, Id : Any, Columns> private co
 ) {
     //region compile
     internal abstract fun compile(): Compiled
-    data class Compiled internal constructor(val query: String, val parameters: Map<String, Any>)
+    data class Compiled internal constructor(val component: String, val parameters: Map<String, Any>)
     //endregion
 
     sealed class QueryComponent<Entity : PanacheEntityBase, Id : Any, Columns> private constructor(
@@ -40,12 +45,12 @@ sealed class Component<Entity : PanacheEntityBase, Id : Any, Columns> private co
         //endregion
 
         //region Terminal operations
-        fun count() = with(compile()) { companion.count(query, parameters) }
-        fun delete() = with(compile()) { companion.delete(query, parameters) }
-        fun find() = with(compile()) { companion.find(query, parameters) }
-        fun find(sort: Sort) = with(compile()) { companion.find(query, sort, parameters) }
-        fun stream() = with(compile()) { companion.stream(query, parameters) }
-        fun stream(sort: Sort) = with(compile()) { companion.stream(query, sort, parameters) }
+        fun count() = with(compile()) { companion.count(component, parameters) }
+        fun delete() = with(compile()) { companion.delete(component, parameters) }
+        fun find() = with(compile()) { companion.find(component, parameters) }
+        fun find(sort: Sort) = with(compile()) { companion.find(component, sort, parameters) }
+        fun stream() = with(compile()) { companion.stream(component, parameters) }
+        fun stream(sort: Sort) = with(compile()) { companion.stream(component, sort, parameters) }
 
         fun getSingle() = find().singleResult()
         fun getSingleSafe() = find().singleResultSafe()
@@ -72,7 +77,7 @@ sealed class Component<Entity : PanacheEntityBase, Id : Any, Columns> private co
                 val compiledPrevious = previous.compile()
                 val compiledExpression = expression.compile()
                 return Compiled(
-                    query = "${compiledPrevious.query} $operator ${compiledExpression.expression}",
+                    component = "${compiledPrevious.component} $operator ${compiledExpression.expression}",
                     parameters = compiledPrevious.parameters + compiledExpression.parameters
                 )
             }
@@ -90,26 +95,94 @@ sealed class Component<Entity : PanacheEntityBase, Id : Any, Columns> private co
         }
     }
 
-    class UpdateComponent<Entity : PanacheEntityBase, Id : Any, Columns> internal constructor(
-        companion: PanacheCompanionBase<Entity, Id>,
-        private val columns: Columns
-        //TODO setter providers
+    sealed class UpdateComponent<Entity : PanacheEntityBase, Id : Any, Columns> private constructor(
+        companion: PanacheCompanionBase<Entity, Id>
     ) : Component<Entity, Id, Columns>(companion) {
-        override fun compile(): Compiled {
-            TODO("Not yet implemented")
+        class InitialUpdateComponent<Entity : PanacheEntityBase, Id : Any, Columns> internal constructor(
+            companion: PanacheCompanionBase<Entity, Id>,
+            private val columns: Columns,
+            private val setters: Array<out Columns.() -> Setter>
+        ) : UpdateComponent<Entity, Id, Columns>(companion) {
+            //region Chaining operations
+            fun where(expression: Expression<Columns>): UpdateComponent<Entity, Id, Columns> =
+                LogicalUpdateComponent.WhereUpdateComponent(companion, this, expression)
+            //endregion
+
+            //region Terminal operations
+            //TODO execute on all rows
+            //endregion
+
+            override fun compile(): Compiled {
+                val compiledSetters = setters.map { it(columns).compile() }
+                return Compiled(
+                    component = compiledSetters.joinToString { it.assignment },
+                    parameters = compiledSetters.mapNotNull { it.parameter }.associate { it }
+                )
+            }
+
+            data class Setter internal constructor(val columnName: String, val value: Any?) {
+                private val parameterName: String = generateParameterName()
+
+                internal fun compile(): Compiled = when (value) {
+                    null -> Compiled("$columnName = null", null)
+                    else -> Compiled("$columnName = $parameterName", parameterName to value)
+                }
+                data class Compiled internal constructor(val assignment: String, val parameter: Pair<String, Any>?)
+            }
         }
 
-        //TODO where
+        sealed class LogicalUpdateComponent<Entity : PanacheEntityBase, Id : Any, Columns> private constructor(
+            companion: PanacheCompanionBase<Entity, Id>,
+            private val previous: UpdateComponent<Entity, Id, Columns>,
+            private val operator: String,
+            private val expression: Expression<Columns>
+        ) : UpdateComponent<Entity, Id, Columns>(companion) {
+            //region Chaining operations
+            fun and(expression: Expression<Columns>): UpdateComponent<Entity, Id, Columns> =
+                AndUpdateComponent(companion, this, expression)
+            fun or(expression: Expression<Columns>): UpdateComponent<Entity, Id, Columns> =
+                OrUpdateComponent(companion, this, expression)
+            //endregion
 
-        data class Setter internal constructor(val key: String, val value: Any?)
+            //region Terminal operations
+            //TODO execute
+            //endregion
+
+            override fun compile(): Compiled {
+                val compiledPrevious = previous.compile()
+                val compiledExpression = expression.compile()
+                return Compiled(
+                    component = "${compiledPrevious.component} $operator ${compiledExpression.expression}",
+                    parameters = compiledPrevious.parameters + compiledExpression.parameters
+                )
+            }
+
+            class AndUpdateComponent<Entity : PanacheEntityBase, Id : Any, Columns> internal constructor(
+                companion: PanacheCompanionBase<Entity, Id>,
+                previous: UpdateComponent<Entity, Id, Columns>,
+                expression: Expression<Columns>
+            ) : LogicalUpdateComponent<Entity, Id, Columns>(companion, previous, "AND", expression)
+            class OrUpdateComponent<Entity : PanacheEntityBase, Id : Any, Columns> internal constructor(
+                companion: PanacheCompanionBase<Entity, Id>,
+                previous: UpdateComponent<Entity, Id, Columns>,
+                expression: Expression<Columns>
+            ) : LogicalUpdateComponent<Entity, Id, Columns>(companion, previous, "OR", expression)
+            class WhereUpdateComponent<Entity : PanacheEntityBase, Id : Any, Columns> internal constructor(
+                companion: PanacheCompanionBase<Entity, Id>,
+                previous: UpdateComponent<Entity, Id, Columns>,
+                expression: Expression<Columns>
+            ) : LogicalUpdateComponent<Entity, Id, Columns>(companion, previous, "WHERE", expression)
+        }
     }
 }
 
 fun <Entity : PanacheEntityBase, Id : Any, Columns>
-        PanacheCompanionBase<Entity, Id>.update(columns: Columns)://TODO setter providers
-        Component.UpdateComponent<Entity, Id, Columns> = Component.UpdateComponent(this, columns)
+        PanacheCompanionBase<Entity, Id>.update(columns: Columns, setter: Columns.() -> Setter):
+        UpdateComponent<Entity, Id, Columns> = InitialUpdateComponent(this, columns, arrayOf(setter))
+fun <Entity : PanacheEntityBase, Id : Any, Columns>
+        PanacheCompanionBase<Entity, Id>.update(columns: Columns, setters: Array<out Columns.() -> Setter>):
+        UpdateComponent<Entity, Id, Columns> = InitialUpdateComponent(this, columns, setters)
 
 fun <Entity : PanacheEntityBase, Id : Any, Columns>
         PanacheCompanionBase<Entity, Id>.where(expression: Expression<Columns>):
-        Component.QueryComponent<Entity, Id, Columns> =
-    Component.QueryComponent.InitialQueryComponent(this, expression)
+        QueryComponent<Entity, Id, Columns> = InitialQueryComponent(this, expression)

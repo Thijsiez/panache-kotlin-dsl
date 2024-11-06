@@ -47,7 +47,7 @@ class PanacheCompanionBaseProcessorCompileTests : ProcessorCompileTestCommon() {
         compilation.assertHasFile("EmployeeExtensions.kt")
 
         val employeeExtensions = result.loadClass("EmployeeExtensionsKt")
-        employeeExtensions.assertNumberOfDeclaredMethods(16)
+        employeeExtensions.assertNumberOfDeclaredMethods(17)
         employeeExtensions.assertHasDeclaredMethodWithName("andEmployee")
         employeeExtensions.assertHasDeclaredMethodWithName("andExpressionEmployee")
         employeeExtensions.assertHasDeclaredMethodWithName("countEmployee")
@@ -63,6 +63,7 @@ class PanacheCompanionBaseProcessorCompileTests : ProcessorCompileTestCommon() {
         employeeExtensions.assertHasDeclaredMethodWithName("streamEmployee")
         employeeExtensions.assertHasDeclaredMethodWithName("streamSortedEmployee")
         employeeExtensions.assertHasDeclaredMethodWithName("updateEmployee")
+        employeeExtensions.assertHasDeclaredMethodWithName("updateMultipleEmployee")
         employeeExtensions.assertHasDeclaredMethodWithName("whereEmployee")
     }
 }

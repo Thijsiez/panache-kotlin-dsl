@@ -24,7 +24,9 @@ import ch.icken.query.Expression.BooleanExpression.BooleanValueExpression.*
 import ch.icken.query.Expression.BooleanExpression.IsExpression.IsNotNull
 import ch.icken.query.Expression.BooleanExpression.IsExpression.IsNull
 
-class Column<Columns, T : Any?>(internal val name: String)
+class Column<Columns, T : Any?>(internal val name: String) {
+    operator fun invoke(value: T) = Component.UpdateComponent.InitialUpdateComponent.Setter(name, value)
+}
 
 //region eq
 private fun <Columns> eq(name: String, value: Any?): Expression<Columns> =

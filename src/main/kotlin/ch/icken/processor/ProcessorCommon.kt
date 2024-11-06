@@ -65,7 +65,7 @@ abstract class ProcessorCommon(options: Map<String, String>) {
         val PanacheQueryClassName = PanacheQuery::class.asClassName()
         val PanacheSingleResultClassName = PanacheSingleResult::class.asClassName()
         val QueryComponentClassName = QueryComponent::class.asClassName()
-        val SetterClassName = UpdateComponent.Setter::class.asClassName()
+        val SetterClassName = UpdateComponent.InitialUpdateComponent.Setter::class.asClassName()
         val SortClassName = Sort::class.asClassName()
         val StreamClassName = Stream::class.asClassName()
         val StringClassName = String::class.asClassName()
@@ -89,10 +89,12 @@ abstract class ProcessorCommon(options: Map<String, String>) {
         const val FUNCTION_NAME_STREAM = "stream"
         const val FUNCTION_NAME_STREAM_SORTED = "streamSorted"
         const val FUNCTION_NAME_UPDATE = "update"
+        const val FUNCTION_NAME_UPDATE_MULTIPLE = "updateMultiple"
         const val FUNCTION_NAME_WHERE = "where"
         const val PARAM_NAME_COLUMNS_BASE_CLASS = "parent"
         const val PARAM_NAME_EXPRESSION = "expression"
         const val PARAM_NAME_MAPPED_BY = "mappedBy"
+        const val PARAM_NAME_SETTER = "setter"
         const val PARAM_NAME_SETTERS = "setters"
         const val PARAM_NAME_SORT = "sort"
         const val PARAM_NAME_TYPE = "type"

@@ -69,18 +69,16 @@ class PanacheCompanionBaseProcessor(
             .plusParameter(className)
             .plusParameter(idClassName)
             .plusParameter(columnsObjectClassName)
+        val setterExpressionParameterLambdaType = LambdaTypeName.get(
+            receiver = columnsObjectClassName,
+            returnType = SetterClassName
+        )
+        val updateComponentType = UpdateComponentClassName
+            .plusParameter(className)
+            .plusParameter(idClassName)
+            .plusParameter(columnsObjectClassName)
 
-        //region update, where
-        val update = FunSpec.builder(FUNCTION_NAME_UPDATE)
-            .addModifiers(KModifier.INLINE)
-            .receiver(companionClassName)
-            //TODO setter providers parameter
-            .returns(UpdateComponentClassName.plusParameter(className)
-                .plusParameter(idClassName).plusParameter(columnsObjectClassName))
-            .addStatement("return %M(%T)",
-                MemberName(UpdateComponentClassName.packageName, FUNCTION_NAME_UPDATE), columnsObjectClassName)
-            .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_UPDATE$classSimpleName"))
-
+        //region where, and, or
         val where = FunSpec.builder(FUNCTION_NAME_WHERE)
             .addModifiers(KModifier.INLINE)
             .receiver(companionClassName)
@@ -89,9 +87,7 @@ class PanacheCompanionBaseProcessor(
             .addStatement("return %M($PARAM_NAME_EXPRESSION(%T))",
                 MemberName(QueryComponentClassName.packageName, FUNCTION_NAME_WHERE), columnsObjectClassName)
             .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_WHERE$classSimpleName"))
-        //endregion
 
-        //region and, or
         val and = FunSpec.builder(FUNCTION_NAME_AND)
             .addModifiers(KModifier.INLINE)
             .receiver(queryComponentType)
@@ -142,12 +138,12 @@ class PanacheCompanionBaseProcessor(
             .addStatement("return $FUNCTION_NAME_WHERE($PARAM_NAME_EXPRESSION).$FUNCTION_NAME_FIND($PARAM_NAME_SORT)")
             .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_FIND_SORTED$classSimpleName"))
 
-        val streamReturn = StreamClassName.plusParameter(className)
+        val streamReturns = StreamClassName.plusParameter(className)
         val stream = FunSpec.builder(FUNCTION_NAME_STREAM)
             .addModifiers(KModifier.INLINE)
             .receiver(companionClassName)
             .addParameter(PARAM_NAME_EXPRESSION, expressionParameterLambdaType)
-            .returns(streamReturn)
+            .returns(streamReturns)
             .addStatement("return $FUNCTION_NAME_WHERE($PARAM_NAME_EXPRESSION).$FUNCTION_NAME_STREAM()")
             .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_STREAM$classSimpleName"))
         val streamSorted = FunSpec.builder(FUNCTION_NAME_STREAM)
@@ -155,7 +151,7 @@ class PanacheCompanionBaseProcessor(
             .receiver(companionClassName)
             .addParameter(PARAM_NAME_SORT, SortClassName)
             .addParameter(PARAM_NAME_EXPRESSION, expressionParameterLambdaType)
-            .returns(streamReturn)
+            .returns(streamReturns)
             .addStatement("return $FUNCTION_NAME_WHERE($PARAM_NAME_EXPRESSION).$FUNCTION_NAME_STREAM($PARAM_NAME_SORT)")
             .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_STREAM_SORTED$classSimpleName"))
         //endregion
@@ -194,6 +190,27 @@ class PanacheCompanionBaseProcessor(
             .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_MULTIPLE_SORTED$classSimpleName"))
         //endregion
 
+        //region update
+        val updateExtensionFunction = MemberName(UpdateComponentClassName.packageName, FUNCTION_NAME_UPDATE)
+        val update = FunSpec.builder(FUNCTION_NAME_UPDATE)
+            .receiver(companionClassName)
+            .addParameter(PARAM_NAME_SETTER, setterExpressionParameterLambdaType)
+            .returns(updateComponentType)
+            .addStatement("return %M(%T, $PARAM_NAME_SETTER)", updateExtensionFunction, columnsObjectClassName)
+            .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_UPDATE$classSimpleName"))
+        val updateMultiple = FunSpec.builder(FUNCTION_NAME_UPDATE)
+            .receiver(companionClassName)
+            .addParameter(PARAM_NAME_SETTERS, setterExpressionParameterLambdaType, KModifier.VARARG)
+            .returns(updateComponentType)
+            .addStatement("return %M(%T, $PARAM_NAME_SETTERS)", updateExtensionFunction, columnsObjectClassName)
+            .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_UPDATE_MULTIPLE$classSimpleName"))
+
+        //TODO whereUpdate
+
+        //TODO andUpdate
+        //TODO orUpdate
+        //endregion
+
         //region andExpression, orExpression
         val andExpression = FunSpec.builder(FUNCTION_NAME_AND)
             .addModifiers(KModifier.INLINE)
@@ -211,9 +228,10 @@ class PanacheCompanionBaseProcessor(
             .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_OR_EXPRESSION$classSimpleName"))
         //endregion
 
-        val functions = listOf(update, where, and, or,
+        val functions = listOf(where, and, or,
             count, delete, find, findSorted, stream, streamSorted,
             single, singleSafe, multiple, multipleSorted,
+            update, updateMultiple,
             andExpression, orExpression)
 
         FileSpec.builder(packageName, extensionFileName)

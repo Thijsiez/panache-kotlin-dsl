@@ -16,8 +16,6 @@
 
 package ch.icken.query
 
-import kotlin.random.Random
-
 sealed class Expression<Columns> {
     //region Chaining operations
     fun and(expression: Expression<Columns>): Expression<Columns> = LogicalExpression.AndExpression(this, expression)
@@ -25,12 +23,12 @@ sealed class Expression<Columns> {
     //endregion
 
     //region compile
-    internal fun compile() = when (this) {
-        is BooleanExpression -> compileExpression()
+    internal fun compile(): Compiled = when (this) {
         is LogicalExpression -> {
             val compiledExpression = compileExpression()
             Compiled("(${compiledExpression.expression})", compiledExpression.parameters)
         }
+        else -> compileExpression()
     }
     protected abstract fun compileExpression(): Compiled
     data class Compiled internal constructor(val expression: String, val parameters: Map<String, Any>)
@@ -40,16 +38,6 @@ sealed class Expression<Columns> {
         protected val key: String,
         protected val operator: String
     ) : Expression<Columns>() {
-        companion object {
-            private const val CHARS = //"0123456789" +
-                "abcdefghijklmnopqrstuvwxyz" +
-                        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-
-            protected fun generateParameterName() = (0 ..< 8)
-                .map { CHARS[Random.nextInt(CHARS.length)] }
-                .toCharArray().concatToString()
-        }
-
         sealed class BooleanValueExpression<Columns> private constructor(
             key: String,
             operator: String,
