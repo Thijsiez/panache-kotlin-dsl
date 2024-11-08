@@ -6,6 +6,9 @@ jobs:
   test:
     name: Run tests and publish report to SonarQube
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./examples
     steps:
       - uses: actions/checkout@v4
         with:
@@ -14,7 +17,7 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
-      - run: cd examples && chmod +x gradlew
+      - run: chmod +x gradlew
       - run: ./gradlew koverXmlReport --no-daemon --continue
       - env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
