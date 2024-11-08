@@ -18,7 +18,6 @@ package ch.icken.query
 
 import ch.icken.query.Component.QueryComponent
 import ch.icken.query.Component.QueryComponent.InitialQueryComponent
-import ch.icken.query.Component.UpdateComponent
 import ch.icken.query.Component.UpdateComponent.InitialUpdateComponent
 import ch.icken.query.Component.UpdateComponent.InitialUpdateComponent.Setter
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase
@@ -30,7 +29,7 @@ sealed class Component<Entity : PanacheEntityBase, Id : Any, Columns> private co
 ) {
     //region compile
     internal abstract fun compile(): Compiled
-    data class Compiled internal constructor(val component: String, val parameters: Map<String, Any>)
+    class Compiled internal constructor(val component: String, val parameters: Map<String, Any>)
     //endregion
 
     sealed class QueryComponent<Entity : PanacheEntityBase, Id : Any, Columns> private constructor(
@@ -104,7 +103,7 @@ sealed class Component<Entity : PanacheEntityBase, Id : Any, Columns> private co
             private val setters: Array<out Columns.() -> Setter>
         ) : UpdateComponent<Entity, Id, Columns>(companion) {
             //region Chaining operations
-            fun where(expression: Expression<Columns>): UpdateComponent<Entity, Id, Columns> =
+            fun where(expression: Expression<Columns>): LogicalUpdateComponent<Entity, Id, Columns> =
                 LogicalUpdateComponent.WhereUpdateComponent(companion, this, expression)
             //endregion
 
@@ -120,14 +119,14 @@ sealed class Component<Entity : PanacheEntityBase, Id : Any, Columns> private co
                 )
             }
 
-            data class Setter internal constructor(val columnName: String, val value: Any?) {
+            class Setter internal constructor(private val columnName: String, private val value: Any?) {
                 private val parameterName: String = generateParameterName()
 
                 internal fun compile(): Compiled = when (value) {
                     null -> Compiled("$columnName = null", null)
                     else -> Compiled("$columnName = $parameterName", parameterName to value)
                 }
-                data class Compiled internal constructor(val assignment: String, val parameter: Pair<String, Any>?)
+                class Compiled internal constructor(val assignment: String, val parameter: Pair<String, Any>?)
             }
         }
 
@@ -178,10 +177,10 @@ sealed class Component<Entity : PanacheEntityBase, Id : Any, Columns> private co
 
 fun <Entity : PanacheEntityBase, Id : Any, Columns>
         PanacheCompanionBase<Entity, Id>.update(columns: Columns, setter: Columns.() -> Setter):
-        UpdateComponent<Entity, Id, Columns> = InitialUpdateComponent(this, columns, arrayOf(setter))
+        InitialUpdateComponent<Entity, Id, Columns> = InitialUpdateComponent(this, columns, arrayOf(setter))
 fun <Entity : PanacheEntityBase, Id : Any, Columns>
         PanacheCompanionBase<Entity, Id>.update(columns: Columns, setters: Array<out Columns.() -> Setter>):
-        UpdateComponent<Entity, Id, Columns> = InitialUpdateComponent(this, columns, setters)
+        InitialUpdateComponent<Entity, Id, Columns> = InitialUpdateComponent(this, columns, setters)
 
 fun <Entity : PanacheEntityBase, Id : Any, Columns>
         PanacheCompanionBase<Entity, Id>.where(expression: Expression<Columns>):

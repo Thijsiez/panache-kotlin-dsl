@@ -69,11 +69,16 @@ class PanacheCompanionBaseProcessor(
             .plusParameter(className)
             .plusParameter(idClassName)
             .plusParameter(columnsObjectClassName)
+
         val setterExpressionParameterLambdaType = LambdaTypeName.get(
             receiver = columnsObjectClassName,
             returnType = SetterClassName
         )
-        val updateComponentType = UpdateComponentClassName
+        val initialUpdateComponentType = InitialUpdateComponentClassName
+            .plusParameter(className)
+            .plusParameter(idClassName)
+            .plusParameter(columnsObjectClassName)
+        val logicalUpdateComponentType = LogicalUpdateComponentClassName
             .plusParameter(className)
             .plusParameter(idClassName)
             .plusParameter(columnsObjectClassName)
@@ -190,22 +195,28 @@ class PanacheCompanionBaseProcessor(
             .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_MULTIPLE_SORTED$classSimpleName"))
         //endregion
 
-        //region update
-        val updateExtensionFunction = MemberName(UpdateComponentClassName.packageName, FUNCTION_NAME_UPDATE)
+        //region update, where
+        val updateExtensionFunction = MemberName(InitialUpdateComponentClassName.packageName, FUNCTION_NAME_UPDATE)
         val update = FunSpec.builder(FUNCTION_NAME_UPDATE)
             .receiver(companionClassName)
             .addParameter(PARAM_NAME_SETTER, setterExpressionParameterLambdaType)
-            .returns(updateComponentType)
+            .returns(initialUpdateComponentType)
             .addStatement("return %M(%T, $PARAM_NAME_SETTER)", updateExtensionFunction, columnsObjectClassName)
             .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_UPDATE$classSimpleName"))
         val updateMultiple = FunSpec.builder(FUNCTION_NAME_UPDATE)
             .receiver(companionClassName)
             .addParameter(PARAM_NAME_SETTERS, setterExpressionParameterLambdaType, KModifier.VARARG)
-            .returns(updateComponentType)
+            .returns(initialUpdateComponentType)
             .addStatement("return %M(%T, $PARAM_NAME_SETTERS)", updateExtensionFunction, columnsObjectClassName)
             .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_UPDATE_MULTIPLE$classSimpleName"))
 
-        //TODO whereUpdate
+        val whereUpdate = FunSpec.builder(FUNCTION_NAME_WHERE)
+            .addModifiers(KModifier.INLINE)
+            .receiver(initialUpdateComponentType)
+            .addParameter(PARAM_NAME_EXPRESSION, expressionParameterLambdaType)
+            .returns(logicalUpdateComponentType)
+            .addStatement("return $FUNCTION_NAME_WHERE($PARAM_NAME_EXPRESSION(%T))", columnsObjectClassName)
+            .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_WHERE_UPDATE$classSimpleName"))
 
         //TODO andUpdate
         //TODO orUpdate
@@ -231,7 +242,7 @@ class PanacheCompanionBaseProcessor(
         val functions = listOf(where, and, or,
             count, delete, find, findSorted, stream, streamSorted,
             single, singleSafe, multiple, multipleSorted,
-            update, updateMultiple,
+            update, updateMultiple, whereUpdate,
             andExpression, orExpression)
 
         FileSpec.builder(packageName, extensionFileName)

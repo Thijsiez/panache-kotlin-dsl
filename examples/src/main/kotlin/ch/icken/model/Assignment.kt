@@ -21,9 +21,10 @@ import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanion
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntity
 import jakarta.persistence.*
 
+@Suppress("unused")
 @Entity
 @Table(name = "ASSIGNMENT")
-data class Assignment(
+class Assignment(
 
     @OneToOne(optional = false)
     @JoinColumn(name = "EMPLOYEE_ID", unique = true, nullable = false)

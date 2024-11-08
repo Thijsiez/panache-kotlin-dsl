@@ -21,9 +21,10 @@ import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntity
 import jakarta.persistence.*
 import java.time.LocalDate
 
+@Suppress("unused")
 @Entity
 @Table(name = "EMPLOYEE")
-data class Employee(
+class Employee(
 
     @Column(name = "EMPLOYEE_NO", unique = true, nullable = false, updatable = false)
     val employeeNumber: Int,

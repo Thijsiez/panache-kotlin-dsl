@@ -59,8 +59,10 @@ abstract class ProcessorCommon(options: Map<String, String>) {
         internal val ColumnClassName = Column::class.asClassName()
         internal val ExpressionClassName = Expression::class.asClassName()
         internal val GeneratedClassName = Generated::class.asClassName()
+        internal val InitialUpdateComponentClassName = UpdateComponent.InitialUpdateComponent::class.asClassName()
         internal val JvmNameClassName = JvmName::class.asClassName()
         internal val ListClassName = List::class.asClassName()
+        internal val LogicalUpdateComponentClassName = UpdateComponent.LogicalUpdateComponent::class.asClassName()
         internal val LongClassName = Long::class.asClassName()
         internal val PanacheQueryClassName = PanacheQuery::class.asClassName()
         internal val PanacheSingleResultClassName = PanacheSingleResult::class.asClassName()
@@ -70,7 +72,6 @@ abstract class ProcessorCommon(options: Map<String, String>) {
         internal val StreamClassName = Stream::class.asClassName()
         internal val StringClassName = String::class.asClassName()
         internal val SuppressClassName = Suppress::class.asClassName()
-        internal val UpdateComponentClassName = UpdateComponent::class.asClassName()
         //endregion
         //region Constants
         internal const val CLASS_NAME_COMPANION = "Companion"
@@ -91,6 +92,7 @@ abstract class ProcessorCommon(options: Map<String, String>) {
         internal const val FUNCTION_NAME_UPDATE = "update"
         internal const val FUNCTION_NAME_UPDATE_MULTIPLE = "updateMultiple"
         internal const val FUNCTION_NAME_WHERE = "where"
+        internal const val FUNCTION_NAME_WHERE_UPDATE = "whereUpdate"
         internal const val PARAM_NAME_COLUMNS_BASE_CLASS = "parent"
         internal const val PARAM_NAME_EXPRESSION = "expression"
         internal const val PARAM_NAME_MAPPED_BY = "mappedBy"

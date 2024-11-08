@@ -20,9 +20,10 @@ import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanion
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntity
 import jakarta.persistence.*
 
+@Suppress("unused")
 @Entity
 @Table(name = "DEPARTMENT")
-data class Department(
+class Department(
 
     @Column(name = "NAME", unique = true,  nullable = false)
     var name: String,

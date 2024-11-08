@@ -31,7 +31,7 @@ sealed class Expression<Columns> {
         else -> compileExpression()
     }
     protected abstract fun compileExpression(): Compiled
-    data class Compiled internal constructor(val expression: String, val parameters: Map<String, Any>)
+    class Compiled internal constructor(val expression: String, val parameters: Map<String, Any>)
     //endregion
 
     sealed class BooleanExpression<Columns> private constructor(
