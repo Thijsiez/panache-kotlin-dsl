@@ -3,22 +3,20 @@ name: test
 on: [push, workflow_dispatch]
 
 jobs:
-  build:
-    name: test
+  test:
+    name: Run tests and publish report to SonarQube
     runs-on: ubuntu-latest
-    permissions: read-all
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
+      - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
-      - name: Run tests with Gradle wrapper
-        env:
+      - run: cd examples && chmod +x gradlew
+      - run: ./gradlew koverXmlReport --no-daemon --continue
+      - env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-        run: cd examples && chmod +x gradlew && ./gradlew koverXmlReport sonar --no-daemon --continue --info
+        run: ./gradlew sonar --no-daemon --info
