@@ -51,10 +51,10 @@ sealed class Component<Entity : PanacheEntityBase, Id : Any, Columns> private co
         fun stream() = with(compile()) { companion.stream(component, parameters) }
         fun stream(sort: Sort) = with(compile()) { companion.stream(component, sort, parameters) }
 
-        fun getSingle() = find().singleResult()
-        fun getSingleSafe() = find().singleResultSafe()
-        fun getMultiple() = find().list()
-        fun getMultiple(sort: Sort) = find(sort).list()
+        fun single() = find().singleResult()
+        fun singleSafe() = find().singleResultSafe()
+        fun multiple() = find().list()
+        fun multiple(sort: Sort) = find(sort).list()
         //endregion
 
         class InitialQueryComponent<Entity : PanacheEntityBase, Id : Any, Columns> internal constructor(
@@ -108,7 +108,7 @@ sealed class Component<Entity : PanacheEntityBase, Id : Any, Columns> private co
             //endregion
 
             //region Terminal operations
-            //TODO execute on all rows
+            fun executeWithoutWhere() = with(compile()) { companion.update(component, parameters) }
             //endregion
 
             override fun compile(): Compiled {
@@ -137,14 +137,14 @@ sealed class Component<Entity : PanacheEntityBase, Id : Any, Columns> private co
             private val expression: Expression<Columns>
         ) : UpdateComponent<Entity, Id, Columns>(companion) {
             //region Chaining operations
-            fun and(expression: Expression<Columns>): UpdateComponent<Entity, Id, Columns> =
+            fun and(expression: Expression<Columns>): LogicalUpdateComponent<Entity, Id, Columns> =
                 AndUpdateComponent(companion, this, expression)
-            fun or(expression: Expression<Columns>): UpdateComponent<Entity, Id, Columns> =
+            fun or(expression: Expression<Columns>): LogicalUpdateComponent<Entity, Id, Columns> =
                 OrUpdateComponent(companion, this, expression)
             //endregion
 
             //region Terminal operations
-            //TODO execute
+            fun execute() = with(compile()) { companion.update(component, parameters) }
             //endregion
 
             override fun compile(): Compiled {

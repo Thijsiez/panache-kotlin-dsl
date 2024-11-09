@@ -167,14 +167,14 @@ class PanacheCompanionBaseProcessor(
             .receiver(companionClassName)
             .addParameter(PARAM_NAME_EXPRESSION, expressionParameterLambdaType)
             .returns(className)
-            .addStatement("return $FUNCTION_NAME_WHERE($PARAM_NAME_EXPRESSION).getSingle()")
+            .addStatement("return $FUNCTION_NAME_WHERE($PARAM_NAME_EXPRESSION).single()")
             .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_SINGLE$classSimpleName"))
         val singleSafe = FunSpec.builder(FUNCTION_NAME_SINGLE_SAFE)
             .addModifiers(KModifier.INLINE)
             .receiver(companionClassName)
             .addParameter(PARAM_NAME_EXPRESSION, expressionParameterLambdaType)
             .returns(PanacheSingleResultClassName.plusParameter(WildcardTypeName.producerOf(className)))
-            .addStatement("return $FUNCTION_NAME_WHERE($PARAM_NAME_EXPRESSION).getSingleSafe()")
+            .addStatement("return $FUNCTION_NAME_WHERE($PARAM_NAME_EXPRESSION).singleSafe()")
             .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_SINGLE_SAFE$classSimpleName"))
 
         val multipleReturns = ListClassName.plusParameter(className)
@@ -183,7 +183,7 @@ class PanacheCompanionBaseProcessor(
             .receiver(companionClassName)
             .addParameter(PARAM_NAME_EXPRESSION, expressionParameterLambdaType)
             .returns(multipleReturns)
-            .addStatement("return $FUNCTION_NAME_WHERE($PARAM_NAME_EXPRESSION).getMultiple()")
+            .addStatement("return $FUNCTION_NAME_WHERE($PARAM_NAME_EXPRESSION).multiple()")
             .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_MULTIPLE$classSimpleName"))
         val multipleSorted = FunSpec.builder(FUNCTION_NAME_MULTIPLE)
             .addModifiers(KModifier.INLINE)
@@ -191,11 +191,11 @@ class PanacheCompanionBaseProcessor(
             .addParameter(PARAM_NAME_SORT, SortClassName)
             .addParameter(PARAM_NAME_EXPRESSION, expressionParameterLambdaType)
             .returns(multipleReturns)
-            .addStatement("return $FUNCTION_NAME_WHERE($PARAM_NAME_EXPRESSION).getMultiple($PARAM_NAME_SORT)")
+            .addStatement("return $FUNCTION_NAME_WHERE($PARAM_NAME_EXPRESSION).multiple($PARAM_NAME_SORT)")
             .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_MULTIPLE_SORTED$classSimpleName"))
         //endregion
 
-        //region update, where
+        //region update, whereUpdate, andUpdate, orUpdate
         val updateExtensionFunction = MemberName(InitialUpdateComponentClassName.packageName, FUNCTION_NAME_UPDATE)
         val update = FunSpec.builder(FUNCTION_NAME_UPDATE)
             .receiver(companionClassName)
@@ -218,8 +218,20 @@ class PanacheCompanionBaseProcessor(
             .addStatement("return $FUNCTION_NAME_WHERE($PARAM_NAME_EXPRESSION(%T))", columnsObjectClassName)
             .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_WHERE_UPDATE$classSimpleName"))
 
-        //TODO andUpdate
-        //TODO orUpdate
+        val andUpdate = FunSpec.builder(FUNCTION_NAME_AND)
+            .addModifiers(KModifier.INLINE)
+            .receiver(logicalUpdateComponentType)
+            .addParameter(PARAM_NAME_EXPRESSION, expressionParameterLambdaType)
+            .returns(logicalUpdateComponentType)
+            .addStatement("return $FUNCTION_NAME_AND($PARAM_NAME_EXPRESSION(%T))", columnsObjectClassName)
+            .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_AND_UPDATE$classSimpleName"))
+        val orUpdate = FunSpec.builder(FUNCTION_NAME_OR)
+            .addModifiers(KModifier.INLINE)
+            .receiver(logicalUpdateComponentType)
+            .addParameter(PARAM_NAME_EXPRESSION, expressionParameterLambdaType)
+            .returns(logicalUpdateComponentType)
+            .addStatement("return $FUNCTION_NAME_OR($PARAM_NAME_EXPRESSION(%T))", columnsObjectClassName)
+            .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_OR_UPDATE$classSimpleName"))
         //endregion
 
         //region andExpression, orExpression
@@ -242,7 +254,7 @@ class PanacheCompanionBaseProcessor(
         val functions = listOf(where, and, or,
             count, delete, find, findSorted, stream, streamSorted,
             single, singleSafe, multiple, multipleSorted,
-            update, updateMultiple, whereUpdate,
+            update, updateMultiple, whereUpdate, andUpdate, orUpdate,
             andExpression, orExpression)
 
         FileSpec.builder(packageName, extensionFileName)

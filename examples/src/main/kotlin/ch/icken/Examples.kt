@@ -23,7 +23,7 @@ import java.time.LocalDate
 
 //WHERE FIRST_NAME = 'John'
 //Using type-safe sealed result wrapper
-fun findJohn() = Employee.where { firstName eq "John" }.getSingleSafe()
+fun findJohn() = Employee.where { firstName eq "John" }.singleSafe()
 
 //SELECT COUNT(*) FROM EMPLOYEE WHERE GENDER != 'M'
 fun countNotMen() = Employee.count { gender neq Employee.Gender.M }
