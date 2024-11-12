@@ -44,4 +44,4 @@ pluginManagement {
     project(":panache-kotlin-dsl").projectDir = file("..")
 }
 
-rootProject.name = "examples"
+rootProject.name = "tests"

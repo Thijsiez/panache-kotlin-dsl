@@ -15,7 +15,9 @@ A dynamic, type-safe way to write your queries
 [Changelog](CHANGELOG.md) | [Contributing](CONTRIBUTING.md)
 
 ## Getting Started
-Examples given use Gradle's Kotlin DSL  
+<details open>
+<summary><b>Gradle Kotlin DSL</b></summary>
+
 Add the KSP Gradle plugin to your build file
 ```kotlin
 plugins {
@@ -60,6 +62,7 @@ project.afterEvaluate {
   }
 }
 ```
+</details>
 
 ## Requirements
 - Quarkus version `3.9.2` or newer

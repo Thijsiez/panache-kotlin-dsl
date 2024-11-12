@@ -68,7 +68,6 @@ kover {
         filters {
             //Exclude non-library classes/packages
             excludes {
-                classes("ch.icken.ExamplesKt")
                 packages("ch.icken.model")
             }
         }
@@ -80,8 +79,8 @@ sonar {
         property("sonar.projectName", "panache-kotlin-dsl")
         property("sonar.coverage.jacoco.xmlReportPaths", "**/build/reports/kover/report.xml")
         //Exclude non-library classes/packages
-        property("sonar.coverage.exclusions", "**/ch/icken/model/*,**/ch/icken/Examples.kt")
-        property("sonar.exclusions", "**/ch/icken/model/*,**/ch/icken/Examples.kt")
+        property("sonar.coverage.exclusions", "**/ch/icken/model/*")
+        property("sonar.exclusions", "**/ch/icken/model/*")
     }
 }
 
