@@ -23,6 +23,7 @@ import ch.icken.query.Component.UpdateComponent.InitialUpdateComponent.Setter
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
 import io.quarkus.panache.common.Sort
+import org.jboss.logging.Logger
 
 sealed class Component<Entity : PanacheEntityBase, Id : Any, Columns> private constructor(
     protected val companion: PanacheCompanionBase<Entity, Id>
@@ -30,7 +31,19 @@ sealed class Component<Entity : PanacheEntityBase, Id : Any, Columns> private co
     //region compile
     internal abstract fun compile(): Compiled
     class Compiled internal constructor(val component: String, val parameters: Map<String, Any>)
+
+    internal inline fun <R> withCompiled(block: Compiled.() -> R): R {
+        val compiled = compile()
+        LOG.debug(compiled.parameters.entries.fold(compiled.component) { acc, param ->
+            acc.replace(":${param.key}", param.value.toString())
+        })
+        return compiled.block()
+    }
     //endregion
+
+    companion object {
+        private val LOG: Logger = Logger.getLogger(Component::class.java)
+    }
 
     sealed class QueryComponent<Entity : PanacheEntityBase, Id : Any, Columns> private constructor(
         companion: PanacheCompanionBase<Entity, Id>,
@@ -44,12 +57,12 @@ sealed class Component<Entity : PanacheEntityBase, Id : Any, Columns> private co
         //endregion
 
         //region Terminal operations
-        fun count() = with(compile()) { companion.count(component, parameters) }
-        fun delete() = with(compile()) { companion.delete(component, parameters) }
-        fun find() = with(compile()) { companion.find(component, parameters) }
-        fun find(sort: Sort) = with(compile()) { companion.find(component, sort, parameters) }
-        fun stream() = with(compile()) { companion.stream(component, parameters) }
-        fun stream(sort: Sort) = with(compile()) { companion.stream(component, sort, parameters) }
+        fun count() = withCompiled { companion.count(component, parameters) }
+        fun delete() = withCompiled { companion.delete(component, parameters) }
+        fun find() = withCompiled { companion.find(component, parameters) }
+        fun find(sort: Sort) = withCompiled { companion.find(component, sort, parameters) }
+        fun stream() = withCompiled { companion.stream(component, parameters) }
+        fun stream(sort: Sort) = withCompiled { companion.stream(component, sort, parameters) }
 
         fun single() = find().singleResult()
         fun singleSafe() = find().singleResultSafe()
@@ -108,7 +121,7 @@ sealed class Component<Entity : PanacheEntityBase, Id : Any, Columns> private co
             //endregion
 
             //region Terminal operations
-            fun executeWithoutWhere() = with(compile()) { companion.update(component, parameters) }
+            fun executeWithoutWhere() = withCompiled { companion.update(component, parameters) }
             //endregion
 
             override fun compile(): Compiled {
@@ -124,7 +137,7 @@ sealed class Component<Entity : PanacheEntityBase, Id : Any, Columns> private co
 
                 internal fun compile(): Compiled = when (value) {
                     null -> Compiled("$columnName = null", null)
-                    else -> Compiled("$columnName = $parameterName", parameterName to value)
+                    else -> Compiled("$columnName = :$parameterName", parameterName to value)
                 }
                 class Compiled internal constructor(val assignment: String, val parameter: Pair<String, Any>?)
             }
@@ -144,7 +157,7 @@ sealed class Component<Entity : PanacheEntityBase, Id : Any, Columns> private co
             //endregion
 
             //region Terminal operations
-            fun execute() = with(compile()) { companion.update(component, parameters) }
+            fun execute() = withCompiled { companion.update(component, parameters) }
             //endregion
 
             override fun compile(): Compiled {
