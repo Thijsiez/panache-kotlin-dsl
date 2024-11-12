@@ -83,7 +83,9 @@ Allows you to handle no/multiple results with a `when (result) { ... }` block in
 ### Code Generation
 - Generate `Column`s for non-transient and non-mapped fields in classes annotated `@Entity` and extending `PanacheEntity`/`PanacheEntityBase`
 - Generate query entry point extension functions for classes with companion objects extending `PanacheCompanion`/`PanacheCompanionBase`
-  - `where`, `count`, `delete`, `find`, `stream`, `single`, `singleSafe`, and `multiple`
+  - `where` to start building a SELECT queries, which can be chained to other Panache functions
+  - `update` with setters to bulk-update multiple rows at once
+  - Shortcut functions for single expression `count`, `delete`, `find`, `stream`, `single`, `singleSafe`, and `multiple`
 - Allows for overriding the generated `Column`'s type parameter using `@ColumnType`
   - Especially useful when using a JPA `@Converter` when the field's type is different to the column's type
 - Optionally annotate generated code with `@Generated` so it can more easily be excluded from test coverage reporting
@@ -94,4 +96,3 @@ Allows you to handle no/multiple results with a `when (result) { ... }` block in
 ## Planned Features
 These features will be added some time in the future. Please do submit an issue if you'd like these sooner rather than later :)
 - DSL for sorting expressions
-- DSL for UPDATE queries
