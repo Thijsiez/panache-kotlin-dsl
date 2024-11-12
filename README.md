@@ -14,6 +14,9 @@ A dynamic, type-safe way to write your queries
 
 [Changelog](CHANGELOG.md) | [Contributing](CONTRIBUTING.md)
 
+## Examples
+TODO
+
 ## Getting Started
 <details open>
 <summary><b>Gradle Kotlin DSL</b></summary>
@@ -72,9 +75,6 @@ project.afterEvaluate {
   - Your KSP version needs to match your Kotlin version. This is a strict requirement!  
     For example, when your Kotlin version is `2.0.21`, your KSP version needs to be built for and start with the same version, such as `2.0.21-1.0.25`
 
-## Examples
-TODO
-
 ## Features
 ### Queries
 - Supports the following expressions in a type-safe and null-safe way for all columns
@@ -82,16 +82,16 @@ TODO
 - Supports `like` and `notLike` expressions in a null-safe way for String columns
 - Supports `and` and `or` expressions for building up a query
 - Adds the `PanacheSingleResult<T>` sealed class and `singleResultSafe()` extension function to return a single result without throwing exceptions.
-Allows you to handle no/multiple results with a `when (result) { ... }` block instead of try-catching
+  - Allows you to handle no/multiple results with a `when (result) {...}` block instead of try-catching
 ### Code Generation
-- Generate `Column`s for non-transient and non-mapped fields in classes annotated `@Entity` and extending `PanacheEntity`/`PanacheEntityBase`
-- Generate query entry point extension functions for classes with companion objects extending `PanacheCompanion`/`PanacheCompanionBase`
+- Generate `Column`s for non-transient and non-mapped fields in Panache entities
+- Generate query entry point extension functions for entities with Panache companion objects
   - `where` to start building a SELECT queries, which can be chained to other Panache functions
   - `update` with setters to bulk-update multiple rows at once
-  - Shortcut functions for single expression `count`, `delete`, `find`, `stream`, `single`, `singleSafe`, and `multiple`
+  - Single expression `count`, `delete`, `find`, `stream`, `single`, `singleSafe`, and `multiple`
 - Allows for overriding the generated `Column`'s type parameter using `@ColumnType`
   - Especially useful when using a JPA `@Converter` when the field's type is different to the column's type
-- Optionally annotate generated code with `@Generated` so it can more easily be excluded from test coverage reporting
+- Optionally annotate generated code with `@Generated` so it can be excluded from test coverage reporting
 
 ## Known Issues
 - Code generation does not handle fields of generic types (e.g. `List<E>`, `Set<E>`, etc.), but as far as I'm aware this is difficult to get working with Hibernate anyway. Consider using a JPA `@Converter` in combination with `@ColumnType`
