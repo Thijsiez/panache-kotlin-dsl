@@ -88,6 +88,7 @@ project.afterEvaluate {
 - Generate query entry point extension functions for entities with Panache companion objects
   - `where` to start building a SELECT queries, which can be chained to other Panache functions
   - `update` with setters to bulk-update multiple rows at once
+  - Single expression `updateAll` to update all rows without requiring a WHERE clause
   - Single expression `count`, `delete`, `find`, `stream`, `single`, `singleSafe`, and `multiple`
 - Allows for overriding the generated `Column`'s type parameter using `@ColumnType`
   - Especially useful when using a JPA `@Converter` when the field's type is different to the column's type

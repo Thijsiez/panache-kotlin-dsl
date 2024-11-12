@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.4
+- Add DSL for bulk updates
+- Add printing of the Panache query at DEBUG log level
+  - **Note:** output does not follow a specific format like SQL, JPQL, or HQL, and should only be used in debugging  
+    Use Hibernate's SQL logging functionality to see what is actually being queried
+
 ## 0.0.3
 - Remove `whereGroup`, `andGroup`, and `orGroup` functions in favor of expression chaining
 

@@ -60,6 +60,7 @@ abstract class ProcessorCommon(options: Map<String, String>) {
         internal val ExpressionClassName = Expression::class.asClassName()
         internal val GeneratedClassName = Generated::class.asClassName()
         internal val InitialUpdateComponentClassName = UpdateComponent.InitialUpdateComponent::class.asClassName()
+        internal val IntClassName = Int::class.asClassName()
         internal val JvmNameClassName = JvmName::class.asClassName()
         internal val ListClassName = List::class.asClassName()
         internal val LogicalUpdateComponentClassName = UpdateComponent.LogicalUpdateComponent::class.asClassName()
@@ -92,6 +93,8 @@ abstract class ProcessorCommon(options: Map<String, String>) {
         internal const val FUNCTION_NAME_STREAM = "stream"
         internal const val FUNCTION_NAME_STREAM_SORTED = "streamSorted"
         internal const val FUNCTION_NAME_UPDATE = "update"
+        internal const val FUNCTION_NAME_UPDATE_ALL = "updateAll"
+        internal const val FUNCTION_NAME_UPDATE_ALL_MULTIPLE = "updateAllMultiple"
         internal const val FUNCTION_NAME_UPDATE_MULTIPLE = "updateMultiple"
         internal const val FUNCTION_NAME_WHERE = "where"
         internal const val FUNCTION_NAME_WHERE_UPDATE = "whereUpdate"

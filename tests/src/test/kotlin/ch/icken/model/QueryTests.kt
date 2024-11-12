@@ -28,49 +28,39 @@ import java.time.LocalDate
 class QueryTests {
 
     @Test
-    fun findJohn() {
+    fun testCount() {
 
-        //WHERE FIRST_NAME = 'John'
-        //Using type-safe sealed result wrapper
-        val john = Employee.where { firstName eq "John" }.singleSafe()
+        // Given
 
-        assertInstanceOf(PanacheSingleResult.Result::class.java, john)
-    }
-
-    @Test
-    fun countNotMen() {
-
+        // When
         //SELECT COUNT(*) FROM EMPLOYEE WHERE GENDER != 'M'
         val numberOfNotMen = Employee.count { gender neq Employee.Gender.M }
 
+        // Then
         assertEquals(4, numberOfNotMen)
     }
 
     @Test
-    fun bornBeforeEpoch() {
+    fun testFind() {
 
-        //WHERE BIRTH_DATE < 1970-01-01
-        val bornBeforeEpoch = Employee.multiple { birthDate lt LocalDate.EPOCH }
+        // Given
 
-        assertEquals(2, bornBeforeEpoch.size)
-    }
-
-    @Test
-    fun findAllSons() {
-
+        // When
         //WHERE LAST_NAME LIKE '%son'
-        //Using find, which allows Panache pagination etc. to be used still
         val sons = Employee.find { lastName like "%son" }.list()
 
+        // Then
         assertEquals(2, sons.size)
     }
 
     @Test
-    fun averageSalary() {
+    fun testStream() {
 
+        // Given
+
+        // When
         //WHERE (SALARY > 50000.0 AND SALARY <= 60000.0)
         // OR SALARY BETWEEN 75000.0 AND 85000.0
-        //Then we take the average using Java 8 streams
         val averageSalary = Employee
             .where {
                 salary.gt(50_000.0)
@@ -82,6 +72,33 @@ class QueryTests {
             .average()
             .orElse(0.0)
 
+        // Then
         assertEquals(67_500.0, averageSalary)
+    }
+
+    @Test
+    fun testSingleSafe() {
+
+        // Given
+
+        // When
+        //WHERE FIRST_NAME = 'John'
+        val john = Employee.where { firstName eq "John" }.singleSafe()
+
+        // Then
+        assertInstanceOf(PanacheSingleResult.Result::class.java, john)
+    }
+
+    @Test
+    fun testMultiple() {
+
+        // Given
+
+        // When
+        //WHERE BIRTH_DATE < 1970-01-01
+        val bornBeforeEpoch = Employee.multiple { birthDate lt LocalDate.EPOCH }
+
+        // Then
+        assertEquals(2, bornBeforeEpoch.size)
     }
 }

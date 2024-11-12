@@ -17,8 +17,8 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
-      - run: ./gradlew koverXmlReport --no-daemon --continue
+      - run: ./gradlew koverXmlReport --no-daemon
       - env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-        run: ./gradlew sonar --no-daemon --info
+        run: ./gradlew sonar --no-daemon
