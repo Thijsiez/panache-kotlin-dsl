@@ -1,5 +1,5 @@
-[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0.txt)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/ch.icken/panache-kotlin-dsl/badge.svg)](https://maven-badges.herokuapp.com/maven-central/ch.icken/panache-kotlin-dsl)
+[![License](https://img.shields.io/badge/license-Apache_2.0-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0.txt)
+[![Maven Central](https://img.shields.io/badge/maven_central-0.0.3-brightgreen.svg)](https://search.maven.org/artifact/ch.icken/panache-kotlin-dsl/0.0.3/jar)
 [![Test](https://github.com/Thijsiez/panache-kotlin-dsl/actions/workflows/test.yaml/badge.svg?branch=main)](https://github.com/Thijsiez/panache-kotlin-dsl/actions/workflows/test.yaml)  
 ![Quality Gate Status](https://sonarqube.icken.ch/api/project_badges/measure?project=Thijsiez_panache-kotlin-dsl_760170ef-68c7-43b0-880d-cf1034afe3c6&metric=alert_status&token=sqb_cfafb36de6f18194da2e383324ee281b0de5b953)
 ![Reliability Rating](https://sonarqube.icken.ch/api/project_badges/measure?project=Thijsiez_panache-kotlin-dsl_760170ef-68c7-43b0-880d-cf1034afe3c6&metric=reliability_rating&token=sqb_cfafb36de6f18194da2e383324ee281b0de5b953)
@@ -15,7 +15,7 @@ A dynamic, type-safe way to write your queries
 [Changelog](CHANGELOG.md) | [Contributing](CONTRIBUTING.md)
 
 ## Examples
-TODO
+[//]: # (TODO add examples)
 
 ## Getting Started
 <details open>
@@ -67,6 +67,9 @@ project.afterEvaluate {
 ```
 </details>
 
+[//]: # (TODO add Gradle Groovy DSL)  
+[//]: # (TODO add Apache Maven)
+
 ## Requirements
 - Quarkus version `3.9.2` or newer
   - Dependency `io.quarkus:quarkus-hibernate-orm-panache-kotlin` is required
@@ -95,7 +98,8 @@ project.afterEvaluate {
 - Optionally annotate generated code with `@Generated` so it can be excluded from test coverage reporting
 
 ## Known Issues
-- Code generation does not handle fields of generic types (e.g. `List<E>`, `Set<E>`, etc.), but as far as I'm aware this is difficult to get working with Hibernate anyway. Consider using a JPA `@Converter` in combination with `@ColumnType`
+- Code generation does not handle fields of generic types (e.g. `List<E>`, `Set<E>`, etc.), but as far as I'm aware this is difficult to get working with Hibernate anyway.
+Consider using `@ColumnType` from this library in combination with a JPA `@Converter` on such a field.
 
 ## Planned Features
 These features will be added some time in the future. Please do submit an issue if you'd like these sooner rather than later :)
