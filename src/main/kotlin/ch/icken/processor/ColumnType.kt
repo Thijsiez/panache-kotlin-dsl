@@ -20,6 +20,16 @@ import kotlin.annotation.AnnotationRetention.SOURCE
 import kotlin.annotation.AnnotationTarget.PROPERTY
 import kotlin.reflect.KClass
 
+/**
+ * Specifies the generic type of the generated [Column][ch.icken.query.Column] to match the type as used by Hibernate.
+ *
+ * The intended use case for this annotation is when the column's Kotlin type is different from your database.
+ * When using JPA's [@Convert][jakarta.persistence.Convert] annotation, Hibernate converts to and from the type as
+ * specified by the [@Converter][jakarta.persistence.Converter]. Panache uses this other type in its queries,
+ * so it needs to be known during [Column][ch.icken.query.Column] generation.
+ *
+ * @property type the generic type to be used by the generated [Column][ch.icken.query.Column]
+ */
 @Retention(SOURCE)
 @Target(PROPERTY)
 annotation class ColumnType(

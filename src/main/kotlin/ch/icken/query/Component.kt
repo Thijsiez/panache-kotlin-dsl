@@ -50,23 +50,59 @@ sealed class Component<Entity : PanacheEntityBase, Id : Any, Columns> private co
         protected val expression: Expression<Columns>
     ) : Component<Entity, Id, Columns>(companion) {
         //region Chaining operations
+        /**
+         * TODO
+         */
         fun and(expression: Expression<Columns>): QueryComponent<Entity, Id, Columns> =
             LogicalQueryComponent.AndQueryComponent(companion, this, expression)
+        /**
+         * TODO
+         */
         fun or(expression: Expression<Columns>): QueryComponent<Entity, Id, Columns> =
             LogicalQueryComponent.OrQueryComponent(companion, this, expression)
         //endregion
 
         //region Terminal operations
+        /**
+         * TODO
+         */
         fun count() = withCompiled { companion.count(component, parameters) }
+        /**
+         * TODO
+         */
         fun delete() = withCompiled { companion.delete(component, parameters) }
+        /**
+         * TODO
+         */
         fun find() = withCompiled { companion.find(component, parameters) }
+        /**
+         * TODO
+         */
         fun find(sort: Sort) = withCompiled { companion.find(component, sort, parameters) }
+        /**
+         * TODO
+         */
         fun stream() = withCompiled { companion.stream(component, parameters) }
+        /**
+         * TODO
+         */
         fun stream(sort: Sort) = withCompiled { companion.stream(component, sort, parameters) }
 
+        /**
+         * TODO
+         */
         fun single() = find().singleResult()
+        /**
+         * TODO
+         */
         fun singleSafe() = find().singleResultSafe()
+        /**
+         * TODO
+         */
         fun multiple() = find().list()
+        /**
+         * TODO
+         */
         fun multiple(sort: Sort) = find(sort).list()
         //endregion
 
@@ -116,11 +152,17 @@ sealed class Component<Entity : PanacheEntityBase, Id : Any, Columns> private co
             private val setters: Array<out Columns.() -> Setter>
         ) : UpdateComponent<Entity, Id, Columns>(companion) {
             //region Chaining operations
+            /**
+             * TODO
+             */
             fun where(expression: Expression<Columns>): LogicalUpdateComponent<Entity, Id, Columns> =
                 LogicalUpdateComponent.WhereUpdateComponent(companion, this, expression)
             //endregion
 
             //region Terminal operations
+            /**
+             * TODO
+             */
             fun executeWithoutWhere() = withCompiled { companion.update(component, parameters) }
             //endregion
 
@@ -150,13 +192,22 @@ sealed class Component<Entity : PanacheEntityBase, Id : Any, Columns> private co
             private val expression: Expression<Columns>
         ) : UpdateComponent<Entity, Id, Columns>(companion) {
             //region Chaining operations
+            /**
+             * TODO
+             */
             fun and(expression: Expression<Columns>): LogicalUpdateComponent<Entity, Id, Columns> =
                 AndUpdateComponent(companion, this, expression)
+            /**
+             * TODO
+             */
             fun or(expression: Expression<Columns>): LogicalUpdateComponent<Entity, Id, Columns> =
                 OrUpdateComponent(companion, this, expression)
             //endregion
 
             //region Terminal operations
+            /**
+             * TODO
+             */
             fun execute() = withCompiled { companion.update(component, parameters) }
             //endregion
 

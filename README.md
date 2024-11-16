@@ -81,12 +81,12 @@ project.afterEvaluate {
   - `eq`, `neq`, `lt`, `gt`, `lte`, `gte`, `in`, `notIn`, `between`, and `notBetween`
 - Supports `like` and `notLike` expressions in a null-safe way for String columns
 - Supports `and` and `or` expressions for building up a query
-- Adds the `PanacheSingleResult<T>` sealed class and `singleResultSafe()` extension function to return a single result without throwing exceptions.
+- Adds the `PanacheSingleResult` sealed class and `singleResultSafe()` extension function to return a single result without throwing exceptions.
   - Allows you to handle no/multiple results with a `when (result) {...}` block instead of try-catching
 ### Code Generation
 - Generate `Column`s for non-transient and non-mapped fields in Panache entities
 - Generate query entry point extension functions for entities with Panache companion objects
-  - `where` to start building a SELECT queries, which can be chained to other Panache functions
+  - `where` to start building a SELECT/DELETE queries, which may be chained to other Panache functions
   - `update` with setters to bulk-update multiple rows at once
   - Single expression `updateAll` to update all rows without requiring a WHERE clause
   - Single expression `count`, `delete`, `find`, `stream`, `single`, `singleSafe`, and `multiple`

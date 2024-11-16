@@ -24,85 +24,156 @@ import ch.icken.query.Expression.BooleanExpression.BooleanValueExpression.*
 import ch.icken.query.Expression.BooleanExpression.IsExpression.IsNotNull
 import ch.icken.query.Expression.BooleanExpression.IsExpression.IsNull
 
-class Column<Columns, T : Any?>(internal val name: String) {
-    operator fun invoke(value: T) = Component.UpdateComponent.InitialUpdateComponent.Setter(name, value)
+class Column<Columns, Type : Any?>(internal val name: String) {
+    /**
+     * Adds a setter expression to this update query
+     *
+     * @param value the new value for this column
+     */
+    infix fun set(value: Type) = Component.UpdateComponent.InitialUpdateComponent.Setter(name, value)
 }
 
 //region eq
 private fun <Columns> eq(name: String, value: Any?): Expression<Columns> =
     if (value == null) IsNull(name) else EqualTo(name, value)
+/**
+ * TODO
+ */
 @JvmName("eq")
-infix fun <Columns, T : Any> Column<Columns, T>.eq(value: T) = eq<Columns>(name, value)
+infix fun <Columns, Type : Any> Column<Columns, Type>.eq(value: Type) = eq<Columns>(name, value)
+/**
+ * TODO
+ */
 @JvmName("eqNullable")
-infix fun <Columns, T : Any> Column<Columns, T?>.eq(value: T?) = eq<Columns>(name, value)
+infix fun <Columns, Type : Any> Column<Columns, Type?>.eq(value: Type?) = eq<Columns>(name, value)
 //endregion
 //region neq
 private fun <Columns> neq(name: String, value: Any?): Expression<Columns> =
     if (value == null) IsNotNull(name) else NotEqualTo(name, value)
+/**
+ * TODO
+ */
 @JvmName("neq")
-infix fun <Columns, T : Any> Column<Columns, T>.neq(value: T) = neq<Columns>(name, value)
+infix fun <Columns, Type : Any> Column<Columns, Type>.neq(value: Type) = neq<Columns>(name, value)
+/**
+ * TODO
+ */
 @JvmName("neqNullable")
-infix fun <Columns, T : Any> Column<Columns, T?>.neq(value: T?) = neq<Columns>(name, value)
+infix fun <Columns, Type : Any> Column<Columns, Type?>.neq(value: Type?) = neq<Columns>(name, value)
 //endregion
 //region lt
 private fun <Columns> lt(name: String, value: Any): Expression<Columns> = LessThan(name, value)
+/**
+ * TODO
+ */
 @JvmName("lt")
-infix fun <Columns, T : Any> Column<Columns, T>.lt(value: T) = lt<Columns>(name, value)
+infix fun <Columns, Type : Any> Column<Columns, Type>.lt(value: Type) = lt<Columns>(name, value)
+/**
+ * TODO
+ */
 @JvmName("ltNullable")
-infix fun <Columns, T : Any> Column<Columns, T?>.lt(value: T) = lt<Columns>(name, value)
+infix fun <Columns, Type : Any> Column<Columns, Type?>.lt(value: Type) = lt<Columns>(name, value)
 //endregion
 //region gt
 private fun <Columns> gt(name: String, value: Any): Expression<Columns> = GreaterThan(name, value)
+/**
+ * TODO
+ */
 @JvmName("gt")
-infix fun <Columns, T : Any> Column<Columns, T>.gt(value: T) = gt<Columns>(name, value)
+infix fun <Columns, Type : Any> Column<Columns, Type>.gt(value: Type) = gt<Columns>(name, value)
+/**
+ * TODO
+ */
 @JvmName("gtNullable")
-infix fun <Columns, T : Any> Column<Columns, T?>.gt(value: T) = gt<Columns>(name, value)
+infix fun <Columns, Type : Any> Column<Columns, Type?>.gt(value: Type) = gt<Columns>(name, value)
 //endregion
 //region lte
 private fun <Columns> lte(name: String, value: Any): Expression<Columns> = LessThanOrEqualTo(name, value)
+/**
+ * TODO
+ */
 @JvmName("lte")
-infix fun <Columns, T : Any> Column<Columns, T>.lte(value: T) = lte<Columns>(name, value)
+infix fun <Columns, Type : Any> Column<Columns, Type>.lte(value: Type) = lte<Columns>(name, value)
+/**
+ * TODO
+ */
 @JvmName("lteNullable")
-infix fun <Columns, T : Any> Column<Columns, T?>.lte(value: T) = lte<Columns>(name, value)
+infix fun <Columns, Type : Any> Column<Columns, Type?>.lte(value: Type) = lte<Columns>(name, value)
 //endregion
 //region gte
 private fun <Columns> gte(name: String, value: Any): Expression<Columns> = GreaterThanOrEqualTo(name, value)
+/**
+ * TODO
+ */
 @JvmName("gte")
-infix fun <Columns, T : Any> Column<Columns, T>.gte(value: T) = gte<Columns>(name, value)
+infix fun <Columns, Type : Any> Column<Columns, Type>.gte(value: Type) = gte<Columns>(name, value)
+/**
+ * TODO
+ */
 @JvmName("gteNullable")
-infix fun <Columns, T : Any> Column<Columns, T?>.gte(value: T) = gte<Columns>(name, value)
+infix fun <Columns, Type : Any> Column<Columns, Type?>.gte(value: Type) = gte<Columns>(name, value)
 //endregion
 
 //region in
 private fun <Columns> `in`(name: String, values: Collection<Any>): Expression<Columns> = In(name, values)
+/**
+ * TODO
+ */
 @JvmName("in")
-infix fun <Columns, T : Any> Column<Columns, T>.`in`(values: Collection<T>) = `in`<Columns>(name, values)
+infix fun <Columns, Type : Any> Column<Columns, Type>.`in`(values: Collection<Type>) = `in`<Columns>(name, values)
+/**
+ * TODO
+ */
 @JvmName("inNullable")
-infix fun <Columns, T : Any> Column<Columns, T?>.`in`(values: Collection<T>) = `in`<Columns>(name, values)
+infix fun <Columns, Type : Any> Column<Columns, Type?>.`in`(values: Collection<Type>) = `in`<Columns>(name, values)
 //endregion
 //region notIn
 private fun <Columns> notIn(name: String, values: Collection<Any>): Expression<Columns> = NotIn(name, values)
+/**
+ * TODO
+ */
 @JvmName("notIn")
-infix fun <Columns, T : Any> Column<Columns, T>.notIn(values: Collection<T>) = notIn<Columns>(name, values)
+infix fun <Columns, Type : Any> Column<Columns, Type>.notIn(values: Collection<Type>) = notIn<Columns>(name, values)
+/**
+ * TODO
+ */
 @JvmName("notInNullable")
-infix fun <Columns, T : Any> Column<Columns, T?>.notIn(values: Collection<T>) = notIn<Columns>(name, values)
+infix fun <Columns, Type : Any> Column<Columns, Type?>.notIn(values: Collection<Type>) = notIn<Columns>(name, values)
 //endregion
 
 //region like
 private fun <Columns> like(name: String, expression: String?): Expression<Columns> =
     if (expression == null) IsNull(name) else Like(name, expression)
+/**
+ * TODO
+ */
 @JvmName("like")
 infix fun <Columns> Column<Columns, String>.like(expression: String) = like<Columns>(name, expression)
+/**
+ * TODO
+ */
 @JvmName("likeNullable")
 infix fun <Columns> Column<Columns, String?>.like(expression: String?) = like<Columns>(name, expression)
+//TODO startsWith
+//TODO contains
+//TODO endsWith
 //endregion
 //region notLike
 private fun <Columns> notLike(name: String, expression: String?): Expression<Columns> =
     if (expression == null) IsNotNull(name) else NotLike(name, expression)
+/**
+ * TODO
+ */
 @JvmName("notLike")
 infix fun <Columns> Column<Columns, String>.notLike(expression: String) = notLike<Columns>(name, expression)
+/**
+ * TODO
+ */
 @JvmName("notLikeNullable")
 infix fun <Columns> Column<Columns, String?>.notLike(expression: String?) = notLike<Columns>(name, expression)
+//TODO notStartsWith
+//TODO notContains
+//TODO notEndsWith
 //endregion
 
 //region between
@@ -112,10 +183,18 @@ private fun <Columns> between(name: String, min: Any?, maxIncl: Any?): Expressio
     min == null && maxIncl != null -> LessThanOrEqualTo(name, maxIncl)
     else -> IsNull(name)
 }
+/**
+ * TODO
+ */
 @JvmName("between")
-fun <Columns, T : Any> Column<Columns, T>.between(min: T, maxIncl: T) = between<Columns>(name, min, maxIncl)
+fun <Columns, Type : Any> Column<Columns, Type>.between(min: Type, maxIncl: Type) =
+    between<Columns>(name, min, maxIncl)
+/**
+ * TODO
+ */
 @JvmName("betweenNullable")
-fun <Columns, T : Any> Column<Columns, T?>.between(min: T?, maxIncl: T?) = between<Columns>(name, min, maxIncl)
+fun <Columns, Type : Any> Column<Columns, Type?>.between(min: Type?, maxIncl: Type?) =
+    between<Columns>(name, min, maxIncl)
 //endregion
 //region notBetween
 private fun <Columns> notBetween(name: String, min: Any?, maxIncl: Any?): Expression<Columns> = when {
@@ -124,8 +203,16 @@ private fun <Columns> notBetween(name: String, min: Any?, maxIncl: Any?): Expres
     min == null && maxIncl != null -> GreaterThan(name, maxIncl)
     else -> IsNotNull(name)
 }
+/**
+ * TODO
+ */
 @JvmName("notBetween")
-fun <Columns, T : Any> Column<Columns, T>.notBetween(min: T, maxIncl: T) = notBetween<Columns>(name, min, maxIncl)
+fun <Columns, Type : Any> Column<Columns, Type>.notBetween(min: Type, maxIncl: Type) =
+    notBetween<Columns>(name, min, maxIncl)
+/**
+ * TODO
+ */
 @JvmName("notBetweenNullable")
-fun <Columns, T : Any> Column<Columns, T?>.notBetween(min: T?, maxIncl: T?) = notBetween<Columns>(name, min, maxIncl)
+fun <Columns, Type : Any> Column<Columns, Type?>.notBetween(min: Type?, maxIncl: Type?) =
+    notBetween<Columns>(name, min, maxIncl)
 //endregion

@@ -40,7 +40,7 @@ class UpdateTests {
 
         // When
         //UPDATE EMPLOYEE SET SALARY = 0.0
-        val entitiesUpdated = Employee.updateAll { salary(0.0) }
+        val entitiesUpdated = Employee.updateAll { salary set 0.0 }
 
         // Then
         assertEquals(7, entitiesUpdated)
@@ -57,7 +57,7 @@ class UpdateTests {
         // When
         //UPDATE EMPLOYEE SET SALARY = 100000.0 WHERE SALARY < 100000.0
         val entitiesUpdated = Employee
-            .update { salary(100_000.0) }
+            .update { salary set 100_000.0 }
             .where { salary lt 100_000.0 }
             .execute()
 
