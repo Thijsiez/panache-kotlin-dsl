@@ -85,7 +85,7 @@ project.afterEvaluate {
 - Supports `like` and `notLike` expressions in a null-safe way for String columns
 - Supports `and` and `or` expressions for building up a query
 - Adds the `PanacheSingleResult` sealed class and `singleResultSafe()` extension function to return a single result without throwing exceptions.
-  - Allows you to handle no/multiple results with a `when (result) {...}` block instead of try-catching
+  - Allows you to handle no/multiple results with a `when (result) { ... }` block instead of try-catching
 ### Code Generation
 - Generate `Column`s for non-transient and non-mapped fields in Panache entities
 - Generate query entry point extension functions for entities with Panache companion objects

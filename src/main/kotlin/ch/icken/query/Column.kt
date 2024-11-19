@@ -26,11 +26,13 @@ import ch.icken.query.Expression.BooleanExpression.IsExpression.IsNull
 
 class Column<Columns, Type : Any?>(internal val name: String) {
     /**
-     * Adds a setter expression to this update query
+     * Creates a [SetterExpression][ch.icken.query.Component.UpdateComponent.InitialUpdateComponent.SetterExpression]
+     * for this column
      *
-     * @param value the new value for this column
+     * @param   value   the new value for this column
+     * @return          a new `SetterExpression` instance
      */
-    infix fun set(value: Type) = Component.UpdateComponent.InitialUpdateComponent.Setter(name, value)
+    infix fun set(value: Type) = Component.UpdateComponent.InitialUpdateComponent.SetterExpression(name, value)
 }
 
 //region eq

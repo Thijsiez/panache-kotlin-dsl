@@ -18,7 +18,9 @@ package ch.icken.processor
 
 import ch.icken.query.Column
 import ch.icken.query.Component.QueryComponent
-import ch.icken.query.Component.UpdateComponent
+import ch.icken.query.Component.UpdateComponent.InitialUpdateComponent
+import ch.icken.query.Component.UpdateComponent.InitialUpdateComponent.SetterExpression
+import ch.icken.query.Component.UpdateComponent.LogicalUpdateComponent
 import ch.icken.query.Expression
 import ch.icken.query.PanacheSingleResult
 import com.squareup.kotlinpoet.AnnotationSpec
@@ -59,16 +61,16 @@ abstract class ProcessorCommon(options: Map<String, String>) {
         internal val ColumnClassName = Column::class.asClassName()
         internal val ExpressionClassName = Expression::class.asClassName()
         internal val GeneratedClassName = Generated::class.asClassName()
-        internal val InitialUpdateComponentClassName = UpdateComponent.InitialUpdateComponent::class.asClassName()
+        internal val InitialUpdateComponentClassName = InitialUpdateComponent::class.asClassName()
         internal val IntClassName = Int::class.asClassName()
         internal val JvmNameClassName = JvmName::class.asClassName()
         internal val ListClassName = List::class.asClassName()
-        internal val LogicalUpdateComponentClassName = UpdateComponent.LogicalUpdateComponent::class.asClassName()
+        internal val LogicalUpdateComponentClassName = LogicalUpdateComponent::class.asClassName()
         internal val LongClassName = Long::class.asClassName()
         internal val PanacheQueryClassName = PanacheQuery::class.asClassName()
         internal val PanacheSingleResultClassName = PanacheSingleResult::class.asClassName()
         internal val QueryComponentClassName = QueryComponent::class.asClassName()
-        internal val SetterClassName = UpdateComponent.InitialUpdateComponent.Setter::class.asClassName()
+        internal val SetterExpressionClassName = SetterExpression::class.asClassName()
         internal val SortClassName = Sort::class.asClassName()
         internal val StreamClassName = Stream::class.asClassName()
         internal val StringClassName = String::class.asClassName()

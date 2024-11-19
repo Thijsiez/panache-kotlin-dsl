@@ -19,7 +19,7 @@ package ch.icken.query
 import ch.icken.query.Component.QueryComponent
 import ch.icken.query.Component.QueryComponent.InitialQueryComponent
 import ch.icken.query.Component.UpdateComponent.InitialUpdateComponent
-import ch.icken.query.Component.UpdateComponent.InitialUpdateComponent.Setter
+import ch.icken.query.Component.UpdateComponent.InitialUpdateComponent.SetterExpression
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
 import io.quarkus.panache.common.Sort
@@ -64,44 +64,115 @@ sealed class Component<Entity : PanacheEntityBase, Id : Any, Columns> private co
 
         //region Terminal operations
         /**
-         * TODO
+         * Counts the number of entities matching the preceding query.
+         *
+         * @return  the number of entities counted
+         * @see     io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase.count
          */
         fun count() = withCompiled { companion.count(component, parameters) }
         /**
-         * TODO
+         * Deletes all entities matching the preceding query.
+         *
+         * WARNING: the default Panache implementation behind this function uses a bulk delete query
+         * and ignores cascading rules from the JPA model.
+         *
+         * @return  the number of entities deleted
+         * @see     io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase.delete
          */
         fun delete() = withCompiled { companion.delete(component, parameters) }
         /**
-         * TODO
+         * Finds entities matching the preceding query.
+         *
+         * May be used to chain functionality not (yet) abstracted by this library, like
+         * [page][io.quarkus.hibernate.orm.panache.kotlin.PanacheQuery.page] and
+         * [project][io.quarkus.hibernate.orm.panache.kotlin.PanacheQuery.project].
+         *
+         * @return  a new [PanacheQuery][io.quarkus.hibernate.orm.panache.kotlin.PanacheQuery] instance
+         * @see     io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase.find
          */
         fun find() = withCompiled { companion.find(component, parameters) }
         /**
-         * TODO
+         * Finds entities matching the preceding query and the given sort options.
+         *
+         * May be used to chain functionality not (yet) abstracted by this library, like
+         * [page][io.quarkus.hibernate.orm.panache.kotlin.PanacheQuery.page] and
+         * [project][io.quarkus.hibernate.orm.panache.kotlin.PanacheQuery.project].
+         *
+         * @param   sort    the sort strategy to use
+         * @return          a new [PanacheQuery][io.quarkus.hibernate.orm.panache.kotlin.PanacheQuery] instance
+         * @see             io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase.find
          */
         fun find(sort: Sort) = withCompiled { companion.find(component, sort, parameters) }
         /**
-         * TODO
+         * Streams all entities matching the preceding query. This function is a shortcut for `find().stream()`.
+         *
+         * WARNING: this function requires a transaction to be active,
+         * otherwise the underlying cursor may be closed before the end of the stream.
+         *
+         * @return  a new [Stream][java.util.stream.Stream] instance containing all results, without paging
+         * @see     io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase.stream
          */
         fun stream() = withCompiled { companion.stream(component, parameters) }
         /**
-         * TODO
+         * Streams all entities matching the preceding query and the given sort options.
+         * This function is a shortcut for `find(sort).stream()`.
+         *
+         * WARNING: this function requires a transaction to be active,
+         * otherwise the underlying cursor may be closed before the end of the stream.
+         *
+         * @param   sort    the sort strategy to use
+         * @return          a new [Stream][java.util.stream.Stream] instance containing all results, without paging
+         * @see             io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase.stream
          */
         fun stream(sort: Sort) = withCompiled { companion.stream(component, sort, parameters) }
 
         /**
-         * TODO
+         * Finds a single result matching the preceding query, or throws if there is not exactly one.
+         * This function is a shortcut for `find().singleResult()`.
+         *
+         * @return  the single result
+         * @throws  jakarta.persistence.NoResultException when there is no result
+         * @throws  jakarta.persistence.NonUniqueResultException when there are multiple results
+         * @see     io.quarkus.hibernate.orm.panache.kotlin.PanacheQuery.singleResult
          */
         fun single() = find().singleResult()
         /**
-         * TODO
+         * Finds a single result matching the preceding query, but does not throw if there is not exactly one.
+         * This function is a shortcut for `find().singleResultSafe()`.
+         *
+         * This function will always return one of the following:
+         * - [NoResult][ch.icken.query.PanacheSingleResult.NoResult] when there is no result
+         * - A new instance of [Result][ch.icken.query.PanacheSingleResult.Result] when there is exactly one result
+         * - [NotUnique][ch.icken.query.PanacheSingleResult.NotUnique] when there are multiple results
+         *
+         * Below is an example of how this result could be used:
+         * ```
+         * val result = User.where { ... }
+         * val user = when (result) {
+         *     NoResult -> null //or maybe return
+         *     is Result -> result.value
+         *     NotUnique -> throw IllegalStateException()
+         * }
+         * ```
+         *
+         * @return  a [PanacheSingleResult][ch.icken.query.PanacheSingleResult] instance
+         * @see     ch.icken.query.singleResultSafe
          */
         fun singleSafe() = find().singleResultSafe()
         /**
-         * TODO
+         * Finds all entities matching the preceding query. This function is a shortcut for `find().list()`.
+         *
+         * @return  a new [List][kotlin.collections.List] instance containing all results, without paging
+         * @see     io.quarkus.hibernate.orm.panache.kotlin.PanacheQuery.list
          */
         fun multiple() = find().list()
         /**
-         * TODO
+         * Finds all entities matching the preceding query and the given sort options.
+         * This function is a shortcut for `find(sort).list()`.
+         *
+         * @param   sort    the sort strategy to use
+         * @return          a new [List][kotlin.collections.List] instance containing all results, without paging
+         * @see             io.quarkus.hibernate.orm.panache.kotlin.PanacheQuery.list
          */
         fun multiple(sort: Sort) = find(sort).list()
         //endregion
@@ -149,7 +220,7 @@ sealed class Component<Entity : PanacheEntityBase, Id : Any, Columns> private co
         class InitialUpdateComponent<Entity : PanacheEntityBase, Id : Any, Columns> internal constructor(
             companion: PanacheCompanionBase<Entity, Id>,
             private val columns: Columns,
-            private val setters: Array<out Columns.() -> Setter>
+            private val setters: Array<out Columns.() -> SetterExpression>
         ) : UpdateComponent<Entity, Id, Columns>(companion) {
             //region Chaining operations
             /**
@@ -174,7 +245,7 @@ sealed class Component<Entity : PanacheEntityBase, Id : Any, Columns> private co
                 )
             }
 
-            class Setter internal constructor(private val columnName: String, private val value: Any?) {
+            class SetterExpression internal constructor(private val columnName: String, private val value: Any?) {
                 private val parameterName: String = generateParameterName()
 
                 internal fun compile(): Compiled = when (value) {
@@ -240,10 +311,10 @@ sealed class Component<Entity : PanacheEntityBase, Id : Any, Columns> private co
 }
 
 fun <Entity : PanacheEntityBase, Id : Any, Columns>
-        PanacheCompanionBase<Entity, Id>.update(columns: Columns, setter: Columns.() -> Setter):
+        PanacheCompanionBase<Entity, Id>.update(columns: Columns, setter: Columns.() -> SetterExpression):
         InitialUpdateComponent<Entity, Id, Columns> = InitialUpdateComponent(this, columns, arrayOf(setter))
 fun <Entity : PanacheEntityBase, Id : Any, Columns>
-        PanacheCompanionBase<Entity, Id>.update(columns: Columns, setters: Array<out Columns.() -> Setter>):
+        PanacheCompanionBase<Entity, Id>.update(columns: Columns, setters: Array<out Columns.() -> SetterExpression>):
         InitialUpdateComponent<Entity, Id, Columns> = InitialUpdateComponent(this, columns, setters)
 
 fun <Entity : PanacheEntityBase, Id : Any, Columns>

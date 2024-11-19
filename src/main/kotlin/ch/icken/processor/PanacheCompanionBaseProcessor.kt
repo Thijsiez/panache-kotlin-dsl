@@ -73,7 +73,7 @@ class PanacheCompanionBaseProcessor(
 
         val setterExpressionParameterLambdaType = LambdaTypeName.get(
             receiver = columnsObjectClassName,
-            returnType = SetterClassName
+            returnType = SetterExpressionClassName
         )
         val initialUpdateComponentType = InitialUpdateComponentClassName
             .plusParameter(className)
