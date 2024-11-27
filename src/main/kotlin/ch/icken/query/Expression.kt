@@ -68,11 +68,10 @@ sealed class Expression<Columns> {
             class NotIn<Columns> internal constructor(key: String, values: Collection<Any>) :
                 BooleanValueExpression<Columns>(key, "NOT IN", values)
 
-            class Like<Columns> internal constructor(key: String, expression: String) :
-                BooleanValueExpression<Columns>(key, "LIKE", expression)
-            class NotLike<Columns> internal constructor(key: String, expression: String) :
-                BooleanValueExpression<Columns>(key, "NOT LIKE", expression)
-
+            class Like<Columns> internal constructor(key: String, pattern: String) :
+                BooleanValueExpression<Columns>(key, "LIKE", pattern)
+            class NotLike<Columns> internal constructor(key: String, pattern: String) :
+                BooleanValueExpression<Columns>(key, "NOT LIKE", pattern)
         }
 
         sealed class BetweenExpression<Columns> private constructor(

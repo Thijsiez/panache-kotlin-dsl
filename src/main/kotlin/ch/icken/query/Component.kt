@@ -50,14 +50,8 @@ sealed class Component<Entity : PanacheEntityBase, Id : Any, Columns> private co
         protected val expression: Expression<Columns>
     ) : Component<Entity, Id, Columns>(companion) {
         //region Chaining operations
-        /**
-         * TODO
-         */
         fun and(expression: Expression<Columns>): QueryComponent<Entity, Id, Columns> =
             LogicalQueryComponent.AndQueryComponent(companion, this, expression)
-        /**
-         * TODO
-         */
         fun or(expression: Expression<Columns>): QueryComponent<Entity, Id, Columns> =
             LogicalQueryComponent.OrQueryComponent(companion, this, expression)
         //endregion
@@ -223,16 +217,20 @@ sealed class Component<Entity : PanacheEntityBase, Id : Any, Columns> private co
             private val setters: Array<out Columns.() -> SetterExpression>
         ) : UpdateComponent<Entity, Id, Columns>(companion) {
             //region Chaining operations
-            /**
-             * TODO
-             */
             fun where(expression: Expression<Columns>): LogicalUpdateComponent<Entity, Id, Columns> =
                 LogicalUpdateComponent.WhereUpdateComponent(companion, this, expression)
             //endregion
 
             //region Terminal operations
             /**
-             * TODO
+             * Updates all entities of this type.
+             *
+             * WARNING: this function updates ALL entities without a WHERE clause
+             *
+             * WARNING: this function requires a transaction to be active.
+             *
+             * @return  the number of entities updated
+             * @see     io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase.update
              */
             fun executeWithoutWhere() = withCompiled { companion.update(component, parameters) }
             //endregion
@@ -263,21 +261,20 @@ sealed class Component<Entity : PanacheEntityBase, Id : Any, Columns> private co
             private val expression: Expression<Columns>
         ) : UpdateComponent<Entity, Id, Columns>(companion) {
             //region Chaining operations
-            /**
-             * TODO
-             */
             fun and(expression: Expression<Columns>): LogicalUpdateComponent<Entity, Id, Columns> =
                 AndUpdateComponent(companion, this, expression)
-            /**
-             * TODO
-             */
             fun or(expression: Expression<Columns>): LogicalUpdateComponent<Entity, Id, Columns> =
                 OrUpdateComponent(companion, this, expression)
             //endregion
 
             //region Terminal operations
             /**
-             * TODO
+             * Updates all entities matching the preceding query
+             *
+             * WARNING: this function requires a transaction to be active
+             *
+             * @return  the number of entities updated
+             * @see     io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase.update
              */
             fun execute() = withCompiled { companion.update(component, parameters) }
             //endregion
