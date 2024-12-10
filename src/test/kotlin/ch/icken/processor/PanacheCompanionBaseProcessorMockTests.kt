@@ -16,11 +16,11 @@
 
 package ch.icken.processor
 
-import ch.icken.processor.ProcessorCommon.Companion.HibernatePanacheCompanionBase
+import ch.icken.processor.PanacheCompanionBaseProcessor.Companion.HibernatePanacheCompanionBase
+import ch.icken.processor.PanacheCompanionBaseProcessor.Companion.JakartaPersistenceId
+import ch.icken.processor.PanacheCompanionBaseProcessor.Companion.LongClassName
 import ch.icken.processor.ProcessorCommon.Companion.HibernatePanacheEntityBase
 import ch.icken.processor.ProcessorCommon.Companion.JakartaPersistenceEntity
-import ch.icken.processor.ProcessorCommon.Companion.JakartaPersistenceId
-import ch.icken.processor.ProcessorCommon.Companion.LongClassName
 import ch.icken.processor.ProcessorCommon.Companion.OPTION_ADD_GENERATED_ANNOTATION
 import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.KSPLogger

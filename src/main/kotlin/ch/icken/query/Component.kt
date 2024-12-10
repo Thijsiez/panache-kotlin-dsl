@@ -225,7 +225,7 @@ sealed class Component<Entity : PanacheEntityBase, Id : Any, Columns> private co
             /**
              * Updates all entities of this type.
              *
-             * WARNING: this function updates ALL entities without a WHERE clause
+             * WARNING: this function updates ALL entities without a WHERE clause.
              *
              * WARNING: this function requires a transaction to be active.
              *
@@ -269,9 +269,9 @@ sealed class Component<Entity : PanacheEntityBase, Id : Any, Columns> private co
 
             //region Terminal operations
             /**
-             * Updates all entities matching the preceding query
+             * Updates all entities matching the preceding query.
              *
-             * WARNING: this function requires a transaction to be active
+             * WARNING: this function requires a transaction to be active.
              *
              * @return  the number of entities updated
              * @see     io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase.update

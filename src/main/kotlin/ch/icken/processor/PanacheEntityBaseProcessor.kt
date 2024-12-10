@@ -16,6 +16,7 @@
 
 package ch.icken.processor
 
+import ch.icken.query.Column
 import com.google.devtools.ksp.processing.*
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
@@ -25,6 +26,7 @@ import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.plusParameter
 import com.squareup.kotlinpoet.ksp.toClassName
 import com.squareup.kotlinpoet.ksp.writeTo
+import jakarta.persistence.*
 
 class PanacheEntityBaseProcessor(
     options: Map<String, String>,
@@ -113,6 +115,26 @@ class PanacheEntityBaseProcessor(
             .addAnnotationIf(generatedAnnotation, addGeneratedAnnotation)
             .build()
             .writeTo(codeGenerator, Dependencies(false))
+    }
+
+    companion object {
+        //region Class Names
+        internal val ColumnClassName = Column::class.asClassName()
+        internal val StringClassName = String::class.asClassName()
+        //endregion
+        //region Constants
+        internal const val PARAM_NAME_COLUMNS_BASE_CLASS = "parent"
+        internal const val PARAM_NAME_MAPPED_BY = "mappedBy"
+        internal const val SUFFIX_CLASS_COLUMNS_BASE = "Base"
+        internal const val TYPE_VARIABLE_NAME_COLUMNS = "Columns"
+        //endregion
+        //region Names
+        internal val JakartaPersistenceJoinColumn: String = JoinColumn::class.java.name
+        internal val JakartaPersistenceManyToMany: String = ManyToMany::class.java.name
+        internal val JakartaPersistenceOneToMany: String = OneToMany::class.java.name
+        internal val JakartaPersistenceOneToOne: String = OneToOne::class.java.name
+        internal val JakartaPersistenceTransient: String = Transient::class.java.name
+        //endregion
     }
 }
 

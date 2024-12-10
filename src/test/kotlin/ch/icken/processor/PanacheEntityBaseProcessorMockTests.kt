@@ -16,16 +16,16 @@
 
 package ch.icken.processor
 
+import ch.icken.processor.PanacheCompanionBaseProcessor.Companion.ListClassName
+import ch.icken.processor.PanacheEntityBaseProcessor.Companion.JakartaPersistenceJoinColumn
+import ch.icken.processor.PanacheEntityBaseProcessor.Companion.JakartaPersistenceTransient
+import ch.icken.processor.PanacheEntityBaseProcessor.Companion.PARAM_NAME_MAPPED_BY
+import ch.icken.processor.PanacheEntityBaseProcessor.Companion.StringClassName
 import ch.icken.processor.ProcessorCommon.Companion.HibernatePanacheEntityBase
 import ch.icken.processor.ProcessorCommon.Companion.JakartaPersistenceEntity
-import ch.icken.processor.ProcessorCommon.Companion.JakartaPersistenceJoinColumn
-import ch.icken.processor.ProcessorCommon.Companion.JakartaPersistenceTransient
-import ch.icken.processor.ProcessorCommon.Companion.ListClassName
 import ch.icken.processor.ProcessorCommon.Companion.OPTION_ADD_GENERATED_ANNOTATION
-import ch.icken.processor.ProcessorCommon.Companion.PARAM_NAME_MAPPED_BY
 import ch.icken.processor.ProcessorCommon.Companion.PARAM_NAME_TYPE
 import ch.icken.processor.ProcessorCommon.Companion.ProcessorColumnType
-import ch.icken.processor.ProcessorCommon.Companion.StringClassName
 import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.processing.Resolver
