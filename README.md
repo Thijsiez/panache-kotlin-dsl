@@ -1,5 +1,5 @@
 [![License](https://img.shields.io/badge/license-Apache_2.0-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0.txt)
-[![Maven Central](https://img.shields.io/badge/maven_central-0.0.3-brightgreen.svg)](https://search.maven.org/artifact/ch.icken/panache-kotlin-dsl/0.0.3/jar)
+[![Maven Central](https://img.shields.io/badge/maven_central-0.0.4-brightgreen.svg)](https://search.maven.org/artifact/ch.icken/panache-kotlin-dsl/0.0.4/jar)
 [![Test](https://github.com/Thijsiez/panache-kotlin-dsl/actions/workflows/test.yaml/badge.svg?branch=main)](https://github.com/Thijsiez/panache-kotlin-dsl/actions/workflows/test.yaml)  
 ![Quality Gate Status](https://sonarqube.icken.ch/api/project_badges/measure?project=Thijsiez_panache-kotlin-dsl_760170ef-68c7-43b0-880d-cf1034afe3c6&metric=alert_status&token=sqb_cfafb36de6f18194da2e383324ee281b0de5b953)
 ![Reliability Rating](https://sonarqube.icken.ch/api/project_badges/measure?project=Thijsiez_panache-kotlin-dsl_760170ef-68c7-43b0-880d-cf1034afe3c6&metric=reliability_rating&token=sqb_cfafb36de6f18194da2e383324ee281b0de5b953)
@@ -24,14 +24,14 @@ A dynamic, type-safe way to write your queries
 Add the KSP Gradle plugin to your build file
 ```kotlin
 plugins {
-    id("com.google.devtools.ksp") version "2.0.21-1.0.26"
+    id("com.google.devtools.ksp") version "2.0.21-1.0.28"
 }
 ```
 Add this library to your build file and register it with KSP
 ```kotlin
 dependencies {
-  implementation("ch.icken:panache-kotlin-dsl:0.0.3")
-  ksp("ch.icken:panache-kotlin-dsl:0.0.3")
+  implementation("ch.icken:panache-kotlin-dsl:0.0.4")
+  ksp("ch.icken:panache-kotlin-dsl:0.0.4")
 }
 ```
 Optionally configure the behavior
@@ -76,7 +76,7 @@ project.afterEvaluate {
 - Kotlin version `1.9.23` or newer
 - KSP version `1.9.23-1.0.20` or newer
   - Your KSP version needs to match your Kotlin version. This is a strict requirement!  
-    For example, when your Kotlin version is `2.0.21`, your KSP version needs to be built for and start with the same version, such as `2.0.21-1.0.25`
+    For example, when your Kotlin version is `2.0.21`, your KSP version needs to be built for and start with the same version, such as `2.0.21-1.0.28`
 
 ## Features
 ### Queries
