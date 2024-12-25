@@ -98,7 +98,6 @@ class PanacheCompanionBaseProcessor(
 
         //region where, and, or
         val where = FunSpec.builder(FUNCTION_NAME_WHERE)
-            .addModifiers(KModifier.INLINE)
             .receiver(companionClassName)
             .addParameter(PARAM_NAME_EXPRESSION, expressionParameterLambdaType)
             .returns(queryComponentType)
@@ -113,7 +112,6 @@ class PanacheCompanionBaseProcessor(
                 """.trimIndent())
 
         val and = FunSpec.builder(FUNCTION_NAME_AND)
-            .addModifiers(KModifier.INLINE)
             .receiver(queryComponentType)
             .addParameter(PARAM_NAME_EXPRESSION, expressionParameterLambdaType)
             .returns(queryComponentType)
@@ -126,7 +124,6 @@ class PanacheCompanionBaseProcessor(
                 @return             a new [QueryComponent][ch.icken.query.Component.QueryComponent] instance
                 """.trimIndent())
         val or = FunSpec.builder(FUNCTION_NAME_OR)
-            .addModifiers(KModifier.INLINE)
             .receiver(queryComponentType)
             .addParameter(PARAM_NAME_EXPRESSION, expressionParameterLambdaType)
             .returns(queryComponentType)
@@ -142,7 +139,6 @@ class PanacheCompanionBaseProcessor(
 
         //region count, delete, find, stream
         val count = FunSpec.builder(FUNCTION_NAME_COUNT)
-            .addModifiers(KModifier.INLINE)
             .receiver(companionClassName)
             .addParameter(PARAM_NAME_EXPRESSION, expressionParameterLambdaType)
             .returns(LongClassName)
@@ -157,7 +153,6 @@ class PanacheCompanionBaseProcessor(
                 """.trimIndent())
 
         val delete = FunSpec.builder(FUNCTION_NAME_DELETE)
-            .addModifiers(KModifier.INLINE)
             .receiver(companionClassName)
             .addParameter(PARAM_NAME_EXPRESSION, expressionParameterLambdaType)
             .returns(LongClassName)
@@ -176,7 +171,6 @@ class PanacheCompanionBaseProcessor(
 
         val findReturns = PanacheQueryClassName.plusParameter(className)
         val find = FunSpec.builder(FUNCTION_NAME_FIND)
-            .addModifiers(KModifier.INLINE)
             .receiver(companionClassName)
             .addParameter(PARAM_NAME_EXPRESSION, expressionParameterLambdaType)
             .returns(findReturns)
@@ -194,7 +188,6 @@ class PanacheCompanionBaseProcessor(
                 @see                io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase.find
                 """.trimIndent())
         val findSorted = FunSpec.builder(FUNCTION_NAME_FIND)
-            .addModifiers(KModifier.INLINE)
             .receiver(companionClassName)
             .addParameter(PARAM_NAME_SORT, SortClassName)
             .addParameter(PARAM_NAME_EXPRESSION, expressionParameterLambdaType)
@@ -216,7 +209,6 @@ class PanacheCompanionBaseProcessor(
 
         val streamReturns = StreamClassName.plusParameter(className)
         val stream = FunSpec.builder(FUNCTION_NAME_STREAM)
-            .addModifiers(KModifier.INLINE)
             .receiver(companionClassName)
             .addParameter(PARAM_NAME_EXPRESSION, expressionParameterLambdaType)
             .returns(streamReturns)
@@ -235,7 +227,6 @@ class PanacheCompanionBaseProcessor(
                 @see                io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase.stream
                 """.trimIndent())
         val streamSorted = FunSpec.builder(FUNCTION_NAME_STREAM)
-            .addModifiers(KModifier.INLINE)
             .receiver(companionClassName)
             .addParameter(PARAM_NAME_SORT, SortClassName)
             .addParameter(PARAM_NAME_EXPRESSION, expressionParameterLambdaType)
@@ -259,7 +250,6 @@ class PanacheCompanionBaseProcessor(
 
         //region single, multiple
         val single = FunSpec.builder(FUNCTION_NAME_SINGLE)
-            .addModifiers(KModifier.INLINE)
             .receiver(companionClassName)
             .addParameter(PARAM_NAME_EXPRESSION, expressionParameterLambdaType)
             .returns(className)
@@ -276,7 +266,6 @@ class PanacheCompanionBaseProcessor(
                 @see                io.quarkus.hibernate.orm.panache.kotlin.PanacheQuery.singleResult
                 """.trimIndent())
         val singleSafe = FunSpec.builder(FUNCTION_NAME_SINGLE_SAFE)
-            .addModifiers(KModifier.INLINE)
             .receiver(companionClassName)
             .addParameter(PARAM_NAME_EXPRESSION, expressionParameterLambdaType)
             .returns(PanacheSingleResultClassName.plusParameter(WildcardTypeName.producerOf(className)))
@@ -295,7 +284,6 @@ class PanacheCompanionBaseProcessor(
 
         val multipleReturns = ListClassName.plusParameter(className)
         val multiple = FunSpec.builder(FUNCTION_NAME_MULTIPLE)
-            .addModifiers(KModifier.INLINE)
             .receiver(companionClassName)
             .addParameter(PARAM_NAME_EXPRESSION, expressionParameterLambdaType)
             .returns(multipleReturns)
@@ -310,7 +298,6 @@ class PanacheCompanionBaseProcessor(
                 @see                io.quarkus.hibernate.orm.panache.kotlin.PanacheQuery.list
                 """.trimIndent())
         val multipleSorted = FunSpec.builder(FUNCTION_NAME_MULTIPLE)
-            .addModifiers(KModifier.INLINE)
             .receiver(companionClassName)
             .addParameter(PARAM_NAME_SORT, SortClassName)
             .addParameter(PARAM_NAME_EXPRESSION, expressionParameterLambdaType)
@@ -402,7 +389,6 @@ class PanacheCompanionBaseProcessor(
 
         //region whereUpdate, andUpdate, orUpdate
         val whereUpdate = FunSpec.builder(FUNCTION_NAME_WHERE)
-            .addModifiers(KModifier.INLINE)
             .receiver(initialUpdateComponentType)
             .addParameter(PARAM_NAME_EXPRESSION, expressionParameterLambdaType)
             .returns(logicalUpdateComponentType)
@@ -417,7 +403,6 @@ class PanacheCompanionBaseProcessor(
                 """.trimIndent())
 
         val andUpdate = FunSpec.builder(FUNCTION_NAME_AND)
-            .addModifiers(KModifier.INLINE)
             .receiver(logicalUpdateComponentType)
             .addParameter(PARAM_NAME_EXPRESSION, expressionParameterLambdaType)
             .returns(logicalUpdateComponentType)
@@ -431,7 +416,6 @@ class PanacheCompanionBaseProcessor(
                 [LogicalUpdateComponent][ch.icken.query.Component.UpdateComponent.LogicalUpdateComponent] instance
                 """.trimIndent())
         val orUpdate = FunSpec.builder(FUNCTION_NAME_OR)
-            .addModifiers(KModifier.INLINE)
             .receiver(logicalUpdateComponentType)
             .addParameter(PARAM_NAME_EXPRESSION, expressionParameterLambdaType)
             .returns(logicalUpdateComponentType)
@@ -448,7 +432,6 @@ class PanacheCompanionBaseProcessor(
 
         //region andExpression, orExpression
         val andExpression = FunSpec.builder(FUNCTION_NAME_AND)
-            .addModifiers(KModifier.INLINE)
             .receiver(expressionType)
             .addParameter(PARAM_NAME_EXPRESSION, expressionParameterLambdaType)
             .returns(expressionType)
@@ -461,7 +444,6 @@ class PanacheCompanionBaseProcessor(
                 @return             a new [Expression][ch.icken.query.Expression] instance
                 """.trimIndent())
         val orExpression = FunSpec.builder(FUNCTION_NAME_OR)
-            .addModifiers(KModifier.INLINE)
             .receiver(expressionType)
             .addParameter(PARAM_NAME_EXPRESSION, expressionParameterLambdaType)
             .returns(expressionType)
