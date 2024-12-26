@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.0.5
+- Remove inline modifier on generated extension functions so they can be mocked
+
 ## 0.0.4
 - Add DSL for bulk updates
 - Add printing of the Panache query at DEBUG log level
