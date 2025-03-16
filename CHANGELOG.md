@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.0.6
+- Change `@JoinColumn` generated Column properties to use getter instead of value
+
 ## 0.0.5
 - Remove inline modifier on generated extension functions so they can be mocked
 
