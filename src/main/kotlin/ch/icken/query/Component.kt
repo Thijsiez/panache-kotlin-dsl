@@ -175,8 +175,12 @@ sealed class Component<Entity : PanacheEntityBase, Id : Any, Columns> private co
             companion: PanacheCompanionBase<Entity, Id>,
             expression: Expression<Columns>
         ) : QueryComponent<Entity, Id, Columns>(companion, expression) {
-            override fun compile(): Compiled = expression.compile().let {
-                Compiled(it.expression, it.parameters)
+            override fun compile(): Compiled {
+                val compiledExpression = expression.compile()
+                return Compiled(
+                    component = compiledExpression.expression,
+                    parameters = compiledExpression.parameters
+                )
             }
         }
 
