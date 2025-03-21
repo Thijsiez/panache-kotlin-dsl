@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.0.8
+- Correctly resolve `@JoinColumn` property type's package
+
 ## 0.0.7
 - Find entity ID type based on PanacheCompanion\[Base\] declaration instead of `@Id` annotation
 
