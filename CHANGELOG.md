@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.0.7
+- Find entity ID type based on PanacheCompanion\[Base\] declaration instead of `@Id` annotation
+
 ## 0.0.6
 - Change `@JoinColumn` generated Column properties to use getter instead of value
 

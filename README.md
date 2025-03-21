@@ -1,5 +1,5 @@
 [![License](https://img.shields.io/badge/license-Apache_2.0-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0.txt)
-[![Maven Central](https://img.shields.io/badge/maven_central-0.0.6-brightgreen.svg)](https://search.maven.org/artifact/ch.icken/panache-kotlin-dsl/0.0.6/jar)
+[![Maven Central](https://img.shields.io/badge/maven_central-0.0.7-brightgreen.svg)](https://search.maven.org/artifact/ch.icken/panache-kotlin-dsl/0.0.7/jar)
 [![Test](https://github.com/Thijsiez/panache-kotlin-dsl/actions/workflows/test.yaml/badge.svg?branch=main)](https://github.com/Thijsiez/panache-kotlin-dsl/actions/workflows/test.yaml)  
 ![Quality Gate Status](https://sonarqube.icken.ch/api/project_badges/measure?project=Thijsiez_panache-kotlin-dsl_760170ef-68c7-43b0-880d-cf1034afe3c6&metric=alert_status&token=sqb_cfafb36de6f18194da2e383324ee281b0de5b953)
 ![Reliability Rating](https://sonarqube.icken.ch/api/project_badges/measure?project=Thijsiez_panache-kotlin-dsl_760170ef-68c7-43b0-880d-cf1034afe3c6&metric=reliability_rating&token=sqb_cfafb36de6f18194da2e383324ee281b0de5b953)
@@ -31,8 +31,8 @@ plugins {
 Add this library to your build file and register it with KSP
 ```kotlin
 dependencies {
-  implementation("ch.icken:panache-kotlin-dsl:0.0.6")
-  ksp("ch.icken:panache-kotlin-dsl:0.0.6")
+  implementation("ch.icken:panache-kotlin-dsl:0.0.7")
+  ksp("ch.icken:panache-kotlin-dsl:0.0.7")
 }
 ```
 Optionally configure the behavior
