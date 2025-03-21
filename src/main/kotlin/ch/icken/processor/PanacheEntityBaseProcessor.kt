@@ -20,6 +20,7 @@ import com.google.devtools.ksp.processing.*
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
+import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.validate
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.plusParameter
@@ -76,11 +77,14 @@ class PanacheEntityBaseProcessor(
                 // Generate properties
                 ksProperties.forEach { ksProperty ->
                     val propertyName = ksProperty.simpleName.asString()
+                    val propertyType = ksProperty.type.resolve()
                     val isJoinColumn = ksProperty.hasAnnotation(JakartaPersistenceJoinColumn)
 
                     val propertyBuilder = if (isJoinColumn) {
-                        val joinObjectName = ksProperty.typeName + SUFFIX_OBJECT_COLUMNS
-                        val joinBaseClassType = ClassName(packageName, joinObjectName + SUFFIX_CLASS_COLUMNS_BASE)
+                        val propertyTypeDeclaration = propertyType.declaration
+                        val joinPackageName = propertyTypeDeclaration.packageName.asString() + SUFFIX_PACKAGE_GENERATED
+                        val joinObjectName = propertyTypeDeclaration.simpleName.asString() + SUFFIX_OBJECT_COLUMNS
+                        val joinBaseClassType = ClassName(joinPackageName, joinObjectName + SUFFIX_CLASS_COLUMNS_BASE)
                             .plusParameter(baseClassColumnsTypeVariable)
 
                         PropertySpec.builder(propertyName, joinBaseClassType)
@@ -90,9 +94,14 @@ class PanacheEntityBaseProcessor(
                                     .build()
                             )
                     } else {
-                        val ksPropertyType = ksProperty.type.resolve()
-                        val columnTypeParameter = (ksProperty.columnTypeClassName ?: ksPropertyType.toClassName())
-                            .copy(nullable = ksPropertyType.isMarkedNullable)
+                        @Suppress("kotlin:S6530")//False positive
+                        //The value from get() can be any type. In the case of @ColumnType, it will be a KSType
+                        val columnTypeParameter = ((ksProperty.annotation(ProcessorColumnType)
+                            ?.arguments
+                            ?.get(PARAM_NAME_TYPE) as? KSType)
+                            ?.toClassName()
+                            ?: propertyType.toClassName())
+                            .copy(nullable = propertyType.isMarkedNullable)
                         val columnType = ColumnClassName.plusParameter(baseClassColumnsTypeVariable)
                             .plusParameter(columnTypeParameter)
 
@@ -131,6 +140,7 @@ class PanacheEntityBaseProcessor(
         internal const val PARAM_NAME_MAPPED_BY = "mappedBy"
         internal const val SUFFIX_CLASS_COLUMNS_BASE = "Base"
         internal const val TYPE_VARIABLE_NAME_COLUMNS = "Columns"
+        internal const val PARAM_NAME_TYPE = "type"
         //endregion
         //region Names
         internal val JakartaPersistenceJoinColumn: String = JoinColumn::class.java.name
@@ -138,6 +148,7 @@ class PanacheEntityBaseProcessor(
         internal val JakartaPersistenceOneToMany: String = OneToMany::class.java.name
         internal val JakartaPersistenceOneToOne: String = OneToOne::class.java.name
         internal val JakartaPersistenceTransient: String = Transient::class.java.name
+        internal val ProcessorColumnType: String = ColumnType::class.java.name
         //endregion
     }
 }

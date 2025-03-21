@@ -20,6 +20,8 @@ import ch.icken.processor.PanacheCompanionBaseProcessor.Companion.ListClassName
 import ch.icken.processor.PanacheEntityBaseProcessor.Companion.JakartaPersistenceJoinColumn
 import ch.icken.processor.PanacheEntityBaseProcessor.Companion.JakartaPersistenceTransient
 import ch.icken.processor.PanacheEntityBaseProcessor.Companion.PARAM_NAME_MAPPED_BY
+import ch.icken.processor.PanacheEntityBaseProcessor.Companion.PARAM_NAME_TYPE
+import ch.icken.processor.PanacheEntityBaseProcessor.Companion.ProcessorColumnType
 import ch.icken.processor.PanacheEntityBaseProcessor.Companion.StringClassName
 import ch.icken.processor.ProcessorCommon.Companion.HibernatePanacheEntityBase
 import ch.icken.processor.ProcessorCommon.Companion.JakartaPersistenceEntity
@@ -29,7 +31,6 @@ import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.symbol.*
 import com.google.devtools.ksp.validate
-import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.ksp.toClassName
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
@@ -217,7 +218,7 @@ class PanacheEntityBaseProcessorMockTests : ProcessorMockTestCommon() {
         every { ksClass.packageName } returns classPackageName
         every { ksClass.simpleName } returns classSimpleName
 
-        //region firstName
+        //region firstName (not JoinColumn, not ColumnType)
         val firstNameSimpleName = mockk<KSName>()
         every { firstNameSimpleName.asString() } returns "firstName"
 
@@ -230,12 +231,12 @@ class PanacheEntityBaseProcessorMockTests : ProcessorMockTestCommon() {
 
         val firstName = mockk<KSPropertyDeclaration>()
         every { firstName.simpleName } returns firstNameSimpleName
-        every { firstName.hasAnnotation(eq(JakartaPersistenceJoinColumn)) } returns false
         every { firstName.type } returns firstNameTypeReference
-        every { firstName.columnTypeClassName } returns null
+        every { firstName.hasAnnotation(eq(JakartaPersistenceJoinColumn)) } returns false
+        every { firstName.annotation(eq(ProcessorColumnType)) } returns null
         //endregion
 
-        //region lastName
+        //region lastName (not JoinColum, has ColumnType)
         val lastNameSimpleName = mockk<KSName>()
         every { lastNameSimpleName.asString() } returns "lastName"
 
@@ -249,10 +250,8 @@ class PanacheEntityBaseProcessorMockTests : ProcessorMockTestCommon() {
         val lastNameColumnTypeParameterName = mockk<KSName>()
         every { lastNameColumnTypeParameterName.asString() } returns PARAM_NAME_TYPE
 
-        val lastNameColumnClassName = mockk<ClassName>()
-
         val lastNameColumnTypeArgument = mockk<KSType>()
-        every { lastNameColumnTypeArgument.toClassName() } returns lastNameColumnClassName
+        every { lastNameColumnTypeArgument.toClassName() } returns StringClassName
 
         val lastNameColumnTypeParameter = mockk<KSValueArgument>()
         every { lastNameColumnTypeParameter.name } returns lastNameColumnTypeParameterName
@@ -263,22 +262,35 @@ class PanacheEntityBaseProcessorMockTests : ProcessorMockTestCommon() {
 
         val lastName = mockk<KSPropertyDeclaration>()
         every { lastName.simpleName } returns lastNameSimpleName
-        every { lastName.hasAnnotation(eq(JakartaPersistenceJoinColumn)) } returns false
         every { lastName.type } returns lastNameTypeReference
+        every { lastName.hasAnnotation(eq(JakartaPersistenceJoinColumn)) } returns false
         every { lastName.annotation(eq(ProcessorColumnType)) } returns lastNameColumnType
         //endregion
 
-        //region department
+        //region department (has JoinColumn)
         val departmentSimpleName = mockk<KSName>()
         every { departmentSimpleName.asString() } returns "department"
 
+        val departmentTypeSimpleName = mockk<KSName>()
+        every { departmentTypeSimpleName.asString() } returns "Department"
+
+        val departmentTypeDeclaration = mockk<KSDeclaration>()
+        every { departmentTypeDeclaration.packageName } returns classPackageName
+        every { departmentTypeDeclaration.simpleName } returns departmentTypeSimpleName
+
+        val departmentType = mockk<KSType>()
+        every { departmentType.declaration } returns departmentTypeDeclaration
+
+        val departmentTypeReference = mockk<KSTypeReference>()
+        every { departmentTypeReference.resolve() } returns departmentType
+
         val department = mockk<KSPropertyDeclaration>()
         every { department.simpleName } returns departmentSimpleName
+        every { department.type } returns departmentTypeReference
         every { department.hasAnnotation(eq(JakartaPersistenceJoinColumn)) } returns true
-        every { department.typeName } returns "Department"
         //endregion
 
-        val ksProperties = listOf(firstName, department)
+        val ksProperties = listOf(firstName, lastName, department)
 
         // When
         processor.createColumnsObject(ksClass, ksProperties)

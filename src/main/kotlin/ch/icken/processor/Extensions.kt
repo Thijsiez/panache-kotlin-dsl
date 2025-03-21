@@ -20,8 +20,6 @@ import com.google.devtools.ksp.getAllSuperTypes
 import com.google.devtools.ksp.symbol.*
 import com.squareup.kotlinpoet.Annotatable
 import com.squareup.kotlinpoet.AnnotationSpec
-import com.squareup.kotlinpoet.ClassName
-import com.squareup.kotlinpoet.ksp.toClassName
 
 //region KSAnnotated
 internal fun KSAnnotated.annotation(qualifiedAnnotationClassName: String): KSAnnotation? =
@@ -52,18 +50,8 @@ private fun KSDeclaration.isClass(qualifiedClassName: String): Boolean =
     qualifiedName?.asString() == qualifiedClassName
 //endregion
 
-//region KSPropertyDeclaration
-internal const val PARAM_NAME_TYPE = "type"
-internal val ProcessorColumnType: String = ColumnType::class.java.name
-internal val KSPropertyDeclaration.columnTypeClassName: ClassName?
-    get() = (annotation(ProcessorColumnType)?.arguments?.get(PARAM_NAME_TYPE) as? KSType)?.toClassName()
-
-internal val KSPropertyDeclaration.typeName: String
-    get() = type.resolve().declaration.simpleName.asString()
-//endregion
-
 //region KSValueArgument
-private operator fun List<KSValueArgument>.get(name: String): Any? =
+internal operator fun List<KSValueArgument>.get(name: String): Any? =
     find { it.name?.asString() == name }?.value
 //endregion
 
