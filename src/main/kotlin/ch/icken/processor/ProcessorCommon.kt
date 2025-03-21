@@ -43,18 +43,16 @@ abstract class ProcessorCommon(options: Map<String, String>) {
 
     companion object {
         //region Class Names
-        internal val GeneratedClassName = Generated::class.asClassName()
-        internal val SuppressClassName = Suppress::class.asClassName()
+        private val GeneratedClassName = Generated::class.asClassName()
+        private val SuppressClassName = Suppress::class.asClassName()
         //endregion
         //region Constants
-        internal const val PARAM_NAME_TYPE = "type"
         internal const val SUFFIX_OBJECT_COLUMNS = "Columns"
         internal const val SUFFIX_PACKAGE_GENERATED = ".generated"
         //endregion
         //region Names
         internal val HibernatePanacheEntityBase: String = PanacheEntityBase::class.java.name
         internal val JakartaPersistenceEntity: String = Entity::class.java.name
-        internal val ProcessorColumnType: String = ColumnType::class.java.name
         //endregion
         //region Options
         internal const val OPTION_ADD_GENERATED_ANNOTATION = "addGeneratedAnnotation"

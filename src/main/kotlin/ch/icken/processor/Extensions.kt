@@ -16,8 +16,6 @@
 
 package ch.icken.processor
 
-import ch.icken.processor.ProcessorCommon.Companion.PARAM_NAME_TYPE
-import ch.icken.processor.ProcessorCommon.Companion.ProcessorColumnType
 import com.google.devtools.ksp.getAllSuperTypes
 import com.google.devtools.ksp.symbol.*
 import com.squareup.kotlinpoet.Annotatable
@@ -25,31 +23,55 @@ import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.ksp.toClassName
 
-private fun KSDeclaration.isClass(qualifiedClassName: String): Boolean =
-    qualifiedName?.asString() == qualifiedClassName
-
-internal fun KSClassDeclaration.isSubclass(qualifiedSuperclassName: String): Boolean =
-    getAllSuperTypes().map { it.declaration }.any { it.isClass(qualifiedSuperclassName) }
-
-private fun KSAnnotation.isClass(qualifiedAnnotationClassName: String): Boolean =
-    annotationType.resolve().declaration.isClass(qualifiedAnnotationClassName)
-
-internal fun KSAnnotated.hasAnnotation(qualifiedAnnotationClassName: String): Boolean =
-    annotations.any { it.isClass(qualifiedAnnotationClassName) }
-
+//region KSAnnotated
 internal fun KSAnnotated.annotation(qualifiedAnnotationClassName: String): KSAnnotation? =
     annotations.filter { it.isClass(qualifiedAnnotationClassName) }.singleOrNull()
 
-private operator fun List<KSValueArgument>.get(name: String): Any? = find { it.name?.asString() == name }?.value
+internal fun KSAnnotated.hasAnnotation(qualifiedAnnotationClassName: String): Boolean =
+    annotations.any { it.isClass(qualifiedAnnotationClassName) }
+//endregion
+
+//region KSAnnotation
+private fun KSAnnotation.isClass(qualifiedAnnotationClassName: String): Boolean =
+    annotationType.resolve().declaration.isClass(qualifiedAnnotationClassName)
 
 internal fun KSAnnotation?.isParameterSet(parameterName: String): Boolean =
     this != null && defaultArguments[parameterName] != arguments[parameterName]
+//endregion
+
+//region KSClassDeclaration
+internal fun KSClassDeclaration.isSubclass(qualifiedSuperclassName: String): Boolean =
+    getAllSuperTypes().any { it.declaration.isClass(qualifiedSuperclassName) }
+
+internal fun KSClassDeclaration.superclassType(qualifiedSuperclassName: String): KSType? =
+    getAllSuperTypes().firstOrNull { it.declaration.isClass(qualifiedSuperclassName) }
+//endregion
+
+//region KSDeclaration
+private fun KSDeclaration.isClass(qualifiedClassName: String): Boolean =
+    qualifiedName?.asString() == qualifiedClassName
+//endregion
+
+//region KSPropertyDeclaration
+internal const val PARAM_NAME_TYPE = "type"
+internal val ProcessorColumnType: String = ColumnType::class.java.name
+internal val KSPropertyDeclaration.columnTypeClassName: ClassName?
+    get() = (annotation(ProcessorColumnType)?.arguments?.get(PARAM_NAME_TYPE) as? KSType)?.toClassName()
 
 internal val KSPropertyDeclaration.typeName: String
     get() = type.resolve().declaration.simpleName.asString()
+//endregion
 
-internal val KSPropertyDeclaration.columnTypeClassName: ClassName?
-    get() = (annotation(ProcessorColumnType)?.arguments?.get(PARAM_NAME_TYPE) as? KSType)?.toClassName()
+//region KSValueArgument
+private operator fun List<KSValueArgument>.get(name: String): Any? =
+    find { it.name?.asString() == name }?.value
+//endregion
+
+internal fun <K, V> Map<out K, V?>.filterValuesNotNull(): Map<K, V> {
+    val result = LinkedHashMap<K, V>()
+    for (entry in this) entry.value?.let { result[entry.key] = it }
+    return result
+}
 
 internal fun <T : Annotatable.Builder<T>> T.addAnnotationIf(annotationSpec: AnnotationSpec, condition: Boolean) =
     apply { if (condition) addAnnotation(annotationSpec) }

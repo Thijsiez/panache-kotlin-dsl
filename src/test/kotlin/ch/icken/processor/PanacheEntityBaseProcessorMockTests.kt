@@ -24,13 +24,12 @@ import ch.icken.processor.PanacheEntityBaseProcessor.Companion.StringClassName
 import ch.icken.processor.ProcessorCommon.Companion.HibernatePanacheEntityBase
 import ch.icken.processor.ProcessorCommon.Companion.JakartaPersistenceEntity
 import ch.icken.processor.ProcessorCommon.Companion.OPTION_ADD_GENERATED_ANNOTATION
-import ch.icken.processor.ProcessorCommon.Companion.PARAM_NAME_TYPE
-import ch.icken.processor.ProcessorCommon.Companion.ProcessorColumnType
 import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.symbol.*
 import com.google.devtools.ksp.validate
+import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.ksp.toClassName
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
@@ -233,7 +232,7 @@ class PanacheEntityBaseProcessorMockTests : ProcessorMockTestCommon() {
         every { firstName.simpleName } returns firstNameSimpleName
         every { firstName.hasAnnotation(eq(JakartaPersistenceJoinColumn)) } returns false
         every { firstName.type } returns firstNameTypeReference
-        every { firstName.annotation(eq(ProcessorColumnType)) } returns null
+        every { firstName.columnTypeClassName } returns null
         //endregion
 
         //region lastName
@@ -250,9 +249,14 @@ class PanacheEntityBaseProcessorMockTests : ProcessorMockTestCommon() {
         val lastNameColumnTypeParameterName = mockk<KSName>()
         every { lastNameColumnTypeParameterName.asString() } returns PARAM_NAME_TYPE
 
+        val lastNameColumnClassName = mockk<ClassName>()
+
+        val lastNameColumnTypeArgument = mockk<KSType>()
+        every { lastNameColumnTypeArgument.toClassName() } returns lastNameColumnClassName
+
         val lastNameColumnTypeParameter = mockk<KSValueArgument>()
         every { lastNameColumnTypeParameter.name } returns lastNameColumnTypeParameterName
-        every { lastNameColumnTypeParameter.value } returns null
+        every { lastNameColumnTypeParameter.value } returns lastNameColumnTypeArgument
 
         val lastNameColumnType = mockk<KSAnnotation>()
         every { lastNameColumnType.arguments } returns listOf(lastNameColumnTypeParameter)

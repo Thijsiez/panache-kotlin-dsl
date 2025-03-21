@@ -17,7 +17,6 @@
 package ch.icken.processor
 
 import ch.icken.processor.PanacheCompanionBaseProcessor.Companion.HibernatePanacheCompanionBase
-import ch.icken.processor.PanacheCompanionBaseProcessor.Companion.JakartaPersistenceId
 import ch.icken.processor.PanacheCompanionBaseProcessor.Companion.LongClassName
 import ch.icken.processor.ProcessorCommon.Companion.HibernatePanacheEntityBase
 import ch.icken.processor.ProcessorCommon.Companion.JakartaPersistenceEntity
@@ -28,7 +27,9 @@ import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.symbol.*
 import com.google.devtools.ksp.validate
 import com.squareup.kotlinpoet.ClassName
+import com.squareup.kotlinpoet.TypeName
 import com.squareup.kotlinpoet.ksp.toClassName
+import com.squareup.kotlinpoet.ksp.toTypeName
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
@@ -56,9 +57,17 @@ class PanacheCompanionBaseProcessorMockTests : ProcessorMockTestCommon() {
     fun testProcessValid() {
 
         // Given
+        val idTypeName = mockk<TypeName>()
+
+        val idTypeArgument = mockk<KSTypeArgument>()
+        every { idTypeArgument.toTypeName() } returns idTypeName
+
+        val companionSuperclassType = mockk<KSType>()
+        every { companionSuperclassType.arguments } returns listOf(idTypeArgument)
+
         val companionObject = mockk<KSClassDeclaration>()
         every { companionObject.isCompanionObject } returns true
-        every { companionObject.isSubclass(eq(HibernatePanacheCompanionBase)) } returns true
+        every { companionObject.superclassType(eq(HibernatePanacheCompanionBase)) } returns companionSuperclassType
 
         val qualifiedPackageName = "ch.icken.model"
         val packageName = mockk<KSName>()
@@ -72,7 +81,7 @@ class PanacheCompanionBaseProcessorMockTests : ProcessorMockTestCommon() {
 
         every { resolver.getSymbolsWithAnnotation(eq(JakartaPersistenceEntity)) } returns sequenceOf(validClass)
 
-        every { processor.createEntityExtensions(any()) } just Runs
+        every { processor.createEntityExtensions(any(), any()) } just Runs
 
         // When
         val invalid = processor.process(resolver)
@@ -80,7 +89,8 @@ class PanacheCompanionBaseProcessorMockTests : ProcessorMockTestCommon() {
         // Then
         verify(exactly = 1) {
             processor.createEntityExtensions(
-                ksClass = eq(validClass)
+                ksClass = eq(validClass),
+                idTypeName = eq(idTypeName)
             )
         }
         assertEquals(0, invalid.size)
@@ -92,7 +102,7 @@ class PanacheCompanionBaseProcessorMockTests : ProcessorMockTestCommon() {
         // Given
         val companionObject = mockk<KSClassDeclaration>()
         every { companionObject.isCompanionObject } returns true
-        every { companionObject.isSubclass(eq(HibernatePanacheCompanionBase)) } returns false
+        every { companionObject.superclassType(eq(HibernatePanacheCompanionBase)) } returns null
 
         val validClass = mockk<KSClassDeclaration>()
         every { validClass.validate(any()) } returns true
@@ -106,7 +116,7 @@ class PanacheCompanionBaseProcessorMockTests : ProcessorMockTestCommon() {
 
         // Then
         verify(exactly = 0) {
-            processor.createEntityExtensions(any())
+            processor.createEntityExtensions(any(), any())
         }
         assertEquals(0, invalid.size)
     }
@@ -130,7 +140,7 @@ class PanacheCompanionBaseProcessorMockTests : ProcessorMockTestCommon() {
 
         // Then
         verify(exactly = 0) {
-            processor.createEntityExtensions(any())
+            processor.createEntityExtensions(any(), any())
         }
         assertEquals(0, invalid.size)
     }
@@ -153,7 +163,7 @@ class PanacheCompanionBaseProcessorMockTests : ProcessorMockTestCommon() {
 
         // Then
         verify(exactly = 0) {
-            processor.createEntityExtensions(any())
+            processor.createEntityExtensions(any(), any())
         }
         assertEquals(0, invalid.size)
     }
@@ -174,7 +184,7 @@ class PanacheCompanionBaseProcessorMockTests : ProcessorMockTestCommon() {
 
         // Then
         verify(exactly = 0) {
-            processor.createEntityExtensions(any())
+            processor.createEntityExtensions(any(), any())
         }
         assertEquals(0, invalid.size)
     }
@@ -194,7 +204,7 @@ class PanacheCompanionBaseProcessorMockTests : ProcessorMockTestCommon() {
 
         // Then
         verify(exactly = 0) {
-            processor.createEntityExtensions(any())
+            processor.createEntityExtensions(any(), any())
         }
         assertEquals(0, invalid.size)
     }
@@ -213,7 +223,7 @@ class PanacheCompanionBaseProcessorMockTests : ProcessorMockTestCommon() {
 
         // Then
         verify(exactly = 0) {
-            processor.createEntityExtensions(any())
+            processor.createEntityExtensions(any(), any())
         }
         assertEquals(0, invalid.size)
     }
@@ -232,7 +242,7 @@ class PanacheCompanionBaseProcessorMockTests : ProcessorMockTestCommon() {
 
         // Then
         verify(exactly = 0) {
-            processor.createEntityExtensions(any())
+            processor.createEntityExtensions(any(), any())
         }
         assertEquals(1, invalid.size)
     }
@@ -253,24 +263,13 @@ class PanacheCompanionBaseProcessorMockTests : ProcessorMockTestCommon() {
         val classSimpleName = mockk<KSName>()
         every { classSimpleName.asString() } returns simpleName
 
-        val idPropertyType = mockk<KSType>()
-        every { idPropertyType.toClassName() } returns LongClassName
-
-        val idPropertyTypeReference = mockk<KSTypeReference>()
-        every { idPropertyTypeReference.resolve() } returns idPropertyType
-
-        val idProperty = mockk<KSPropertyDeclaration>()
-        every { idProperty.hasAnnotation(eq(JakartaPersistenceId)) } returns true
-        every { idProperty.type } returns idPropertyTypeReference
-
         val ksClass = mockk<KSClassDeclaration>()
         every { ksClass.toClassName() } returns className
         every { ksClass.packageName } returns packageSimpleName
         every { ksClass.simpleName } returns classSimpleName
-        every { ksClass.getAllProperties() } returns sequenceOf(idProperty)
 
         // When
-        processor.createEntityExtensions(ksClass)
+        processor.createEntityExtensions(ksClass, LongClassName)
 
         // Then
         verify(exactly = 1) {

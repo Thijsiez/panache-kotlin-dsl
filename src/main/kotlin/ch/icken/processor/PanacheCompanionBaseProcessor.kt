@@ -29,11 +29,11 @@ import com.google.devtools.ksp.validate
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.plusParameter
 import com.squareup.kotlinpoet.ksp.toClassName
+import com.squareup.kotlinpoet.ksp.toTypeName
 import com.squareup.kotlinpoet.ksp.writeTo
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheQuery
 import io.quarkus.panache.common.Sort
-import jakarta.persistence.Id
 import java.util.stream.Stream
 
 class PanacheCompanionBaseProcessor(
@@ -41,22 +41,29 @@ class PanacheCompanionBaseProcessor(
     private val codeGenerator: CodeGenerator,
     private val logger: KSPLogger
 ) : ProcessorCommon(options), SymbolProcessor {
+
     override fun process(resolver: Resolver): List<KSAnnotated> {
         val (valid, invalid) = resolver.getSymbolsWithAnnotation(JakartaPersistenceEntity)
             .partition(KSAnnotated::validate)
 
         valid.filterIsInstance<KSClassDeclaration>()
             .filter { it.isSubclass(HibernatePanacheEntityBase) }
-            .filter { ksClassDeclaration ->
-                ksClassDeclaration.declarations.filterIsInstance<KSClassDeclaration>()
-                    .filter(KSClassDeclaration::isCompanionObject)
-                    .filter { it.isSubclass(HibernatePanacheCompanionBase) }.any()
-            }.forEach(::createEntityExtensions)
+            .associateWith { ksClassDeclaration ->
+                ksClassDeclaration.declarations
+                    .filterIsInstance<KSClassDeclaration>()
+                    .singleOrNull(KSClassDeclaration::isCompanionObject)
+                    ?.superclassType(HibernatePanacheCompanionBase)
+                    ?.arguments
+                    ?.lastOrNull()
+                    ?.toTypeName()
+            }
+            .filterValuesNotNull()
+            .forEach(::createEntityExtensions)
 
         return invalid
     }
 
-    internal fun createEntityExtensions(ksClass: KSClassDeclaration) {
+    internal fun createEntityExtensions(ksClass: KSClassDeclaration, idTypeName: TypeName) {
         val packageName = ksClass.packageName.asString() + SUFFIX_PACKAGE_GENERATED
         val classSimpleName = ksClass.simpleName.asString()
         val extensionFileName = classSimpleName + SUFFIX_FILE_EXTENSIONS
@@ -66,11 +73,6 @@ class PanacheCompanionBaseProcessor(
         val className = ksClass.toClassName()
         val columnsObjectClassName = ClassName(packageName, classSimpleName + SUFFIX_OBJECT_COLUMNS)
         val companionClassName = className.nestedClass(CLASS_NAME_COMPANION)
-        val idClassName = ksClass.getAllProperties()
-            .filter { it.hasAnnotation(JakartaPersistenceId) }
-            .single()
-            .type.resolve()
-            .toClassName()
 
         val expressionType = ExpressionClassName.plusParameter(columnsObjectClassName)
         val expressionParameterLambdaType = LambdaTypeName.get(
@@ -79,7 +81,7 @@ class PanacheCompanionBaseProcessor(
         )
         val queryComponentType = QueryComponentClassName
             .plusParameter(className)
-            .plusParameter(idClassName)
+            .plusParameter(idTypeName)
             .plusParameter(columnsObjectClassName)
 
         val setterExpressionParameterLambdaType = LambdaTypeName.get(
@@ -88,11 +90,11 @@ class PanacheCompanionBaseProcessor(
         )
         val initialUpdateComponentType = InitialUpdateComponentClassName
             .plusParameter(className)
-            .plusParameter(idClassName)
+            .plusParameter(idTypeName)
             .plusParameter(columnsObjectClassName)
         val logicalUpdateComponentType = LogicalUpdateComponentClassName
             .plusParameter(className)
-            .plusParameter(idClassName)
+            .plusParameter(idTypeName)
             .plusParameter(columnsObjectClassName)
         //endregion
 
@@ -527,7 +529,6 @@ class PanacheCompanionBaseProcessor(
         //endregion
         //region Names
         internal val HibernatePanacheCompanionBase: String = PanacheCompanionBase::class.java.name
-        internal val JakartaPersistenceId: String = Id::class.java.name
         //endregion
     }
 }

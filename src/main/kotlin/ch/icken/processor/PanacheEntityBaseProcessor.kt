@@ -16,7 +16,6 @@
 
 package ch.icken.processor
 
-import ch.icken.query.Column
 import com.google.devtools.ksp.processing.*
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
@@ -33,6 +32,7 @@ class PanacheEntityBaseProcessor(
     private val codeGenerator: CodeGenerator,
     private val logger: KSPLogger
 ) : ProcessorCommon(options), SymbolProcessor {
+
     override fun process(resolver: Resolver): List<KSAnnotated> {
         val (valid, invalid) = resolver.getSymbolsWithAnnotation(JakartaPersistenceEntity)
             .partition(KSAnnotated::validate)
@@ -123,7 +123,7 @@ class PanacheEntityBaseProcessor(
 
     companion object {
         //region Class Names
-        internal val ColumnClassName = Column::class.asClassName()
+        internal val ColumnClassName = ch.icken.query.Column::class.asClassName()
         internal val StringClassName = String::class.asClassName()
         //endregion
         //region Constants
