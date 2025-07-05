@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import com.vanniktech.maven.publish.SonatypeHost
-
 plugins {
     kotlin("jvm")
     id("org.jetbrains.dokka")
@@ -60,8 +58,6 @@ kotlin {
     jvmToolchain(17)
 }
 mavenPublishing {
-    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL, automaticRelease = false)
-    signAllPublications()
     coordinates(groupId, rootProject.name, version)
 }
 
