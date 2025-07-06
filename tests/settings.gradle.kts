@@ -21,19 +21,19 @@ pluginManagement {
     }
 
     plugins {
-        val quarkusVersion: String by settings
         val kotlinVersion: String by settings
         val kspVersion: String by settings
+        val quarkusVersion: String by settings
         val dokkaVersion: String by settings
         val koverVersion: String by settings
         val sonarqubeVersion: String by settings
         val mavenPublishVersion: String by settings
 
-        id("io.quarkus") version quarkusVersion
         kotlin("jvm") version kotlinVersion
         kotlin("plugin.allopen") version kotlinVersion
         kotlin("plugin.jpa") version kotlinVersion
         id("com.google.devtools.ksp") version kspVersion
+        id("io.quarkus") version quarkusVersion
         id("org.jetbrains.dokka") version dokkaVersion
         id("org.jetbrains.kotlinx.kover") version koverVersion
         id("org.sonarqube") version sonarqubeVersion

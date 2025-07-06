@@ -17,11 +17,11 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    id("io.quarkus")
     kotlin("jvm")
     kotlin("plugin.allopen")
     kotlin("plugin.jpa")
     id("com.google.devtools.ksp")
+    id("io.quarkus")
     id("org.jetbrains.kotlinx.kover")
     id("org.sonarqube")
 }
@@ -31,9 +31,11 @@ repositories {
 }
 
 dependencies {
+    val kotlinVersion: String by project
     val quarkusVersion: String by project
 
-    implementation(platform("io.quarkus.platform:quarkus-bom:$quarkusVersion"))
+    implementation(enforcedPlatform("org.jetbrains.kotlin:kotlin-bom:$kotlinVersion"))
+    implementation(enforcedPlatform("io.quarkus.platform:quarkus-bom:$quarkusVersion"))
     implementation("io.quarkus:quarkus-jdbc-h2")
     implementation("io.quarkus:quarkus-hibernate-orm-panache-kotlin")
     implementation(project(":panache-kotlin-dsl"))

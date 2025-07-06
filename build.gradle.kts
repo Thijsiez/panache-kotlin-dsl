@@ -47,7 +47,7 @@ dependencies {
         exclude(group = "com.thoughtworks.xstream", module = "xstream")
     }
     testImplementation("io.mockk:mockk:$mockkVersion")
-    testImplementation("com.github.tschuchortdev:kotlin-compile-testing-ksp:$compileTestingVersion")
+    testImplementation("dev.zacsweers.kctfork:ksp:$compileTestingVersion")
 }
 
 java {

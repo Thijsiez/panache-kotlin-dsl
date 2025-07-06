@@ -41,7 +41,7 @@ abstract class ProcessorCompileTestCommon {
     protected fun kotlinCompilation(sourceFileName: String, @Language("kotlin") contents: String) =
         compilation(SourceFile.kotlin(sourceFileName, contents))
 
-    protected fun KotlinCompilation.Result.assertOk() = assertEquals(KotlinCompilation.ExitCode.OK, exitCode)
+    protected fun JvmCompilationResult.assertOk() = assertEquals(KotlinCompilation.ExitCode.OK, exitCode)
 
     protected fun KotlinCompilation.assertNumberOfFiles(expectedNumberOfFiles: Int, outputDir: String = "generated") =
         assertEquals(expectedNumberOfFiles, kspSourcesDir.resolve("kotlin").resolve(outputDir)
@@ -50,7 +50,7 @@ abstract class ProcessorCompileTestCommon {
     protected fun KotlinCompilation.assertHasFile(fileName: String, outputDir: String = "generated") =
         assertTrue(kspSourcesDir.resolve("kotlin").resolve(outputDir).resolve(fileName).isFile)
 
-    protected fun KotlinCompilation.Result.loadClass(className: String, outputPackage: String = "generated"): Class<*> =
+    protected fun JvmCompilationResult.loadClass(className: String, outputPackage: String = "generated"): Class<*> =
         this.classLoader.loadClass(if (outputPackage.isBlank()) className else "$outputPackage.$className")
 
     protected fun Class<*>.assertNumberOfMemberProperties(expectedNumberOfProperties: Int) {
