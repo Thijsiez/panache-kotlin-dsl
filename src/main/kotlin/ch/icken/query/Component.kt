@@ -25,7 +25,7 @@ import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
 import io.quarkus.panache.common.Sort
 import org.jboss.logging.Logger
 
-sealed class Component<Entity : PanacheEntityBase, Id : Any, Columns> private constructor(
+sealed class Component<Entity : PanacheEntityBase, Id : Any, Columns>(
     protected val companion: PanacheCompanionBase<Entity, Id>
 ) {
     //region compile
@@ -45,7 +45,7 @@ sealed class Component<Entity : PanacheEntityBase, Id : Any, Columns> private co
         private val LOG: Logger = Logger.getLogger(Component::class.java)
     }
 
-    sealed class QueryComponent<Entity : PanacheEntityBase, Id : Any, Columns> private constructor(
+    sealed class QueryComponent<Entity : PanacheEntityBase, Id : Any, Columns>(
         companion: PanacheCompanionBase<Entity, Id>,
         protected val expression: Expression<Columns>
     ) : Component<Entity, Id, Columns>(companion) {
@@ -184,7 +184,7 @@ sealed class Component<Entity : PanacheEntityBase, Id : Any, Columns> private co
             }
         }
 
-        sealed class LogicalQueryComponent<Entity : PanacheEntityBase, Id : Any, Columns> private constructor(
+        sealed class LogicalQueryComponent<Entity : PanacheEntityBase, Id : Any, Columns>(
             companion: PanacheCompanionBase<Entity, Id>,
             private val previous: QueryComponent<Entity, Id, Columns>,
             private val operator: String,
@@ -212,7 +212,7 @@ sealed class Component<Entity : PanacheEntityBase, Id : Any, Columns> private co
         }
     }
 
-    sealed class UpdateComponent<Entity : PanacheEntityBase, Id : Any, Columns> private constructor(
+    sealed class UpdateComponent<Entity : PanacheEntityBase, Id : Any, Columns>(
         companion: PanacheCompanionBase<Entity, Id>
     ) : Component<Entity, Id, Columns>(companion) {
         class InitialUpdateComponent<Entity : PanacheEntityBase, Id : Any, Columns> internal constructor(
@@ -258,7 +258,7 @@ sealed class Component<Entity : PanacheEntityBase, Id : Any, Columns> private co
             }
         }
 
-        sealed class LogicalUpdateComponent<Entity : PanacheEntityBase, Id : Any, Columns> private constructor(
+        sealed class LogicalUpdateComponent<Entity : PanacheEntityBase, Id : Any, Columns>(
             companion: PanacheCompanionBase<Entity, Id>,
             private val previous: UpdateComponent<Entity, Id, Columns>,
             private val operator: String,

@@ -48,6 +48,7 @@ class PanacheCompanionBaseProcessor(
 
         valid.filterIsInstance<KSClassDeclaration>()
             .filter { it.isSubclass(HibernatePanacheEntityBase) }
+            //Find out what the type of the @Id column of this entity is
             .associateWith { ksClassDeclaration ->
                 ksClassDeclaration.declarations
                     .filterIsInstance<KSClassDeclaration>()
@@ -74,7 +75,8 @@ class PanacheCompanionBaseProcessor(
         val columnsObjectClassName = ClassName(packageName, classSimpleName + SUFFIX_OBJECT_COLUMNS)
         val companionClassName = className.nestedClass(CLASS_NAME_COMPANION)
 
-        val expressionType = ExpressionClassName.plusParameter(columnsObjectClassName)
+        val expressionType = ExpressionClassName
+            .plusParameter(columnsObjectClassName)
         val expressionParameterLambdaType = LambdaTypeName.get(
             receiver = columnsObjectClassName,
             returnType = expressionType
@@ -468,18 +470,15 @@ class PanacheCompanionBaseProcessor(
 
         FileSpec.builder(packageName, extensionFileName)
             .apply {
-                functions.onEach { it.addAnnotationIf(generatedAnnotation, addGeneratedAnnotation) }
+                functions.map { it.addGeneratedAnnotation() }
                     .map(FunSpec.Builder::build)
                     .forEach(::addFunction)
-            }.addAnnotation(suppressFileAnnotation)
-            .addAnnotationIf(generatedAnnotation, addGeneratedAnnotation)
+            }
+            .addAnnotation(suppressFileAnnotation)
+            .addGeneratedAnnotation()
             .build()
             .writeTo(codeGenerator, Dependencies(false))
     }
-
-    private fun jvmNameAnnotation(name: String) = AnnotationSpec.builder(JvmNameClassName)
-        .addMember("%S", name)
-        .build()
 
     companion object {
         //region Class Names
@@ -530,6 +529,10 @@ class PanacheCompanionBaseProcessor(
         //region Names
         internal val HibernatePanacheCompanionBase: String = PanacheCompanionBase::class.java.name
         //endregion
+
+        internal fun jvmNameAnnotation(name: String) = AnnotationSpec.builder(JvmNameClassName)
+            .addMember("%S", name)
+            .build()
     }
 }
 

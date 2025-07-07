@@ -34,11 +34,11 @@ sealed class Expression<Columns> {
     class Compiled internal constructor(val expression: String, val parameters: Map<String, Any>)
     //endregion
 
-    sealed class BooleanExpression<Columns> private constructor(
+    sealed class BooleanExpression<Columns>(
         protected val key: String,
         protected val operator: String
     ) : Expression<Columns>() {
-        sealed class BooleanValueExpression<Columns> private constructor(
+        sealed class BooleanValueExpression<Columns>(
             key: String,
             operator: String,
             private val value: Any
@@ -74,7 +74,7 @@ sealed class Expression<Columns> {
                 BooleanValueExpression<Columns>(key, "NOT LIKE", pattern)
         }
 
-        sealed class BetweenExpression<Columns> private constructor(
+        sealed class BetweenExpression<Columns>(
             key: String,
             operator: String,
             private val min: Any,
@@ -94,7 +94,7 @@ sealed class Expression<Columns> {
                 BetweenExpression<Columns>(key, "NOT BETWEEN", min, maxIncl)
         }
 
-        sealed class IsExpression<Columns> private constructor(
+        sealed class IsExpression<Columns>(
             key: String,
             operator: String
         ) : BooleanExpression<Columns>(key, operator) {
@@ -110,7 +110,7 @@ sealed class Expression<Columns> {
         }
     }
 
-    sealed class LogicalExpression<Columns> private constructor(
+    sealed class LogicalExpression<Columns>(
         private val previous: Expression<Columns>,
         private val operator: String,
         private val expression: Expression<Columns>

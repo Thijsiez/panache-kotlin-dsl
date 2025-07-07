@@ -16,6 +16,7 @@
 
 package ch.icken.processor
 
+import com.squareup.kotlinpoet.Annotatable
 import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.asClassName
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
@@ -39,6 +40,9 @@ abstract class ProcessorCommon(options: Map<String, String>) {
         .addMember("%S", LocalDateTime.now().toString())
         .addMember("%S", "Generated using panache-kotlin-dsl")
         .build()
+
+    protected fun <T : Annotatable.Builder<T>> T.addGeneratedAnnotation() =
+        apply { if (addGeneratedAnnotation) addAnnotation(generatedAnnotation) }
     //endregion
 
     companion object {

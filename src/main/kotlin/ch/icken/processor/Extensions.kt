@@ -18,8 +18,6 @@ package ch.icken.processor
 
 import com.google.devtools.ksp.getAllSuperTypes
 import com.google.devtools.ksp.symbol.*
-import com.squareup.kotlinpoet.Annotatable
-import com.squareup.kotlinpoet.AnnotationSpec
 
 //region KSAnnotated
 internal fun KSAnnotated.annotation(qualifiedAnnotationClassName: String): KSAnnotation? =
@@ -60,6 +58,3 @@ internal fun <K, V> Map<out K, V?>.filterValuesNotNull(): Map<K, V> {
     for (entry in this) entry.value?.let { result[entry.key] = it }
     return result
 }
-
-internal fun <T : Annotatable.Builder<T>> T.addAnnotationIf(annotationSpec: AnnotationSpec, condition: Boolean) =
-    apply { if (condition) addAnnotation(annotationSpec) }
