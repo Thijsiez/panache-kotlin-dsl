@@ -37,15 +37,12 @@ dependencies {
     val mockkVersion: String by project
     val compileTestingVersion: String by project
 
-    implementation(platform("io.quarkus.platform:quarkus-bom:$quarkusVersion"))
+    implementation(platform("io.quarkus:quarkus-bom:$quarkusVersion"))
     implementation("io.quarkus:quarkus-hibernate-orm-panache-kotlin")
     implementation("com.google.devtools.ksp:symbol-processing-api:$kspVersion")
     implementation("com.squareup:kotlinpoet-ksp:$kotlinPoetVersion")
 
-    testImplementation("io.quarkus:quarkus-junit5") {
-        //Because of https://osv.dev/vulnerability/GHSA-hfq9-hggm-c56q, unused anyway
-        exclude(group = "com.thoughtworks.xstream", module = "xstream")
-    }
+    testImplementation("io.quarkus:quarkus-junit5")
     testImplementation("io.mockk:mockk:$mockkVersion")
     testImplementation("dev.zacsweers.kctfork:ksp:$compileTestingVersion")
 }

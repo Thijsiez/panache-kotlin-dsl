@@ -31,11 +31,9 @@ repositories {
 }
 
 dependencies {
-    val kotlinVersion: String by project
     val quarkusVersion: String by project
 
-    implementation(enforcedPlatform("org.jetbrains.kotlin:kotlin-bom:$kotlinVersion"))
-    implementation(enforcedPlatform("io.quarkus.platform:quarkus-bom:$quarkusVersion"))
+    implementation(platform("io.quarkus:quarkus-bom:$quarkusVersion"))
     implementation("io.quarkus:quarkus-jdbc-h2")
     implementation("io.quarkus:quarkus-hibernate-orm-panache-kotlin")
     implementation(project(":panache-kotlin-dsl"))
@@ -91,29 +89,6 @@ tasks {
     test {
         systemProperty("java.util.logging.manager", "org.jboss.logmanager.LogManager")
         useJUnitPlatform()
-    }
-}
-
-//Fixes issue with task execution order
-tasks.compileKotlin {
-    dependsOn(tasks.compileQuarkusGeneratedSourcesJava)
-}
-tasks.configureEach {
-    if (name == "kspKotlin") {
-        dependsOn(tasks.compileQuarkusGeneratedSourcesJava)
-    }
-}
-
-//Fixes issue with circular task dependency,
-//see https://github.com/quarkusio/quarkus/issues/29698#issuecomment-1671861607
-project.afterEvaluate {
-    getTasksByName("quarkusGenerateCode", true).forEach { task ->
-        task.setDependsOn(task.dependsOn.filterIsInstance<Provider<Task>>()
-            .filterNot { it.get().name == "processResources" })
-    }
-    getTasksByName("quarkusGenerateCodeDev", true).forEach { task ->
-        task.setDependsOn(task.dependsOn.filterIsInstance<Provider<Task>>()
-            .filterNot { it.get().name == "processResources" })
     }
 }
 

@@ -22,17 +22,22 @@ import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.validate
 import com.squareup.kotlinpoet.ksp.toClassName
 import io.mockk.mockkStatic
-import org.junit.jupiter.api.BeforeAll
+import io.mockk.unmockkAll
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
 
 abstract class ProcessorMockTestCommon {
-    companion object {
-        @JvmStatic
-        @BeforeAll
-        fun beforeAll() {
-            mockkStatic(KSClassDeclaration::isSubclass)
-            mockkStatic(KSClassDeclaration::toClassName)
-            mockkStatic(KSNode::validate)
-            mockkStatic(KSType::toClassName)
-        }
+
+    @BeforeEach
+    fun setUp() {
+        mockkStatic(KSClassDeclaration::isSubclass)
+        mockkStatic(KSClassDeclaration::toClassName)
+        mockkStatic(KSNode::validate)
+        mockkStatic(KSType::toClassName)
+    }
+
+    @AfterEach
+    fun tearDown() {
+        unmockkAll()
     }
 }

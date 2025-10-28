@@ -28,10 +28,11 @@ import kotlin.reflect.full.memberProperties
 abstract class ProcessorCompileTestCommon {
 
     protected fun compilation(vararg source: SourceFile) = KotlinCompilation().apply {
+        useKsp2()
         inheritClassPath = true
         kspWithCompilation = true
         sources = listOf(*source)
-        symbolProcessorProviders = listOf(
+        symbolProcessorProviders = mutableListOf(
             PanacheCompanionBaseProcessorProvider(),
             PanacheEntityBaseProcessorProvider()
         )
