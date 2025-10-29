@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.0
+- Change minimum Quarkus version to `3.24.0`
+  - Quarkus 3.24 was a major change by upgrading to Hibernate ORM 7
+- Change minimum Kotlin version to `2.1.21`
+- Change minimum KSP version to `2.1.21-2.0.1` to fully support KSP2
+  - **Note:** This also means support for KSP1 is now dropped
+
 ## 0.0.8
 - Correctly resolve `@JoinColumn` property type's package
 
