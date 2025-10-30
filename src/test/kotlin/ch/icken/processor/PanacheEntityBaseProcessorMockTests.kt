@@ -17,14 +17,14 @@
 package ch.icken.processor
 
 import ch.icken.processor.PanacheCompanionBaseProcessor.Companion.ListClassName
-import ch.icken.processor.PanacheEntityBaseProcessor.Companion.JakartaPersistenceJoinColumn
-import ch.icken.processor.PanacheEntityBaseProcessor.Companion.JakartaPersistenceTransient
+import ch.icken.processor.PanacheEntityBaseProcessor.Companion.JAKARTA_PERSISTENCE_JOIN_COLUMN
+import ch.icken.processor.PanacheEntityBaseProcessor.Companion.JAKARTA_PERSISTENCE_TRANSIENT
 import ch.icken.processor.PanacheEntityBaseProcessor.Companion.PARAM_NAME_MAPPED_BY
 import ch.icken.processor.PanacheEntityBaseProcessor.Companion.PARAM_NAME_TYPE
-import ch.icken.processor.PanacheEntityBaseProcessor.Companion.ProcessorColumnType
+import ch.icken.processor.PanacheEntityBaseProcessor.Companion.PROCESSOR_COLUMN_TYPE
 import ch.icken.processor.PanacheEntityBaseProcessor.Companion.StringClassName
-import ch.icken.processor.ProcessorCommon.Companion.HibernatePanacheEntityBase
-import ch.icken.processor.ProcessorCommon.Companion.JakartaPersistenceEntity
+import ch.icken.processor.ProcessorCommon.Companion.HIBERNATE_PANACHE_ENTITY_BASE
+import ch.icken.processor.ProcessorCommon.Companion.JAKARTA_PERSISTENCE_ENTITY
 import ch.icken.processor.ProcessorCommon.Companion.OPTION_ADD_GENERATED_ANNOTATION
 import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.KSPLogger
@@ -60,15 +60,15 @@ class PanacheEntityBaseProcessorMockTests : ProcessorMockTestCommon() {
 
         // Given
         val columnProperty = mockk<KSPropertyDeclaration>()
-        every { columnProperty.hasAnnotation(eq(JakartaPersistenceTransient)) } returns false
+        every { columnProperty.hasAnnotation(eq(JAKARTA_PERSISTENCE_TRANSIENT)) } returns false
         every { columnProperty.annotation(any()).isParameterSet(eq(PARAM_NAME_MAPPED_BY)) } returns false
 
         val validClass = mockk<KSClassDeclaration>()
         every { validClass.validate(any()) } returns true
-        every { validClass.isSubclass(eq(HibernatePanacheEntityBase)) } returns true
+        every { validClass.isSubclass(eq(HIBERNATE_PANACHE_ENTITY_BASE)) } returns true
         every { validClass.getAllProperties() } returns sequenceOf(columnProperty)
 
-        every { resolver.getSymbolsWithAnnotation(eq(JakartaPersistenceEntity)) } returns sequenceOf(validClass)
+        every { resolver.getSymbolsWithAnnotation(eq(JAKARTA_PERSISTENCE_ENTITY)) } returns sequenceOf(validClass)
 
         every { processor.createColumnsObject(any(), any()) } just Runs
 
@@ -93,14 +93,14 @@ class PanacheEntityBaseProcessorMockTests : ProcessorMockTestCommon() {
 
         // Given
         val columnProperty = mockk<KSPropertyDeclaration>()
-        every { columnProperty.hasAnnotation(eq(JakartaPersistenceTransient)) } returns true
+        every { columnProperty.hasAnnotation(eq(JAKARTA_PERSISTENCE_TRANSIENT)) } returns true
 
         val validClass = mockk<KSClassDeclaration>()
         every { validClass.validate(any()) } returns true
-        every { validClass.isSubclass(eq(HibernatePanacheEntityBase)) } returns true
+        every { validClass.isSubclass(eq(HIBERNATE_PANACHE_ENTITY_BASE)) } returns true
         every { validClass.getAllProperties() } returns sequenceOf(columnProperty)
 
-        every { resolver.getSymbolsWithAnnotation(eq(JakartaPersistenceEntity)) } returns sequenceOf(validClass)
+        every { resolver.getSymbolsWithAnnotation(eq(JAKARTA_PERSISTENCE_ENTITY)) } returns sequenceOf(validClass)
 
         every { processor.createColumnsObject(any(), any()) } just Runs
 
@@ -123,10 +123,10 @@ class PanacheEntityBaseProcessorMockTests : ProcessorMockTestCommon() {
         // Given
         val validClass = mockk<KSClassDeclaration>()
         every { validClass.validate(any()) } returns true
-        every { validClass.isSubclass(eq(HibernatePanacheEntityBase)) } returns true
+        every { validClass.isSubclass(eq(HIBERNATE_PANACHE_ENTITY_BASE)) } returns true
         every { validClass.getAllProperties() } returns emptySequence()
 
-        every { resolver.getSymbolsWithAnnotation(eq(JakartaPersistenceEntity)) } returns sequenceOf(validClass)
+        every { resolver.getSymbolsWithAnnotation(eq(JAKARTA_PERSISTENCE_ENTITY)) } returns sequenceOf(validClass)
 
         every { processor.createColumnsObject(any(), any()) } just Runs
 
@@ -149,9 +149,9 @@ class PanacheEntityBaseProcessorMockTests : ProcessorMockTestCommon() {
         // Given
         val validClass = mockk<KSClassDeclaration>()
         every { validClass.validate(any()) } returns true
-        every { validClass.isSubclass(eq(HibernatePanacheEntityBase)) } returns false
+        every { validClass.isSubclass(eq(HIBERNATE_PANACHE_ENTITY_BASE)) } returns false
 
-        every { resolver.getSymbolsWithAnnotation(eq(JakartaPersistenceEntity)) } returns sequenceOf(validClass)
+        every { resolver.getSymbolsWithAnnotation(eq(JAKARTA_PERSISTENCE_ENTITY)) } returns sequenceOf(validClass)
 
         // When
         val invalid = processor.process(resolver)
@@ -170,7 +170,7 @@ class PanacheEntityBaseProcessorMockTests : ProcessorMockTestCommon() {
         val validFunction = mockk<KSFunctionDeclaration>()
         every { validFunction.validate(any()) } returns true
 
-        every { resolver.getSymbolsWithAnnotation(eq(JakartaPersistenceEntity)) } returns sequenceOf(validFunction)
+        every { resolver.getSymbolsWithAnnotation(eq(JAKARTA_PERSISTENCE_ENTITY)) } returns sequenceOf(validFunction)
 
         // When
         val invalid = processor.process(resolver)
@@ -189,7 +189,7 @@ class PanacheEntityBaseProcessorMockTests : ProcessorMockTestCommon() {
         val invalidClass = mockk<KSClassDeclaration>()
         every { invalidClass.validate(any()) } returns false
 
-        every { resolver.getSymbolsWithAnnotation(eq(JakartaPersistenceEntity)) } returns sequenceOf(invalidClass)
+        every { resolver.getSymbolsWithAnnotation(eq(JAKARTA_PERSISTENCE_ENTITY)) } returns sequenceOf(invalidClass)
 
         // When
         val invalid = processor.process(resolver)
@@ -232,8 +232,8 @@ class PanacheEntityBaseProcessorMockTests : ProcessorMockTestCommon() {
         val firstName = mockk<KSPropertyDeclaration>()
         every { firstName.simpleName } returns firstNameSimpleName
         every { firstName.type } returns firstNameTypeReference
-        every { firstName.hasAnnotation(eq(JakartaPersistenceJoinColumn)) } returns false
-        every { firstName.annotation(eq(ProcessorColumnType)) } returns null
+        every { firstName.hasAnnotation(eq(JAKARTA_PERSISTENCE_JOIN_COLUMN)) } returns false
+        every { firstName.annotation(eq(PROCESSOR_COLUMN_TYPE)) } returns null
         //endregion
 
         //region lastName (not JoinColum, has ColumnType)
@@ -263,8 +263,8 @@ class PanacheEntityBaseProcessorMockTests : ProcessorMockTestCommon() {
         val lastName = mockk<KSPropertyDeclaration>()
         every { lastName.simpleName } returns lastNameSimpleName
         every { lastName.type } returns lastNameTypeReference
-        every { lastName.hasAnnotation(eq(JakartaPersistenceJoinColumn)) } returns false
-        every { lastName.annotation(eq(ProcessorColumnType)) } returns lastNameColumnType
+        every { lastName.hasAnnotation(eq(JAKARTA_PERSISTENCE_JOIN_COLUMN)) } returns false
+        every { lastName.annotation(eq(PROCESSOR_COLUMN_TYPE)) } returns lastNameColumnType
         //endregion
 
         //region department (has JoinColumn)
@@ -287,7 +287,7 @@ class PanacheEntityBaseProcessorMockTests : ProcessorMockTestCommon() {
         val department = mockk<KSPropertyDeclaration>()
         every { department.simpleName } returns departmentSimpleName
         every { department.type } returns departmentTypeReference
-        every { department.hasAnnotation(eq(JakartaPersistenceJoinColumn)) } returns true
+        every { department.hasAnnotation(eq(JAKARTA_PERSISTENCE_JOIN_COLUMN)) } returns true
         //endregion
 
         val ksProperties = listOf(firstName, lastName, department)

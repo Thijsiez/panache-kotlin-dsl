@@ -32,19 +32,24 @@ repositories {
 
 dependencies {
     val quarkusVersion: String by project
-    val kspVersion: String by project
-    val kotlinPoetVersion: String by project
-    val mockkVersion: String by project
-    val compileTestingVersion: String by project
+    compileOnly("io.quarkus:quarkus-hibernate-orm-panache-kotlin:$quarkusVersion")
 
-    implementation(platform("io.quarkus:quarkus-bom:$quarkusVersion"))
-    implementation("io.quarkus:quarkus-hibernate-orm-panache-kotlin")
+    val kspVersion: String by project
     implementation("com.google.devtools.ksp:symbol-processing-api:$kspVersion")
+    val kotlinPoetVersion: String by project
     implementation("com.squareup:kotlinpoet-ksp:$kotlinPoetVersion")
 
-    testImplementation("io.quarkus:quarkus-junit5")
+    testImplementation(kotlin("reflect"))
+    testImplementation("io.quarkus:quarkus-hibernate-orm-panache-kotlin:${quarkusVersion}")
+    val jupiterVersion: String by project
+    testImplementation(platform("org.junit:junit-bom:$jupiterVersion"))
+    testImplementation("org.junit.jupiter:junit-jupiter")
+    val mockkVersion: String by project
     testImplementation("io.mockk:mockk:$mockkVersion")
+    val compileTestingVersion: String by project
     testImplementation("dev.zacsweers.kctfork:ksp:$compileTestingVersion")
+
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 java {

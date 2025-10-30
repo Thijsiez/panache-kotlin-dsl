@@ -16,12 +16,6 @@
 
 package ch.icken.processor
 
-import ch.icken.query.Component.QueryComponent
-import ch.icken.query.Component.UpdateComponent.InitialUpdateComponent
-import ch.icken.query.Component.UpdateComponent.InitialUpdateComponent.SetterExpression
-import ch.icken.query.Component.UpdateComponent.LogicalUpdateComponent
-import ch.icken.query.Expression
-import ch.icken.query.PanacheSingleResult
 import com.google.devtools.ksp.processing.*
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
@@ -31,10 +25,6 @@ import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.plusParameter
 import com.squareup.kotlinpoet.ksp.toClassName
 import com.squareup.kotlinpoet.ksp.toTypeName
 import com.squareup.kotlinpoet.ksp.writeTo
-import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase
-import io.quarkus.hibernate.orm.panache.kotlin.PanacheQuery
-import io.quarkus.panache.common.Sort
-import java.util.stream.Stream
 
 class PanacheCompanionBaseProcessor(
     options: Map<String, String>,
@@ -43,17 +33,17 @@ class PanacheCompanionBaseProcessor(
 ) : ProcessorCommon(options), SymbolProcessor {
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
-        val (valid, invalid) = resolver.getSymbolsWithAnnotation(JakartaPersistenceEntity)
+        val (valid, invalid) = resolver.getSymbolsWithAnnotation(JAKARTA_PERSISTENCE_ENTITY)
             .partition(KSAnnotated::validate)
 
         valid.filterIsInstance<KSClassDeclaration>()
-            .filter { it.isSubclass(HibernatePanacheEntityBase) }
+            .filter { it.isSubclass(HIBERNATE_PANACHE_ENTITY_BASE) }
             //Find out what the type of the @Id column of this entity is
             .associateWith { ksClassDeclaration ->
                 ksClassDeclaration.declarations
                     .filterIsInstance<KSClassDeclaration>()
                     .singleOrNull(KSClassDeclaration::isCompanionObject)
-                    ?.superclassType(HibernatePanacheCompanionBase)
+                    ?.superclassType(HIBERNATE_PANACHE_COMPANION_BASE)
                     ?.arguments
                     ?.lastOrNull()
                     ?.toTypeName()
@@ -482,19 +472,22 @@ class PanacheCompanionBaseProcessor(
 
     companion object {
         //region Class Names
-        internal val ExpressionClassName = Expression::class.asClassName()
-        internal val InitialUpdateComponentClassName = InitialUpdateComponent::class.asClassName()
-        internal val IntClassName = Int::class.asClassName()
-        internal val JvmNameClassName = JvmName::class.asClassName()
-        internal val ListClassName = List::class.asClassName()
-        internal val LogicalUpdateComponentClassName = LogicalUpdateComponent::class.asClassName()
-        internal val LongClassName = Long::class.asClassName()
-        internal val PanacheQueryClassName = PanacheQuery::class.asClassName()
-        internal val PanacheSingleResultClassName = PanacheSingleResult::class.asClassName()
-        internal val QueryComponentClassName = QueryComponent::class.asClassName()
-        internal val SetterExpressionClassName = SetterExpression::class.asClassName()
-        internal val SortClassName = Sort::class.asClassName()
-        internal val StreamClassName = Stream::class.asClassName()
+        internal val ExpressionClassName = ClassName("ch.icken.query", "Expression")
+        internal val InitialUpdateComponentClassName =
+            ClassName("ch.icken.query.Component.UpdateComponent", "InitialUpdateComponent")
+        internal val IntClassName = ClassName("kotlin", "Int")
+        internal val JvmNameClassName = ClassName("kotlin.jvm", "JvmName")
+        internal val ListClassName = ClassName("kotlin.collections", "List")
+        internal val LogicalUpdateComponentClassName =
+            ClassName("ch.icken.query.Component.UpdateComponent", "LogicalUpdateComponent")
+        internal val LongClassName = ClassName("kotlin", "Long")
+        internal val PanacheQueryClassName = ClassName("io.quarkus.hibernate.orm.panache.kotlin", "PanacheQuery")
+        internal val PanacheSingleResultClassName = ClassName("ch.icken.query", "PanacheSingleResult")
+        internal val QueryComponentClassName = ClassName("ch.icken.query.Component", "QueryComponent")
+        internal val SetterExpressionClassName =
+            ClassName("ch.icken.query.Component.UpdateComponent.InitialUpdateComponent", "SetterExpression")
+        internal val SortClassName = ClassName("io.quarkus.panache.common", "Sort")
+        internal val StreamClassName = ClassName("java.util.stream", "Stream")
         //endregion
         //region Constant
         internal const val CLASS_NAME_COMPANION = "Companion"
@@ -527,7 +520,8 @@ class PanacheCompanionBaseProcessor(
         internal const val SUFFIX_FILE_EXTENSIONS = "Extensions"
         //endregion
         //region Names
-        internal val HibernatePanacheCompanionBase: String = PanacheCompanionBase::class.java.name
+        internal const val HIBERNATE_PANACHE_COMPANION_BASE: String =
+            "io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase"
         //endregion
 
         internal fun jvmNameAnnotation(name: String) = AnnotationSpec.builder(JvmNameClassName)

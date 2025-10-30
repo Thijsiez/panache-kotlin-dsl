@@ -15,14 +15,13 @@ A dynamic, type-safe way to write your queries
 [Changelog](CHANGELOG.md) | [Contributing](CONTRIBUTING.md)
 
 ## Examples
-[//]: # (TODO add examples)
+TODO
 
 ## Getting Started
 <details open>
 <summary><b>Gradle Kotlin DSL</b></summary>
 
-Add the KSP Gradle plugin to your build file  
-Important: the version is dependent on your version of Kotlin, see the Requirements section
+Add the KSP Gradle plugin to your build file
 ```kotlin
 plugins {
     id("com.google.devtools.ksp") version "2.3.0"
@@ -43,15 +42,24 @@ ksp {
 ```
 </details>
 
-[//]: # (TODO add Gradle Groovy DSL)  
-[//]: # (TODO add Apache Maven)
+<details>
+<summary><b>Gradle Groovy DSL</b></summary>
+
+TODO
+</details>
+
+<details>
+<summary><b>Apache Maven</b></summary>
+
+TODO
+</details>
 
 ## Requirements
 - Quarkus version `3.24.0` or newer
   - Dependency `io.quarkus:quarkus-hibernate-orm-panache-kotlin` is required
 - Kotlin version `2.1.21` or newer
 - KSP version `2.1.21-2.0.1` or newer
-  - KSP1 is not supported
+  - **Note:** Only KSP2 is supported. KSP1 is not supported!
   - When using any KSP version before `2.3.0`, your KSP version needs to match your Kotlin version. This is a strict requirement!  
     For example, when your Kotlin version is `2.1.21`, your KSP version needs to be built for and start with the same version, such as `2.1.21-2.0.1`
 

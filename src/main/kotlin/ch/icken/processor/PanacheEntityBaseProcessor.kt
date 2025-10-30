@@ -26,7 +26,6 @@ import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.plusParameter
 import com.squareup.kotlinpoet.ksp.toClassName
 import com.squareup.kotlinpoet.ksp.writeTo
-import jakarta.persistence.*
 
 class PanacheEntityBaseProcessor(
     options: Map<String, String>,
@@ -35,22 +34,22 @@ class PanacheEntityBaseProcessor(
 ) : ProcessorCommon(options), SymbolProcessor {
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
-        val (valid, invalid) = resolver.getSymbolsWithAnnotation(JakartaPersistenceEntity)
+        val (valid, invalid) = resolver.getSymbolsWithAnnotation(JAKARTA_PERSISTENCE_ENTITY)
             .partition(KSAnnotated::validate)
 
         valid.filterIsInstance<KSClassDeclaration>()
-            .filter { it.isSubclass(HibernatePanacheEntityBase) }
+            .filter { it.isSubclass(HIBERNATE_PANACHE_ENTITY_BASE) }
             //Find which properties are mapped to columns and thus can be queried against
             .associateWith { ksClassDeclaration ->
                 ksClassDeclaration.getAllProperties()
                     //When a property is annotated as @Transient, it is not mapped to a column in the database
                     // Therefore, this property can never be used in a query, so we won't generate a Column for it
-                    .filterNot { it.hasAnnotation(JakartaPersistenceTransient) }
+                    .filterNot { it.hasAnnotation(JAKARTA_PERSISTENCE_TRANSIENT) }
                     //When a property is mapped by another entity, we'd have to use a JOIN to use it in a query
                     // Currently, a JOIN is not supported syntax-wise, so we won't generate Columns for these properties
-                    .filterNot { it.annotation(JakartaPersistenceManyToMany).isParameterSet(PARAM_NAME_MAPPED_BY) }
-                    .filterNot { it.annotation(JakartaPersistenceOneToMany).isParameterSet(PARAM_NAME_MAPPED_BY) }
-                    .filterNot { it.annotation(JakartaPersistenceOneToOne).isParameterSet(PARAM_NAME_MAPPED_BY) }
+                    .filterNot { it.annotation(JAKARTA_PERSISTENCE_MANY_TO_MANY).isParameterSet(PARAM_NAME_MAPPED_BY) }
+                    .filterNot { it.annotation(JAKARTA_PERSISTENCE_ONE_TO_MANY).isParameterSet(PARAM_NAME_MAPPED_BY) }
+                    .filterNot { it.annotation(JAKARTA_PERSISTENCE_ONE_TO_ONE).isParameterSet(PARAM_NAME_MAPPED_BY) }
                     .toList()
             }
             .forEach(::createColumnsObject)
@@ -100,7 +99,7 @@ class PanacheEntityBaseProcessor(
         val propertyName = ksProperty.simpleName.asString()
         val propertyType = ksProperty.type.resolve()
 
-        val isJoinColumn = ksProperty.hasAnnotation(JakartaPersistenceJoinColumn)
+        val isJoinColumn = ksProperty.hasAnnotation(JAKARTA_PERSISTENCE_JOIN_COLUMN)
         if (isJoinColumn) {
             val propertyTypeDeclaration = propertyType.declaration
             val joinPackageName = propertyTypeDeclaration.packageName.asString() + SUFFIX_PACKAGE_GENERATED
@@ -118,7 +117,7 @@ class PanacheEntityBaseProcessor(
 
         @Suppress("kotlin:S6530")//False positive
         //The value from get() can be any type. In the case of @ColumnType, it will be a KSType
-        val columnTypeParameter = ((ksProperty.annotation(ProcessorColumnType)
+        val columnTypeParameter = ((ksProperty.annotation(PROCESSOR_COLUMN_TYPE)
             ?.arguments
             ?.get(PARAM_NAME_TYPE) as? KSType)
             ?.toClassName()
@@ -128,15 +127,15 @@ class PanacheEntityBaseProcessor(
             .plusParameter(columnTypeParameter)
 
         return PropertySpec.builder(propertyName, columnType)
-            .initializer("%T(%P)", ColumnClassName, "\${${PARAM_NAME_COLUMNS_BASE_CLASS}.orEmpty()}$propertyName")
+            .initializer("%T(%P)", ColumnClassName, $$"${$$PARAM_NAME_COLUMNS_BASE_CLASS.orEmpty()}$$propertyName")
             .addGeneratedAnnotation()
             .build()
     }
 
     companion object {
         //region Class Names
-        internal val ColumnClassName = ch.icken.query.Column::class.asClassName()
-        internal val StringClassName = String::class.asClassName()
+        internal val ColumnClassName = ClassName("ch.icken.query", "Column")
+        internal val StringClassName = ClassName("kotlin", "String")
         //endregion
         //region Constants
         internal const val PARAM_NAME_COLUMNS_BASE_CLASS = "parent"
@@ -146,12 +145,12 @@ class PanacheEntityBaseProcessor(
         internal const val PARAM_NAME_TYPE = "type"
         //endregion
         //region Names
-        internal val JakartaPersistenceJoinColumn: String = JoinColumn::class.java.name
-        internal val JakartaPersistenceManyToMany: String = ManyToMany::class.java.name
-        internal val JakartaPersistenceOneToMany: String = OneToMany::class.java.name
-        internal val JakartaPersistenceOneToOne: String = OneToOne::class.java.name
-        internal val JakartaPersistenceTransient: String = Transient::class.java.name
-        internal val ProcessorColumnType: String = ColumnType::class.java.name
+        internal const val JAKARTA_PERSISTENCE_JOIN_COLUMN: String = "jakarta.persistence.JoinColumn"
+        internal const val JAKARTA_PERSISTENCE_MANY_TO_MANY: String = "jakarta.persistence.ManyToMany"
+        internal const val JAKARTA_PERSISTENCE_ONE_TO_MANY: String = "jakarta.persistence.OneToMany"
+        internal const val JAKARTA_PERSISTENCE_ONE_TO_ONE: String = "jakarta.persistence.OneToOne"
+        internal const val JAKARTA_PERSISTENCE_TRANSIENT: String = "jakarta.persistence.Transient"
+        internal const val PROCESSOR_COLUMN_TYPE: String = "ch.icken.processor.ColumnType"
         //endregion
     }
 }

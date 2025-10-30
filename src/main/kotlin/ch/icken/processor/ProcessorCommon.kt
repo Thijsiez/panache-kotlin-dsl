@@ -18,9 +18,7 @@ package ch.icken.processor
 
 import com.squareup.kotlinpoet.Annotatable
 import com.squareup.kotlinpoet.AnnotationSpec
-import com.squareup.kotlinpoet.asClassName
-import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
-import jakarta.persistence.Entity
+import com.squareup.kotlinpoet.ClassName
 import java.time.LocalDateTime
 
 abstract class ProcessorCommon(options: Map<String, String>) {
@@ -47,16 +45,17 @@ abstract class ProcessorCommon(options: Map<String, String>) {
 
     companion object {
         //region Class Names
-        private val GeneratedClassName = Generated::class.asClassName()
-        private val SuppressClassName = Suppress::class.asClassName()
+        private val GeneratedClassName = ClassName("ch.icken.processor", "Generated")
+        private val SuppressClassName = ClassName("kotlin", "Suppress")
         //endregion
         //region Constants
         internal const val SUFFIX_OBJECT_COLUMNS = "Columns"
         internal const val SUFFIX_PACKAGE_GENERATED = ".generated"
         //endregion
         //region Names
-        internal val HibernatePanacheEntityBase: String = PanacheEntityBase::class.java.name
-        internal val JakartaPersistenceEntity: String = Entity::class.java.name
+        internal const val HIBERNATE_PANACHE_ENTITY_BASE: String =
+            "io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase"
+        internal const val JAKARTA_PERSISTENCE_ENTITY: String = "jakarta.persistence.Entity"
         //endregion
         //region Options
         internal const val OPTION_ADD_GENERATED_ANNOTATION = "addGeneratedAnnotation"

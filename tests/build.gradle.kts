@@ -32,7 +32,6 @@ repositories {
 
 dependencies {
     val quarkusVersion: String by project
-
     implementation(platform("io.quarkus:quarkus-bom:$quarkusVersion"))
     implementation("io.quarkus:quarkus-jdbc-h2")
     implementation("io.quarkus:quarkus-hibernate-orm-panache-kotlin")
