@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.1.1
+- Remove Quarkus runtime dependencies to not leak them transitively 
+
 ## 0.1.0
 - Change minimum Quarkus version to `3.24.0`
   - Quarkus 3.24 was a major change by upgrading to Hibernate ORM 7
