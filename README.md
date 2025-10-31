@@ -1,6 +1,7 @@
 [![License](https://img.shields.io/badge/license-Apache_2.0-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0.txt)
 [![Maven Central](https://img.shields.io/badge/maven_central-0.1.1-brightgreen.svg)](https://search.maven.org/artifact/ch.icken/panache-kotlin-dsl/0.1.1/jar)
-[![Test](https://github.com/Thijsiez/panache-kotlin-dsl/actions/workflows/test.yaml/badge.svg?branch=main)](https://github.com/Thijsiez/panache-kotlin-dsl/actions/workflows/test.yaml)  
+[![Test](https://github.com/Thijsiez/panache-kotlin-dsl/actions/workflows/test.yaml/badge.svg?branch=main)](https://github.com/Thijsiez/panache-kotlin-dsl/actions/workflows/test.yaml)
+[![Lines of Code](https://sonarqube.icken.ch/api/project_badges/measure?project=Thijsiez_panache-kotlin-dsl_760170ef-68c7-43b0-880d-cf1034afe3c6&metric=ncloc&token=sqb_cfafb36de6f18194da2e383324ee281b0de5b953)](https://sonarqube.icken.ch/dashboard?id=Thijsiez_panache-kotlin-dsl_760170ef-68c7-43b0-880d-cf1034afe3c6)  
 ![Quality Gate Status](https://sonarqube.icken.ch/api/project_badges/measure?project=Thijsiez_panache-kotlin-dsl_760170ef-68c7-43b0-880d-cf1034afe3c6&metric=alert_status&token=sqb_cfafb36de6f18194da2e383324ee281b0de5b953)
 ![Reliability Rating](https://sonarqube.icken.ch/api/project_badges/measure?project=Thijsiez_panache-kotlin-dsl_760170ef-68c7-43b0-880d-cf1034afe3c6&metric=reliability_rating&token=sqb_cfafb36de6f18194da2e383324ee281b0de5b953)
 ![Maintainability Rating](https://sonarqube.icken.ch/api/project_badges/measure?project=Thijsiez_panache-kotlin-dsl_760170ef-68c7-43b0-880d-cf1034afe3c6&metric=sqale_rating&token=sqb_cfafb36de6f18194da2e383324ee281b0de5b953)
