@@ -127,14 +127,14 @@ class PanacheEntityBaseProcessor(
             .plusParameter(columnTypeParameter)
 
         return PropertySpec.builder(propertyName, columnType)
-            .initializer("%T(%P)", ColumnClassName, $$"${$$PARAM_NAME_COLUMNS_BASE_CLASS.orEmpty()}$$propertyName")
+            .initializer("%T(%P)", ColumnClassName, "\${$PARAM_NAME_COLUMNS_BASE_CLASS.orEmpty()}$propertyName")
             .addGeneratedAnnotation()
             .build()
     }
 
     companion object {
         //region Class Names
-        internal val ColumnClassName = ClassName("ch.icken.query", "Column")
+        internal val ColumnClassName = ClassName(QUERY_PACKAGE, "Column")
         internal val StringClassName = ClassName("kotlin", "String")
         //endregion
         //region Constants

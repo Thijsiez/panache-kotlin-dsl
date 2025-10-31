@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+@file:Suppress("unused")
+
 package ch.icken.processor
 
 import kotlin.annotation.AnnotationRetention.SOURCE

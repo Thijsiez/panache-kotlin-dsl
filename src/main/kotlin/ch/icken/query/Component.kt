@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+@file:Suppress("unused")
+
 package ch.icken.query
 
 import ch.icken.query.Component.QueryComponent

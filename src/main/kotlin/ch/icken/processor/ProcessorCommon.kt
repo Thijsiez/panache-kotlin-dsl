@@ -56,6 +56,7 @@ abstract class ProcessorCommon(options: Map<String, String>) {
         internal const val HIBERNATE_PANACHE_ENTITY_BASE: String =
             "io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase"
         internal const val JAKARTA_PERSISTENCE_ENTITY: String = "jakarta.persistence.Entity"
+        internal const val QUERY_PACKAGE: String = "ch.icken.query"
         //endregion
         //region Options
         internal const val OPTION_ADD_GENERATED_ANNOTATION = "addGeneratedAnnotation"

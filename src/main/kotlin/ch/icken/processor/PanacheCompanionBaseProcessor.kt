@@ -96,13 +96,13 @@ class PanacheCompanionBaseProcessor(
             .addParameter(PARAM_NAME_EXPRESSION, expressionParameterLambdaType)
             .returns(queryComponentType)
             .addStatement("return %M($PARAM_NAME_EXPRESSION(%T))",
-                MemberName(QueryComponentClassName.packageName, FUNCTION_NAME_WHERE), columnsObjectClassName)
+                MemberName(QUERY_PACKAGE, FUNCTION_NAME_WHERE), columnsObjectClassName)
             .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_WHERE$classSimpleName"))
             .addKdoc("""
                 Starts building a SELECT or DELETE query with the returned `expression`.
                 
-                @param  expression  build and return an [Expression][ch.icken.query.Expression]
-                @return             a new [QueryComponent][ch.icken.query.Component.QueryComponent] instance
+                @param  expression  build and return an [Expression][$QUERY_PACKAGE.Expression]
+                @return             a new [QueryComponent][$QUERY_PACKAGE.Component.QueryComponent] instance
                 """.trimIndent())
 
         val and = FunSpec.builder(FUNCTION_NAME_AND)
@@ -114,8 +114,8 @@ class PanacheCompanionBaseProcessor(
             .addKdoc("""
                 Adds an AND operator to this SELECT/DELETE query with the returned `expression`.
                 
-                @param  expression  build and return an [Expression][ch.icken.query.Expression]
-                @return             a new [QueryComponent][ch.icken.query.Component.QueryComponent] instance
+                @param  expression  build and return an [Expression][$QUERY_PACKAGE.Expression]
+                @return             a new [QueryComponent][$QUERY_PACKAGE.Component.QueryComponent] instance
                 """.trimIndent())
         val or = FunSpec.builder(FUNCTION_NAME_OR)
             .receiver(queryComponentType)
@@ -126,8 +126,8 @@ class PanacheCompanionBaseProcessor(
             .addKdoc("""
                 Adds an OR operator to this SELECT/DELETE query with the returned `expression`.
                 
-                @param  expression  build and return an [Expression][ch.icken.query.Expression]
-                @return             a new [QueryComponent][ch.icken.query.Component.QueryComponent] instance
+                @param  expression  build and return an [Expression][$QUERY_PACKAGE.Expression]
+                @return             a new [QueryComponent][$QUERY_PACKAGE.Component.QueryComponent] instance
                 """.trimIndent())
         //endregion
 
@@ -141,7 +141,7 @@ class PanacheCompanionBaseProcessor(
             .addKdoc("""
                 Counts the number of entities matching the returned `expression`.
                 
-                @param  expression  build and return an [Expression][ch.icken.query.Expression]
+                @param  expression  build and return an [Expression][$QUERY_PACKAGE.Expression]
                 @return             the number of entities counted
                 @see                io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase.count
                 """.trimIndent())
@@ -158,7 +158,7 @@ class PanacheCompanionBaseProcessor(
                 WARNING: the default Panache implementation behind this function uses a bulk delete query
                 and ignores cascading rules from the JPA model.
                 
-                @param  expression  build and return an [Expression][ch.icken.query.Expression]
+                @param  expression  build and return an [Expression][$QUERY_PACKAGE.Expression]
                 @return             the number of entities deleted
                 @see                io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase.delete
                 """.trimIndent())
@@ -177,7 +177,7 @@ class PanacheCompanionBaseProcessor(
                 [page][io.quarkus.hibernate.orm.panache.kotlin.PanacheQuery.page] and
                 [project][io.quarkus.hibernate.orm.panache.kotlin.PanacheQuery.project].
                 
-                @param  expression  build and return an [Expression][ch.icken.query.Expression]
+                @param  expression  build and return an [Expression][$QUERY_PACKAGE.Expression]
                 @return             a new [PanacheQuery][io.quarkus.hibernate.orm.panache.kotlin.PanacheQuery] instance
                 @see                io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase.find
                 """.trimIndent())
@@ -196,7 +196,7 @@ class PanacheCompanionBaseProcessor(
                 [project][io.quarkus.hibernate.orm.panache.kotlin.PanacheQuery.project].
                 
                 @param  sort        the sort strategy to use
-                @param  expression  build and return an [Expression][ch.icken.query.Expression]
+                @param  expression  build and return an [Expression][$QUERY_PACKAGE.Expression]
                 @return             a new [PanacheQuery][io.quarkus.hibernate.orm.panache.kotlin.PanacheQuery] instance
                 @see                io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase.find
                 """.trimIndent())
@@ -215,7 +215,7 @@ class PanacheCompanionBaseProcessor(
                 WARNING: this function requires a transaction to be active,
                 otherwise the underlying cursor may be closed before the end of the stream.
                 
-                @param  expression  build and return an [Expression][ch.icken.query.Expression]
+                @param  expression  build and return an [Expression][$QUERY_PACKAGE.Expression]
                 @return             a new [Stream][java.util.stream.Stream] instance containing all results,
                 without paging
                 @see                io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase.stream
@@ -235,7 +235,7 @@ class PanacheCompanionBaseProcessor(
                 otherwise the underlying cursor may be closed before the end of the stream.
                 
                 @param  sort        the sort strategy to use
-                @param  expression  build and return an [Expression][ch.icken.query.Expression]
+                @param  expression  build and return an [Expression][$QUERY_PACKAGE.Expression]
                 @return             a new [Stream][java.util.stream.Stream] instance containing all results,
                 without paging
                 @see                io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase.stream
@@ -253,7 +253,7 @@ class PanacheCompanionBaseProcessor(
                 Finds a single result matching the returned `expression`, or throws if there is not exactly one.
                 This function is a shortcut for `find().singleResult()`.
                 
-                @param  expression  build and return an [Expression][ch.icken.query.Expression]
+                @param  expression  build and return an [Expression][$QUERY_PACKAGE.Expression]
                 @return             the single result
                 @throws             jakarta.persistence.NoResultException when there is no result
                 @throws             jakarta.persistence.NonUniqueResultException when there are multiple results
@@ -269,11 +269,11 @@ class PanacheCompanionBaseProcessor(
                 Finds a single result matching the returned `expression`, but does not throw if there is not exactly one.
                 This function is a shortcut for `find().singleResultSafe()`.
                 
-                See [singleSafe][ch.icken.query.Component.QueryComponent.singleSafe] for more details.
+                See [singleSafe][$QUERY_PACKAGE.Component.QueryComponent.singleSafe] for more details.
                 
-                @param  expression  build and return an [Expression][ch.icken.query.Expression]
-                @return             a [PanacheSingleResult][ch.icken.query.PanacheSingleResult] instance
-                @see                ch.icken.query.singleResultSafe
+                @param  expression  build and return an [Expression][$QUERY_PACKAGE.Expression]
+                @return             a [PanacheSingleResult][$QUERY_PACKAGE.PanacheSingleResult] instance
+                @see                $QUERY_PACKAGE.singleResultSafe
                 """.trimIndent())
 
         val multipleReturns = ListClassName.plusParameter(className)
@@ -286,7 +286,7 @@ class PanacheCompanionBaseProcessor(
             .addKdoc("""
                 Finds all entities matching the returned `expression`. This function is a shortcut for `find().list()`.
                 
-                @param  expression  build and return an [Expression][ch.icken.query.Expression]
+                @param  expression  build and return an [Expression][$QUERY_PACKAGE.Expression]
                 @return             a new [List][kotlin.collections.List] instance containing all results,
                 without paging
                 @see                io.quarkus.hibernate.orm.panache.kotlin.PanacheQuery.list
@@ -303,7 +303,7 @@ class PanacheCompanionBaseProcessor(
                 This function is a shortcut for `find(sort).list()`.
                 
                 @param  sort        the sort strategy to use
-                @param  expression  build and return an [Expression][ch.icken.query.Expression]
+                @param  expression  build and return an [Expression][$QUERY_PACKAGE.Expression]
                 @return             a new [List][kotlin.collections.List] instance containing all results,
                 without paging
                 @see                io.quarkus.hibernate.orm.panache.kotlin.PanacheQuery.list
@@ -311,7 +311,7 @@ class PanacheCompanionBaseProcessor(
         //endregion
 
         //region update, updateAll
-        val updateExtensionFunction = MemberName(InitialUpdateComponentClassName.packageName, FUNCTION_NAME_UPDATE)
+        val updateExtensionFunction = MemberName(QUERY_PACKAGE, FUNCTION_NAME_UPDATE)
         val update = FunSpec.builder(FUNCTION_NAME_UPDATE)
             .receiver(companionClassName)
             .addParameter(PARAM_NAME_SETTER, setterExpressionParameterLambdaType)
@@ -319,12 +319,12 @@ class PanacheCompanionBaseProcessor(
             .addStatement("return %M(%T, $PARAM_NAME_SETTER)", updateExtensionFunction, columnsObjectClassName)
             .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_UPDATE$classSimpleName"))
             .addKdoc("""
-                Starts building an UPDATE query by [set][ch.icken.query.Column.set]-ing a new value.
+                Starts building an UPDATE query by [set][$QUERY_PACKAGE.Column.set]-ing a new value.
                 
                 @param  setter  build and return a
-                [SetterExpression][ch.icken.query.Component.UpdateComponent.InitialUpdateComponent.SetterExpression]
+                [SetterExpression][$QUERY_PACKAGE.Component.UpdateComponent.InitialUpdateComponent.SetterExpression]
                 @return         a new
-                [InitialUpdateComponent][ch.icken.query.Component.UpdateComponent.InitialUpdateComponent] instance
+                [InitialUpdateComponent][$QUERY_PACKAGE.Component.UpdateComponent.InitialUpdateComponent] instance
                 """.trimIndent())
         val updateMultiple = FunSpec.builder(FUNCTION_NAME_UPDATE)
             .receiver(companionClassName)
@@ -333,12 +333,12 @@ class PanacheCompanionBaseProcessor(
             .addStatement("return %M(%T, $PARAM_NAME_SETTERS)", updateExtensionFunction, columnsObjectClassName)
             .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_UPDATE_MULTIPLE$classSimpleName"))
             .addKdoc("""
-                Starts building an UPDATE query by [set][ch.icken.query.Column.set]-ing multiple new values.
+                Starts building an UPDATE query by [set][$QUERY_PACKAGE.Column.set]-ing multiple new values.
                 
                 @param  setters build and return multiple
-                [SetterExpression][ch.icken.query.Component.UpdateComponent.InitialUpdateComponent.SetterExpression]s
+                [SetterExpression][$QUERY_PACKAGE.Component.UpdateComponent.InitialUpdateComponent.SetterExpression]s
                 @return         a new
-                [InitialUpdateComponent][ch.icken.query.Component.UpdateComponent.InitialUpdateComponent] instance
+                [InitialUpdateComponent][$QUERY_PACKAGE.Component.UpdateComponent.InitialUpdateComponent] instance
                 """.trimIndent())
 
         val updateAll = FunSpec.builder(FUNCTION_NAME_UPDATE_ALL)
@@ -349,14 +349,14 @@ class PanacheCompanionBaseProcessor(
                 updateExtensionFunction, columnsObjectClassName)
             .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_UPDATE_ALL$classSimpleName"))
             .addKdoc("""
-                Updates all entities of this type by [set][ch.icken.query.Column.set]-ing a new value.
+                Updates all entities of this type by [set][$QUERY_PACKAGE.Column.set]-ing a new value.
                 
                 WARNING: this function updates ALL entities without a WHERE clause.
                 
                 WARNING: this function requires a transaction to be active.
                 
                 @param  setter  build and return a
-                [SetterExpression][ch.icken.query.Component.UpdateComponent.InitialUpdateComponent.SetterExpression]
+                [SetterExpression][$QUERY_PACKAGE.Component.UpdateComponent.InitialUpdateComponent.SetterExpression]
                 @return         the number of entities updated
                 @see            io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase.update
                 """.trimIndent())
@@ -368,14 +368,14 @@ class PanacheCompanionBaseProcessor(
                 updateExtensionFunction, columnsObjectClassName)
             .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_UPDATE_ALL_MULTIPLE$classSimpleName"))
             .addKdoc("""
-                Updates all entities of this type by [set][ch.icken.query.Column.set]-ing multiple new values.
+                Updates all entities of this type by [set][$QUERY_PACKAGE.Column.set]-ing multiple new values.
                 
                 WARNING: this function updates ALL entities without a WHERE clause.
                 
                 WARNING: this function requires a transaction to be active.
                 
                 @param  setters build and return multiple
-                [SetterExpression][ch.icken.query.Component.UpdateComponent.InitialUpdateComponent.SetterExpression]s
+                [SetterExpression][$QUERY_PACKAGE.Component.UpdateComponent.InitialUpdateComponent.SetterExpression]s
                 @return         the number of entities updated
                 @see            io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase.update
                 """.trimIndent())
@@ -391,9 +391,9 @@ class PanacheCompanionBaseProcessor(
             .addKdoc("""
                 Adds a WHERE clause to this UPDATE query with the returned `expression`.
                 
-                @param  expression  build and return an [Expression][ch.icken.query.Expression]
+                @param  expression  build and return an [Expression][$QUERY_PACKAGE.Expression]
                 @return             a new
-                [LogicalUpdateComponent][ch.icken.query.Component.UpdateComponent.LogicalUpdateComponent] instance
+                [LogicalUpdateComponent][$QUERY_PACKAGE.Component.UpdateComponent.LogicalUpdateComponent] instance
                 """.trimIndent())
 
         val andUpdate = FunSpec.builder(FUNCTION_NAME_AND)
@@ -405,9 +405,9 @@ class PanacheCompanionBaseProcessor(
             .addKdoc("""
                 Adds an AND operator to this UPDATE query with the returned `expression`.
                 
-                @param  expression  build and return an [Expression][ch.icken.query.Expression]
+                @param  expression  build and return an [Expression][$QUERY_PACKAGE.Expression]
                 @return             a new
-                [LogicalUpdateComponent][ch.icken.query.Component.UpdateComponent.LogicalUpdateComponent] instance
+                [LogicalUpdateComponent][$QUERY_PACKAGE.Component.UpdateComponent.LogicalUpdateComponent] instance
                 """.trimIndent())
         val orUpdate = FunSpec.builder(FUNCTION_NAME_OR)
             .receiver(logicalUpdateComponentType)
@@ -418,9 +418,9 @@ class PanacheCompanionBaseProcessor(
             .addKdoc("""
                 Adds an OR operator to this UPDATE query with the returned `expression`.
                 
-                @param  expression  build and return an [Expression][ch.icken.query.Expression]
+                @param  expression  build and return an [Expression][$QUERY_PACKAGE.Expression]
                 @return             a new
-                [LogicalUpdateComponent][ch.icken.query.Component.UpdateComponent.LogicalUpdateComponent] instance
+                [LogicalUpdateComponent][$QUERY_PACKAGE.Component.UpdateComponent.LogicalUpdateComponent] instance
                 """.trimIndent())
         //endregion
 
@@ -434,8 +434,8 @@ class PanacheCompanionBaseProcessor(
             .addKdoc("""
                 Adds an AND operator to this query with the returned `expression`.
                 
-                @param  expression  build and return an [Expression][ch.icken.query.Expression]
-                @return             a new [Expression][ch.icken.query.Expression] instance
+                @param  expression  build and return an [Expression][$QUERY_PACKAGE.Expression]
+                @return             a new [Expression][$QUERY_PACKAGE.Expression] instance
                 """.trimIndent())
         val orExpression = FunSpec.builder(FUNCTION_NAME_OR)
             .receiver(expressionType)
@@ -446,8 +446,8 @@ class PanacheCompanionBaseProcessor(
             .addKdoc("""
                 Adds an OR operator to this query with the returned `expression`.
                 
-                @param  expression  build and return an [Expression][ch.icken.query.Expression]
-                @return             a new [Expression][ch.icken.query.Expression] instance
+                @param  expression  build and return an [Expression][$QUERY_PACKAGE.Expression]
+                @return             a new [Expression][$QUERY_PACKAGE.Expression] instance
                 """.trimIndent())
         //endregion
 
@@ -472,20 +472,20 @@ class PanacheCompanionBaseProcessor(
 
     companion object {
         //region Class Names
-        internal val ExpressionClassName = ClassName("ch.icken.query", "Expression")
+        internal val ExpressionClassName = ClassName(QUERY_PACKAGE, "Expression")
         internal val InitialUpdateComponentClassName =
-            ClassName("ch.icken.query.Component.UpdateComponent", "InitialUpdateComponent")
+            ClassName("$QUERY_PACKAGE.Component.UpdateComponent", "InitialUpdateComponent")
         internal val IntClassName = ClassName("kotlin", "Int")
         internal val JvmNameClassName = ClassName("kotlin.jvm", "JvmName")
         internal val ListClassName = ClassName("kotlin.collections", "List")
         internal val LogicalUpdateComponentClassName =
-            ClassName("ch.icken.query.Component.UpdateComponent", "LogicalUpdateComponent")
+            ClassName("$QUERY_PACKAGE.Component.UpdateComponent", "LogicalUpdateComponent")
         internal val LongClassName = ClassName("kotlin", "Long")
         internal val PanacheQueryClassName = ClassName("io.quarkus.hibernate.orm.panache.kotlin", "PanacheQuery")
-        internal val PanacheSingleResultClassName = ClassName("ch.icken.query", "PanacheSingleResult")
-        internal val QueryComponentClassName = ClassName("ch.icken.query.Component", "QueryComponent")
+        internal val PanacheSingleResultClassName = ClassName(QUERY_PACKAGE, "PanacheSingleResult")
+        internal val QueryComponentClassName = ClassName("$QUERY_PACKAGE.Component", "QueryComponent")
         internal val SetterExpressionClassName =
-            ClassName("ch.icken.query.Component.UpdateComponent.InitialUpdateComponent", "SetterExpression")
+            ClassName("$QUERY_PACKAGE.Component.UpdateComponent.InitialUpdateComponent", "SetterExpression")
         internal val SortClassName = ClassName("io.quarkus.panache.common", "Sort")
         internal val StreamClassName = ClassName("java.util.stream", "Stream")
         //endregion
