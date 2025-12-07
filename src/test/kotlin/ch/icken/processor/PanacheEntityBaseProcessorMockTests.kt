@@ -60,6 +60,7 @@ class PanacheEntityBaseProcessorMockTests : ProcessorMockTestCommon() {
 
         // Given
         val columnProperty = mockk<KSPropertyDeclaration>()
+        every { columnProperty.hasBackingField } returns true
         every { columnProperty.hasAnnotation(eq(JAKARTA_PERSISTENCE_TRANSIENT)) } returns false
         every { columnProperty.annotation(any()).isParameterSet(eq(PARAM_NAME_MAPPED_BY)) } returns false
 
@@ -93,6 +94,7 @@ class PanacheEntityBaseProcessorMockTests : ProcessorMockTestCommon() {
 
         // Given
         val columnProperty = mockk<KSPropertyDeclaration>()
+        every { columnProperty.hasBackingField } returns true
         every { columnProperty.hasAnnotation(eq(JAKARTA_PERSISTENCE_TRANSIENT)) } returns true
 
         val validClass = mockk<KSClassDeclaration>()

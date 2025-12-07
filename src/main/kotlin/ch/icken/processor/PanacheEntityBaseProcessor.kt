@@ -42,7 +42,9 @@ class PanacheEntityBaseProcessor(
             //Find which properties are mapped to columns and thus can be queried against
             .associateWith { ksClassDeclaration ->
                 ksClassDeclaration.getAllProperties()
-                    //When a property is annotated as @Transient, it is not mapped to a column in the database
+                    //When a property has no backing field, there's nothing to save, so we won't generate a column
+                    .filter { it.hasBackingField }
+                    //When a property is annotated with JPA's @Transient, it is not mapped to a column in the database
                     // Therefore, this property can never be used in a query, so we won't generate a Column for it
                     .filterNot { it.hasAnnotation(JAKARTA_PERSISTENCE_TRANSIENT) }
                     //When a property is mapped by another entity, we'd have to use a JOIN to use it in a query

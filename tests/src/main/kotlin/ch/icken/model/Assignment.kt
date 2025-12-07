@@ -16,7 +16,6 @@
 
 package ch.icken.model
 
-import ch.icken.processor.ColumnType
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanion
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntity
 import jakarta.persistence.*
@@ -35,7 +34,6 @@ class Assignment(
     val client: Client,
 
     @Column(name = "ROLE", nullable = false)
-    @ColumnType(type = CharSequence::class)
     var role: String,
 
     @Column(name = "DESCRIPTION")

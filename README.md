@@ -80,12 +80,10 @@ TODO
   - Single expression `updateAll` to update all rows without requiring a WHERE clause
   - Single expression `count`, `delete`, `find`, `stream`, `single`, `singleSafe`, and `multiple`
 - Allows for overriding the generated `Column`'s type parameter using `@ColumnType`
-  - Especially useful when using a JPA `@Converter` when the field's type is different to the column's type
 - Optionally annotate generated code with `@Generated` so it can be excluded from test coverage reporting
 
 ## Known Issues
 - Code generation does not handle fields of generic types (e.g. `List<E>`, `Set<E>`, etc.), but as far as I'm aware this is difficult to get working with Hibernate anyway.
-Consider using `@ColumnType` from this library in combination with a JPA `@Converter` on such a field.
 
 ## Planned Features
 These features will be added some time in the future. Please do submit an issue if you'd like these sooner rather than later :)

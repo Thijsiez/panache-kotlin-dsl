@@ -86,11 +86,38 @@ class PanacheEntityBaseProcessorCompileTests : ProcessorCompileTestCommon() {
     }
 
     @Test
+    fun testPanacheEntityBaseWithPropertyWithoutBackingField() {
+
+        // Given
+        val compilation = kotlinCompilation("Number.kt", """
+            import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
+            import jakarta.persistence.Entity
+
+            @Entity
+            class Number : PanacheEntityBase {
+
+                val one get() = 1
+            }
+        """)
+
+        // When
+        val result = compilation.compile()
+
+        // Then
+        result.assertOk()
+        compilation.assertNumberOfFiles(1)
+        compilation.assertHasFile("NumberColumns.kt")
+
+        val numberColumns = result.loadClass("NumberColumns")
+        numberColumns.assertNumberOfMemberProperties(0)
+    }
+
+    @Test
     fun testPanacheEntityWithTransientProperty() {
 
         // Given
         val compilation = kotlinCompilation("Product.kt", """
-            import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
+            import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntity
             import jakarta.persistence.Entity
             import jakarta.persistence.Transient
 
@@ -100,7 +127,7 @@ class PanacheEntityBaseProcessorCompileTests : ProcessorCompileTestCommon() {
                 @Transient
                 var name: String
 
-            ) : PanacheEntityBase
+            ) : PanacheEntity()
         """)
 
         // When
@@ -112,7 +139,8 @@ class PanacheEntityBaseProcessorCompileTests : ProcessorCompileTestCommon() {
         compilation.assertHasFile("ProductColumns.kt")
 
         val productColumns = result.loadClass("ProductColumns")
-        productColumns.assertNumberOfMemberProperties(0)
+        productColumns.assertNumberOfMemberProperties(1)
+        productColumns.assertHasColumnOfType("id", Long::class)
     }
 
     @Test
