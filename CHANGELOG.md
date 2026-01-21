@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.1.2
+- Don't generate Columns for properties without backing field
+
 ## 0.1.1
 - Remove Quarkus runtime dependencies to not leak them transitively 
 
