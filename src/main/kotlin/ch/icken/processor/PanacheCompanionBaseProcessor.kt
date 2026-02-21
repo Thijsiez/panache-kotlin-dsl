@@ -16,45 +16,36 @@
 
 package ch.icken.processor
 
+import ch.icken.processor.model.KSClassDeclarationWithIdTypeName
 import com.google.devtools.ksp.processing.*
 import com.google.devtools.ksp.symbol.KSAnnotated
-import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.validate
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.plusParameter
 import com.squareup.kotlinpoet.ksp.toClassName
-import com.squareup.kotlinpoet.ksp.toTypeName
 import com.squareup.kotlinpoet.ksp.writeTo
 
-class PanacheCompanionBaseProcessor(
+internal class PanacheCompanionBaseProcessor(
     options: Map<String, String>,
     private val codeGenerator: CodeGenerator,
     private val logger: KSPLogger
-) : ProcessorCommon(options), SymbolProcessor {
+) : Processor(options) {
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
         val (valid, invalid) = resolver.getSymbolsWithAnnotation(JAKARTA_PERSISTENCE_ENTITY)
             .partition(KSAnnotated::validate)
 
-        valid.filterIsInstance<KSClassDeclaration>()
-            .filter { it.isSubclass(HIBERNATE_PANACHE_ENTITY_BASE) }
-            //Find out what the type of the @Id column of this entity is
-            .associateWith { ksClassDeclaration ->
-                ksClassDeclaration.declarations
-                    .filterIsInstance<KSClassDeclaration>()
-                    .singleOrNull(KSClassDeclaration::isCompanionObject)
-                    ?.superclassType(HIBERNATE_PANACHE_COMPANION_BASE)
-                    ?.arguments
-                    ?.lastOrNull()
-                    ?.toTypeName()
-            }
-            .filterValuesNotNull()
+        valid.filterPanacheEntities()
+            .mapNotNull { it.withIdTypeName() }
             .forEach(::createEntityExtensions)
 
         return invalid
     }
 
-    internal fun createEntityExtensions(ksClass: KSClassDeclaration, idTypeName: TypeName) {
+    internal fun createEntityExtensions(entity: KSClassDeclarationWithIdTypeName) {
+        val ksClass = entity.ksClassDeclaration
+        val idTypeName = entity.idTypeName
+
         val packageName = ksClass.packageName.asString() + SUFFIX_PACKAGE_GENERATED
         val classSimpleName = ksClass.simpleName.asString()
         val extensionFileName = classSimpleName + SUFFIX_FILE_EXTENSIONS
@@ -518,10 +509,6 @@ class PanacheCompanionBaseProcessor(
         internal const val PARAM_NAME_SETTERS = "setters"
         internal const val PARAM_NAME_SORT = "sort"
         internal const val SUFFIX_FILE_EXTENSIONS = "Extensions"
-        //endregion
-        //region Names
-        internal const val HIBERNATE_PANACHE_COMPANION_BASE: String =
-            "io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase"
         //endregion
 
         internal fun jvmNameAnnotation(name: String) = AnnotationSpec.builder(JvmNameClassName)

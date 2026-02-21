@@ -16,12 +16,21 @@
 
 package ch.icken.processor
 
+import ch.icken.processor.model.KSClassDeclarationWithSuperTypes
+import com.google.devtools.ksp.processing.SymbolProcessor
+import com.google.devtools.ksp.symbol.KSAnnotated
+import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.squareup.kotlinpoet.Annotatable
 import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.ClassName
 import java.time.LocalDateTime
 
-abstract class ProcessorCommon(options: Map<String, String>) {
+internal sealed class Processor(options: Map<String, String>) : SymbolProcessor {
+
+    fun List<KSAnnotated>.filterPanacheEntities(): List<KSClassDeclarationWithSuperTypes> =
+        filterIsInstance<KSClassDeclaration>()
+            .map { it.withSuperTypes() }
+            .filter { it.isSubclass(HIBERNATE_PANACHE_ENTITY_BASE) }
 
     //region Options
     protected val addGeneratedAnnotation = options[OPTION_ADD_GENERATED_ANNOTATION].toBoolean()
@@ -56,6 +65,7 @@ abstract class ProcessorCommon(options: Map<String, String>) {
         internal const val HIBERNATE_PANACHE_ENTITY_BASE: String =
             "io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase"
         internal const val JAKARTA_PERSISTENCE_ENTITY: String = "jakarta.persistence.Entity"
+        internal const val JAKARTA_PERSISTENCE_MAPPED_SUPERCLASS: String = "jakarta.persistence.MappedSuperclass"
         internal const val QUERY_PACKAGE: String = "ch.icken.query"
         //endregion
         //region Options

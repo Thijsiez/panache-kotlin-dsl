@@ -16,12 +16,13 @@
 
 package ch.icken.processor
 
+import ch.icken.processor.model.KSClassDeclarationWithSuperTypes
 import com.google.devtools.ksp.getAllSuperTypes
 import com.google.devtools.ksp.symbol.*
 
 //region KSAnnotated
 internal fun KSAnnotated.annotation(qualifiedAnnotationClassName: String): KSAnnotation? =
-    annotations.filter { it.isClass(qualifiedAnnotationClassName) }.singleOrNull()
+    annotations.singleOrNull { it.isClass(qualifiedAnnotationClassName) }
 
 internal fun KSAnnotated.hasAnnotation(qualifiedAnnotationClassName: String): Boolean =
     annotations.any { it.isClass(qualifiedAnnotationClassName) }
@@ -36,25 +37,20 @@ internal fun KSAnnotation?.isParameterSet(parameterName: String): Boolean =
 //endregion
 
 //region KSClassDeclaration
-internal fun KSClassDeclaration.isSubclass(qualifiedSuperclassName: String): Boolean =
-    getAllSuperTypes().any { it.declaration.isClass(qualifiedSuperclassName) }
+//TODO phase out usage of getAllSuperTypes and replace with custom resolve logic
+internal fun KSClassDeclaration.withSuperTypes() =
+    KSClassDeclarationWithSuperTypes(this, getAllSuperTypes())
 
 internal fun KSClassDeclaration.superclassType(qualifiedSuperclassName: String): KSType? =
     getAllSuperTypes().firstOrNull { it.declaration.isClass(qualifiedSuperclassName) }
 //endregion
 
 //region KSDeclaration
-private fun KSDeclaration.isClass(qualifiedClassName: String): Boolean =
-    qualifiedName?.asString() == qualifiedClassName
+internal fun KSDeclaration.isClass(qualifiedClassName: String): Boolean =
+    this is KSClassDeclaration && qualifiedName?.asString() == qualifiedClassName
 //endregion
 
 //region KSValueArgument
 internal operator fun List<KSValueArgument>.get(name: String): Any? =
     find { it.name?.asString() == name }?.value
 //endregion
-
-internal fun <K, V> Map<out K, V?>.filterValuesNotNull(): Map<K, V> {
-    val result = LinkedHashMap<K, V>()
-    for (entry in this) entry.value?.let { result[entry.key] = it }
-    return result
-}

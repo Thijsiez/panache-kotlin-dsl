@@ -16,11 +16,13 @@
 
 package ch.icken.processor
 
-import ch.icken.processor.PanacheCompanionBaseProcessor.Companion.HIBERNATE_PANACHE_COMPANION_BASE
 import ch.icken.processor.PanacheCompanionBaseProcessor.Companion.LongClassName
-import ch.icken.processor.ProcessorCommon.Companion.HIBERNATE_PANACHE_ENTITY_BASE
-import ch.icken.processor.ProcessorCommon.Companion.JAKARTA_PERSISTENCE_ENTITY
-import ch.icken.processor.ProcessorCommon.Companion.OPTION_ADD_GENERATED_ANNOTATION
+import ch.icken.processor.Processor.Companion.HIBERNATE_PANACHE_ENTITY_BASE
+import ch.icken.processor.Processor.Companion.JAKARTA_PERSISTENCE_ENTITY
+import ch.icken.processor.Processor.Companion.OPTION_ADD_GENERATED_ANNOTATION
+import ch.icken.processor.model.KSClassDeclarationWithIdTypeName
+import ch.icken.processor.model.KSClassDeclarationWithSuperTypes
+import ch.icken.processor.model.KSClassDeclarationWithSuperTypes.Companion.HIBERNATE_PANACHE_COMPANION_BASE
 import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.processing.Resolver
@@ -75,23 +77,28 @@ class PanacheCompanionBaseProcessorMockTests : ProcessorMockTestCommon() {
 
         val validClass = mockk<KSClassDeclaration>()
         every { validClass.validate(any()) } returns true
-        every { validClass.isSubclass(eq(HIBERNATE_PANACHE_ENTITY_BASE)) } returns true
         every { validClass.declarations } returns sequenceOf(companionObject)
         every { validClass.packageName } returns packageName
 
+        val withSuperTypes = mockk<KSClassDeclarationWithSuperTypes>()
+        every { withSuperTypes.ksClassDeclaration } returns validClass
+        every { withSuperTypes.isSubclass(eq(HIBERNATE_PANACHE_ENTITY_BASE)) } returns true
+        every { withSuperTypes.withIdTypeName() } answers { callOriginal() }
+        every { validClass.withSuperTypes() } returns withSuperTypes
+
         every { resolver.getSymbolsWithAnnotation(eq(JAKARTA_PERSISTENCE_ENTITY)) } returns sequenceOf(validClass)
 
-        every { processor.createEntityExtensions(any(), any()) } just Runs
+        every { processor.createEntityExtensions(any()) } just Runs
 
         // When
         val invalid = processor.process(resolver)
 
         // Then
         verify(exactly = 1) {
-            processor.createEntityExtensions(
-                ksClass = eq(validClass),
-                idTypeName = eq(idTypeName)
-            )
+            processor.createEntityExtensions(withArg {
+                assertEquals(validClass, it.ksClassDeclaration)
+                assertEquals(idTypeName, it.idTypeName)
+            })
         }
         assertEquals(0, invalid.size)
     }
@@ -106,8 +113,13 @@ class PanacheCompanionBaseProcessorMockTests : ProcessorMockTestCommon() {
 
         val validClass = mockk<KSClassDeclaration>()
         every { validClass.validate(any()) } returns true
-        every { validClass.isSubclass(eq(HIBERNATE_PANACHE_ENTITY_BASE)) } returns true
         every { validClass.declarations } returns sequenceOf(companionObject)
+
+        val withSuperTypes = mockk<KSClassDeclarationWithSuperTypes>()
+        every { withSuperTypes.ksClassDeclaration } returns validClass
+        every { withSuperTypes.isSubclass(eq(HIBERNATE_PANACHE_ENTITY_BASE)) } returns true
+        every { withSuperTypes.withIdTypeName() } answers { callOriginal() }
+        every { validClass.withSuperTypes() } returns withSuperTypes
 
         every { resolver.getSymbolsWithAnnotation(eq(JAKARTA_PERSISTENCE_ENTITY)) } returns sequenceOf(validClass)
 
@@ -116,7 +128,7 @@ class PanacheCompanionBaseProcessorMockTests : ProcessorMockTestCommon() {
 
         // Then
         verify(exactly = 0) {
-            processor.createEntityExtensions(any(), any())
+            processor.createEntityExtensions(any())
         }
         assertEquals(0, invalid.size)
     }
@@ -130,8 +142,13 @@ class PanacheCompanionBaseProcessorMockTests : ProcessorMockTestCommon() {
 
         val validClass = mockk<KSClassDeclaration>()
         every { validClass.validate(any()) } returns true
-        every { validClass.isSubclass(eq(HIBERNATE_PANACHE_ENTITY_BASE)) } returns true
         every { validClass.declarations } returns sequenceOf(companionObject)
+
+        val withSuperTypes = mockk<KSClassDeclarationWithSuperTypes>()
+        every { withSuperTypes.ksClassDeclaration } returns validClass
+        every { withSuperTypes.isSubclass(eq(HIBERNATE_PANACHE_ENTITY_BASE)) } returns true
+        every { withSuperTypes.withIdTypeName() } answers { callOriginal() }
+        every { validClass.withSuperTypes() } returns withSuperTypes
 
         every { resolver.getSymbolsWithAnnotation(eq(JAKARTA_PERSISTENCE_ENTITY)) } returns sequenceOf(validClass)
 
@@ -140,7 +157,7 @@ class PanacheCompanionBaseProcessorMockTests : ProcessorMockTestCommon() {
 
         // Then
         verify(exactly = 0) {
-            processor.createEntityExtensions(any(), any())
+            processor.createEntityExtensions(any())
         }
         assertEquals(0, invalid.size)
     }
@@ -153,8 +170,13 @@ class PanacheCompanionBaseProcessorMockTests : ProcessorMockTestCommon() {
 
         val validClass = mockk<KSClassDeclaration>()
         every { validClass.validate(any()) } returns true
-        every { validClass.isSubclass(eq(HIBERNATE_PANACHE_ENTITY_BASE)) } returns true
         every { validClass.declarations } returns sequenceOf(function)
+
+        val withSuperTypes = mockk<KSClassDeclarationWithSuperTypes>()
+        every { withSuperTypes.ksClassDeclaration } returns validClass
+        every { withSuperTypes.isSubclass(eq(HIBERNATE_PANACHE_ENTITY_BASE)) } returns true
+        every { withSuperTypes.withIdTypeName() } answers { callOriginal() }
+        every { validClass.withSuperTypes() } returns withSuperTypes
 
         every { resolver.getSymbolsWithAnnotation(eq(JAKARTA_PERSISTENCE_ENTITY)) } returns sequenceOf(validClass)
 
@@ -163,7 +185,7 @@ class PanacheCompanionBaseProcessorMockTests : ProcessorMockTestCommon() {
 
         // Then
         verify(exactly = 0) {
-            processor.createEntityExtensions(any(), any())
+            processor.createEntityExtensions(any())
         }
         assertEquals(0, invalid.size)
     }
@@ -174,8 +196,13 @@ class PanacheCompanionBaseProcessorMockTests : ProcessorMockTestCommon() {
         // Given
         val validClass = mockk<KSClassDeclaration>()
         every { validClass.validate(any()) } returns true
-        every { validClass.isSubclass(eq(HIBERNATE_PANACHE_ENTITY_BASE)) } returns true
         every { validClass.declarations } returns emptySequence()
+
+        val withSuperTypes = mockk<KSClassDeclarationWithSuperTypes>()
+        every { withSuperTypes.ksClassDeclaration } returns validClass
+        every { withSuperTypes.isSubclass(eq(HIBERNATE_PANACHE_ENTITY_BASE)) } returns true
+        every { withSuperTypes.withIdTypeName() } answers { callOriginal() }
+        every { validClass.withSuperTypes() } returns withSuperTypes
 
         every { resolver.getSymbolsWithAnnotation(eq(JAKARTA_PERSISTENCE_ENTITY)) } returns sequenceOf(validClass)
 
@@ -184,7 +211,7 @@ class PanacheCompanionBaseProcessorMockTests : ProcessorMockTestCommon() {
 
         // Then
         verify(exactly = 0) {
-            processor.createEntityExtensions(any(), any())
+            processor.createEntityExtensions(any())
         }
         assertEquals(0, invalid.size)
     }
@@ -195,7 +222,10 @@ class PanacheCompanionBaseProcessorMockTests : ProcessorMockTestCommon() {
         // Given
         val validClass = mockk<KSClassDeclaration>()
         every { validClass.validate(any()) } returns true
-        every { validClass.isSubclass(eq(HIBERNATE_PANACHE_ENTITY_BASE)) } returns false
+
+        val withSuperTypes = mockk<KSClassDeclarationWithSuperTypes>()
+        every { withSuperTypes.isSubclass(eq(HIBERNATE_PANACHE_ENTITY_BASE)) } returns false
+        every { validClass.withSuperTypes() } returns withSuperTypes
 
         every { resolver.getSymbolsWithAnnotation(eq(JAKARTA_PERSISTENCE_ENTITY)) } returns sequenceOf(validClass)
 
@@ -204,7 +234,7 @@ class PanacheCompanionBaseProcessorMockTests : ProcessorMockTestCommon() {
 
         // Then
         verify(exactly = 0) {
-            processor.createEntityExtensions(any(), any())
+            processor.createEntityExtensions(any())
         }
         assertEquals(0, invalid.size)
     }
@@ -223,7 +253,7 @@ class PanacheCompanionBaseProcessorMockTests : ProcessorMockTestCommon() {
 
         // Then
         verify(exactly = 0) {
-            processor.createEntityExtensions(any(), any())
+            processor.createEntityExtensions(any())
         }
         assertEquals(0, invalid.size)
     }
@@ -242,7 +272,7 @@ class PanacheCompanionBaseProcessorMockTests : ProcessorMockTestCommon() {
 
         // Then
         verify(exactly = 0) {
-            processor.createEntityExtensions(any(), any())
+            processor.createEntityExtensions(any())
         }
         assertEquals(1, invalid.size)
     }
@@ -268,8 +298,12 @@ class PanacheCompanionBaseProcessorMockTests : ProcessorMockTestCommon() {
         every { ksClass.packageName } returns packageSimpleName
         every { ksClass.simpleName } returns classSimpleName
 
+        val withIdTypeName = mockk<KSClassDeclarationWithIdTypeName>()
+        every { withIdTypeName.ksClassDeclaration } returns ksClass
+        every { withIdTypeName.idTypeName } returns LongClassName
+
         // When
-        processor.createEntityExtensions(ksClass, LongClassName)
+        processor.createEntityExtensions(withIdTypeName)
 
         // Then
         verify(exactly = 1) {

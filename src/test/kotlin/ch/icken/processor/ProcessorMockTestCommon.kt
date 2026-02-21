@@ -30,7 +30,7 @@ abstract class ProcessorMockTestCommon {
 
     @BeforeEach
     fun setUp() {
-        mockkStatic(KSClassDeclaration::isSubclass)
+        mockkStatic(KSClassDeclaration::withSuperTypes)
         mockkStatic(KSClassDeclaration::toClassName)
         mockkStatic(KSNode::validate)
         mockkStatic(KSType::toClassName)

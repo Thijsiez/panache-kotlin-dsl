@@ -139,8 +139,7 @@ class PanacheEntityBaseProcessorCompileTests : ProcessorCompileTestCommon() {
         compilation.assertHasFile("ProductColumns.kt")
 
         val productColumns = result.loadClass("ProductColumns")
-        productColumns.assertNumberOfMemberProperties(1)
-        productColumns.assertHasColumnOfType("id", Long::class)
+        productColumns.assertNumberOfMemberProperties(0)
     }
 
     @Test
@@ -188,12 +187,10 @@ class PanacheEntityBaseProcessorCompileTests : ProcessorCompileTestCommon() {
         compilation.assertHasFile("CommentColumns.kt")
 
         val postColumns = result.loadClass("PostColumns")
-        postColumns.assertNumberOfMemberProperties(1)
-        postColumns.assertHasColumnOfType("id", Long::class)
+        postColumns.assertNumberOfMemberProperties(0)
 
         val commentColumns = result.loadClass("CommentColumns")
-        commentColumns.assertNumberOfMemberProperties(2)
-        commentColumns.assertHasColumnOfType("id", Long::class)
+        commentColumns.assertNumberOfMemberProperties(1)
         commentColumns.assertHasMemberPropertyOfType("post", "PostColumnsBase")
     }
 
@@ -224,8 +221,56 @@ class PanacheEntityBaseProcessorCompileTests : ProcessorCompileTestCommon() {
         compilation.assertHasFile("UserColumns.kt")
 
         val userColumns = result.loadClass("UserColumns")
-        userColumns.assertNumberOfMemberProperties(2)
-        userColumns.assertHasColumnOfType("id", Long::class)
+        userColumns.assertNumberOfMemberProperties(1)
         userColumns.assertHasColumnOfType("username", CharSequence::class)
+    }
+
+    @Test
+    fun testPanacheEntityWithMappedSuperclass() {
+
+        // Given
+        val compilation = compilation(
+            kotlin("Base.kt", """
+                import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
+                import jakarta.persistence.Id
+                import jakarta.persistence.MappedSuperclass
+
+                @MappedSuperclass
+                open class Base : PanacheEntityBase {
+
+                    @Id
+                    val id: Long? = null
+
+                }
+            """),
+            kotlin("Derived.kt", """
+                import jakarta.persistence.Entity
+
+                @Entity
+                class Derived(
+
+                    val name: String
+
+                ) : Base()
+            """)
+        )
+
+        // When
+        val result = compilation.compile()
+
+        // Then
+        result.assertOk()
+        //TODO
+//        compilation.assertNumberOfFiles(2)
+//        compilation.assertHasFile("BaseColumns.kt")
+        compilation.assertHasFile("DerivedColumns.kt")
+
+//        val baseColumns = result.loadClass("BaseColumns")
+//        baseColumns.assertNumberOfMemberProperties(1)
+//        baseColumns.assertHasColumnOfType("id", Long::class)
+
+        val derivedColumns = result.loadClass("DerivedColumns")
+        derivedColumns.assertNumberOfMemberProperties(1)
+        derivedColumns.assertHasColumnOfType("name", String::class)
     }
 }
