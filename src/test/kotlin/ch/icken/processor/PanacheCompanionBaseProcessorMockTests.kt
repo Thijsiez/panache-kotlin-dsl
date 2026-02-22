@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Thijs Koppen
+ * Copyright 2023-2026 Thijs Koppen
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -298,9 +298,10 @@ class PanacheCompanionBaseProcessorMockTests : ProcessorMockTestCommon() {
         every { ksClass.packageName } returns packageSimpleName
         every { ksClass.simpleName } returns classSimpleName
 
-        val withIdTypeName = mockk<KSClassDeclarationWithIdTypeName>()
-        every { withIdTypeName.ksClassDeclaration } returns ksClass
-        every { withIdTypeName.idTypeName } returns LongClassName
+        val withIdTypeName = KSClassDeclarationWithIdTypeName(
+            ksClassDeclaration = ksClass,
+            idTypeName = LongClassName
+        )
 
         // When
         processor.createEntityExtensions(withIdTypeName)

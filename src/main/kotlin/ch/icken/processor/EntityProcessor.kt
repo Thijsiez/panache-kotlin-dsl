@@ -16,7 +16,19 @@
 
 package ch.icken.processor
 
+import ch.icken.processor.model.KSClassDeclarationWrapper
+import com.google.devtools.ksp.symbol.KSDeclaration
+
 internal sealed class EntityProcessor(options: Map<String, String>) : Processor(options) {
 
+    protected val KSClassDeclarationWrapper.columnsBaseClassName get() = ksClassDeclaration.columnsBaseClassName
 
+    protected val KSDeclaration.columnsBaseClassName get() = columnsObjectName + SUFFIX_CLASS_COLUMNS_BASE
+
+    companion object {
+        //region Constants
+        protected const val PARAM_NAME_CLASS_COLUMNS_BASE_CONSTRUCTOR = "parent"
+        private const val SUFFIX_CLASS_COLUMNS_BASE = "Base"
+        //endregion
+    }
 }

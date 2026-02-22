@@ -21,10 +21,10 @@ import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import com.squareup.kotlinpoet.ksp.toTypeName
 
-internal data class KSClassDeclarationWithSuperTypes(
-    val ksClassDeclaration: KSClassDeclaration,
+internal class KSClassDeclarationWithSuperTypes(
+    ksClassDeclaration: KSClassDeclaration,
     val superTypes: Sequence<KSType>
-) {
+) : KSClassDeclarationWrapper(ksClassDeclaration) {
 
     fun isSubclass(qualifiedSuperclassName: String): Boolean =
         superTypes.any { it.declaration.isClass(qualifiedSuperclassName) }

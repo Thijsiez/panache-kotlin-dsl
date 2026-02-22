@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Thijs Koppen
+ * Copyright 2023-2026 Thijs Koppen
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package ch.icken.processor
 import ch.icken.processor.model.KSClassDeclarationWithProperties
 import com.google.devtools.ksp.processing.*
 import com.google.devtools.ksp.symbol.KSAnnotated
+import com.google.devtools.ksp.symbol.KSDeclaration
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.validate
@@ -44,81 +45,88 @@ internal class PanacheEntityBaseProcessor(
         return invalid
     }
 
-    internal fun createColumnsObject(entity: KSClassDeclarationWithProperties) {
-        val ksClass = entity.ksClassDeclaration
-        val ksProperties = entity.properties
-
-        val packageName = ksClass.packageName.asString() + SUFFIX_PACKAGE_GENERATED
-        val objectName = ksClass.simpleName.asString() + SUFFIX_OBJECT_COLUMNS
-        logger.info("Generating $packageName.$objectName (${ksProperties.size} columns)")
+    fun createColumnsObject(entity: KSClassDeclarationWithProperties) {
+        val targetPackageName = entity.generatedPackageName
+        val columnsObjectName = entity.columnsObjectName
+        logger.info("Generating $targetPackageName.$columnsObjectName (${entity.propertiesSize} columns)")
 
         // Generate constructor
-        val constructorBuilder = FunSpec.constructorBuilder()
+        val columnsBaseClassConstructorParameter = ParameterSpec
+            .builder(
+                name = PARAM_NAME_CLASS_COLUMNS_BASE_CONSTRUCTOR,
+                type = StringClassName.copy(nullable = true)
+            )
+            .defaultValue("%L", null)
+            .build()
+        val columnsBaseClassConstructor = FunSpec.constructorBuilder()
             .addModifiers(KModifier.INTERNAL)
-            .addParameter(ParameterSpec
-                .builder(PARAM_NAME_COLUMNS_BASE_CLASS, StringClassName.copy(nullable = true))
-                .defaultValue("%L", null)
-                .build())
+            .addParameter(columnsBaseClassConstructorParameter)
+            .build()
 
         // Generate base class
-        val baseClassName = objectName + SUFFIX_CLASS_COLUMNS_BASE
-        val baseClassBuilder = TypeSpec.classBuilder(baseClassName)
+        val columnsBaseClassName = entity.columnsBaseClassName
+        val columnsBaseClass = TypeSpec.classBuilder(columnsBaseClassName)
             //TODO superclass that is the base columns class for the mapped superclass
             .addModifiers(KModifier.OPEN)
             .addTypeVariable(TypeVariableName(TYPE_VARIABLE_NAME_COLUMNS))
             .addGeneratedAnnotation()
-            .primaryConstructor(constructorBuilder.build())
-            .addProperties(ksProperties.map(::createColumnProperty))
+            .primaryConstructor(columnsBaseClassConstructor)
+            .addProperties(entity.mapProperties(::createColumnProperty))
+            .build()
 
         // Generate implementation
-        val objectBuilder = TypeSpec.objectBuilder(objectName)
-            .superclass(ClassName(packageName, baseClassName)
-                .plusParameter(ClassName(packageName, objectName)))
+        val columnsObjectSuperclassTypeName = ClassName(targetPackageName, columnsBaseClassName)
+            .plusParameter(ClassName(targetPackageName, columnsObjectName))
+        val columnsObject = TypeSpec.objectBuilder(columnsObjectName)
+            .superclass(columnsObjectSuperclassTypeName)
             .addGeneratedAnnotation()
+            .build()
 
         // Generate actual source code file
-        FileSpec.builder(packageName, objectName)
-            .addType(baseClassBuilder.build())
-            .addType(objectBuilder.build())
+        FileSpec.builder(targetPackageName, columnsObjectName)
+            .addType(columnsBaseClass)
+            .addType(columnsObject)
             .addAnnotation(suppressFileAnnotation)
             .addGeneratedAnnotation()
             .build()
             .writeTo(codeGenerator, Dependencies(false))
     }
 
-    internal fun createColumnProperty(ksProperty: KSPropertyDeclaration): PropertySpec {
+    fun createColumnProperty(ksProperty: KSPropertyDeclaration): PropertySpec {
         val propertyName = ksProperty.simpleName.asString()
         val propertyType = ksProperty.type.resolve()
 
         val isJoinColumn = ksProperty.hasAnnotation(JAKARTA_PERSISTENCE_JOIN_COLUMN)
-        if (isJoinColumn) {
-            val propertyTypeDeclaration = propertyType.declaration
-            val joinPackageName = propertyTypeDeclaration.packageName.asString() + SUFFIX_PACKAGE_GENERATED
-            val joinObjectName = propertyTypeDeclaration.simpleName.asString() + SUFFIX_OBJECT_COLUMNS
-            val joinBaseClassType = ClassName(joinPackageName, joinObjectName + SUFFIX_CLASS_COLUMNS_BASE)
-                .plusParameter(TypeVariableName(TYPE_VARIABLE_NAME_COLUMNS))
+        if (isJoinColumn) return createJoinColumnProperty(propertyName, propertyType.declaration)
 
-            return PropertySpec.builder(propertyName, joinBaseClassType)
-                .getter(FunSpec.getterBuilder()
-                    .addStatement("return %T(%S)", joinBaseClassType, "$propertyName.")
-                    .build())
-                .addGeneratedAnnotation()
-                .build()
-        }
-
-        @Suppress("kotlin:S6530")//False positive
         //The value from get() can be any type. In the case of @ColumnType, it will be a KSType
-        val columnTypeParameter = ((ksProperty.annotation(PROCESSOR_COLUMN_TYPE)
+        @Suppress("kotlin:S6530")
+        val specifiedColumnType = ksProperty.annotation(PROCESSOR_COLUMN_TYPE)
             ?.arguments
-            ?.get(PARAM_NAME_TYPE) as? KSType)
-            ?.toClassName()
-            ?: propertyType.toClassName())
+            ?.get(PARAM_NAME_TYPE) as? KSType
+        val columnTypeName = (specifiedColumnType ?: propertyType).toClassName()
             .copy(nullable = propertyType.isMarkedNullable)
-        val columnType = ColumnClassName.plusParameter(TypeVariableName(TYPE_VARIABLE_NAME_COLUMNS))
-            .plusParameter(columnTypeParameter)
+        val columnPropertyTypeName = ColumnClassName.plusParameter(TypeVariableName(TYPE_VARIABLE_NAME_COLUMNS))
+            .plusParameter(columnTypeName)
 
-        return PropertySpec.builder(propertyName, columnType)
-            .initializer("%T(%P)", ColumnClassName, "\${$PARAM_NAME_COLUMNS_BASE_CLASS.orEmpty()}$propertyName")
+        return PropertySpec.builder(propertyName, columnPropertyTypeName)
+            .initializer("%T(%P)", ColumnClassName,
+                "\${$PARAM_NAME_CLASS_COLUMNS_BASE_CONSTRUCTOR.orEmpty()}$propertyName")
+            .addGeneratedAnnotation()
+            .build()
+    }
+
+    fun createJoinColumnProperty(propertyName: String, propertyTypeDeclaration: KSDeclaration): PropertySpec {
+        val joinColumnPropertyTypeName = ClassName(propertyTypeDeclaration.generatedPackageName,
+            propertyTypeDeclaration.columnsBaseClassName)
+            .plusParameter(TypeVariableName(TYPE_VARIABLE_NAME_COLUMNS))
+
+        val joinColumnPropertyGetter = FunSpec.getterBuilder()
+            .addStatement("return %T(%S)", joinColumnPropertyTypeName, "$propertyName.")
+            .build()
+
+        return PropertySpec.builder(propertyName, joinColumnPropertyTypeName)
+            .getter(joinColumnPropertyGetter)
             .addGeneratedAnnotation()
             .build()
     }
@@ -129,8 +137,6 @@ internal class PanacheEntityBaseProcessor(
         internal val StringClassName = ClassName("kotlin", "String")
         //endregion
         //region Constants
-        internal const val PARAM_NAME_COLUMNS_BASE_CLASS = "parent"
-        internal const val SUFFIX_CLASS_COLUMNS_BASE = "Base"
         internal const val TYPE_VARIABLE_NAME_COLUMNS = "Columns"
         internal const val PARAM_NAME_TYPE = "type"
         //endregion

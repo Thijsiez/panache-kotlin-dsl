@@ -17,14 +17,7 @@
 package ch.icken.processor.model
 
 import com.google.devtools.ksp.symbol.KSClassDeclaration
-import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 
-internal class KSClassDeclarationWithProperties(
-    ksClassDeclaration: KSClassDeclaration,
-    val properties: List<KSPropertyDeclaration>
-) : KSClassDeclarationWrapper(ksClassDeclaration) {
-
-    val propertiesSize get() = properties.size
-
-    fun <R> mapProperties(transform: (KSPropertyDeclaration) -> R) = properties.map(transform)
-}
+internal sealed class KSClassDeclarationWrapper(
+    val ksClassDeclaration: KSClassDeclaration
+)

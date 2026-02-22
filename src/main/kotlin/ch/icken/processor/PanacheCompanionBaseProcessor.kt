@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Thijs Koppen
+ * Copyright 2023-2026 Thijs Koppen
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.validate
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.plusParameter
-import com.squareup.kotlinpoet.ksp.toClassName
 import com.squareup.kotlinpoet.ksp.writeTo
 
 internal class PanacheCompanionBaseProcessor(
@@ -42,18 +41,16 @@ internal class PanacheCompanionBaseProcessor(
         return invalid
     }
 
+    //TODO refactor for readability and align property names with their types
     internal fun createEntityExtensions(entity: KSClassDeclarationWithIdTypeName) {
-        val ksClass = entity.ksClassDeclaration
-        val idTypeName = entity.idTypeName
-
-        val packageName = ksClass.packageName.asString() + SUFFIX_PACKAGE_GENERATED
-        val classSimpleName = ksClass.simpleName.asString()
-        val extensionFileName = classSimpleName + SUFFIX_FILE_EXTENSIONS
-        logger.info("Generating $packageName.$extensionFileName")
+        val targetPackageName = entity.generatedPackageName
+        val classSimpleName = entity.simpleName
+        val extensionFileName = entity.extensionFileName
+        logger.info("Generating $targetPackageName.$extensionFileName")
 
         //region Names and types
-        val className = ksClass.toClassName()
-        val columnsObjectClassName = ClassName(packageName, classSimpleName + SUFFIX_OBJECT_COLUMNS)
+        val className = entity.toClassName()
+        val columnsObjectClassName = ClassName(targetPackageName, entity.columnsObjectName)
         val companionClassName = className.nestedClass(CLASS_NAME_COMPANION)
 
         val expressionType = ExpressionClassName
@@ -64,7 +61,7 @@ internal class PanacheCompanionBaseProcessor(
         )
         val queryComponentType = QueryComponentClassName
             .plusParameter(className)
-            .plusParameter(idTypeName)
+            .plusParameter(entity.idTypeName)
             .plusParameter(columnsObjectClassName)
 
         val setterExpressionParameterLambdaType = LambdaTypeName.get(
@@ -73,11 +70,11 @@ internal class PanacheCompanionBaseProcessor(
         )
         val initialUpdateComponentType = InitialUpdateComponentClassName
             .plusParameter(className)
-            .plusParameter(idTypeName)
+            .plusParameter(entity.idTypeName)
             .plusParameter(columnsObjectClassName)
         val logicalUpdateComponentType = LogicalUpdateComponentClassName
             .plusParameter(className)
-            .plusParameter(idTypeName)
+            .plusParameter(entity.idTypeName)
             .plusParameter(columnsObjectClassName)
         //endregion
 
@@ -449,7 +446,7 @@ internal class PanacheCompanionBaseProcessor(
             whereUpdate, andUpdate, orUpdate,
             andExpression, orExpression)
 
-        FileSpec.builder(packageName, extensionFileName)
+        FileSpec.builder(targetPackageName, extensionFileName)
             .apply {
                 functions.map { it.addGeneratedAnnotation() }
                     .map(FunSpec.Builder::build)
@@ -508,7 +505,6 @@ internal class PanacheCompanionBaseProcessor(
         internal const val PARAM_NAME_SETTER = "setter"
         internal const val PARAM_NAME_SETTERS = "setters"
         internal const val PARAM_NAME_SORT = "sort"
-        internal const val SUFFIX_FILE_EXTENSIONS = "Extensions"
         //endregion
 
         internal fun jvmNameAnnotation(name: String) = AnnotationSpec.builder(JvmNameClassName)

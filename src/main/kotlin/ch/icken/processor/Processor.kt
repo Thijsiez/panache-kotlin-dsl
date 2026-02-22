@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Thijs Koppen
+ * Copyright 2024-2026 Thijs Koppen
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,20 +17,33 @@
 package ch.icken.processor
 
 import ch.icken.processor.model.KSClassDeclarationWithSuperTypes
+import ch.icken.processor.model.KSClassDeclarationWrapper
 import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
+import com.google.devtools.ksp.symbol.KSDeclaration
 import com.squareup.kotlinpoet.Annotatable
 import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.ClassName
+import com.squareup.kotlinpoet.ksp.toClassName
 import java.time.LocalDateTime
 
 internal sealed class Processor(options: Map<String, String>) : SymbolProcessor {
 
-    fun List<KSAnnotated>.filterPanacheEntities(): List<KSClassDeclarationWithSuperTypes> =
+    protected val KSClassDeclarationWrapper.columnsObjectName get() = ksClassDeclaration.columnsObjectName
+    protected val KSClassDeclarationWrapper.extensionFileName get() = simpleName + SUFFIX_FILE_EXTENSIONS
+    protected val KSClassDeclarationWrapper.generatedPackageName get() = ksClassDeclaration.generatedPackageName
+    protected val KSClassDeclarationWrapper.simpleName get() = ksClassDeclaration.simpleName.asString()
+
+    protected val KSDeclaration.columnsObjectName get() = simpleName.asString() + SUFFIX_OBJECT_COLUMNS
+    protected val KSDeclaration.generatedPackageName get() = packageName.asString() + SUFFIX_PACKAGE_GENERATED
+
+    protected fun List<KSAnnotated>.filterPanacheEntities(): List<KSClassDeclarationWithSuperTypes> =
         filterIsInstance<KSClassDeclaration>()
             .map { it.withSuperTypes() }
             .filter { it.isSubclass(HIBERNATE_PANACHE_ENTITY_BASE) }
+
+    protected fun KSClassDeclarationWrapper.toClassName(): ClassName = ksClassDeclaration.toClassName()
 
     //region Options
     protected val addGeneratedAnnotation = options[OPTION_ADD_GENERATED_ANNOTATION].toBoolean()
@@ -58,15 +71,16 @@ internal sealed class Processor(options: Map<String, String>) : SymbolProcessor 
         private val SuppressClassName = ClassName("kotlin", "Suppress")
         //endregion
         //region Constants
-        internal const val SUFFIX_OBJECT_COLUMNS = "Columns"
-        internal const val SUFFIX_PACKAGE_GENERATED = ".generated"
+        private const val SUFFIX_FILE_EXTENSIONS = "Extensions"
+        private const val SUFFIX_OBJECT_COLUMNS = "Columns"
+        private const val SUFFIX_PACKAGE_GENERATED = ".generated"
         //endregion
         //region Names
         internal const val HIBERNATE_PANACHE_ENTITY_BASE: String =
             "io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase"
         internal const val JAKARTA_PERSISTENCE_ENTITY: String = "jakarta.persistence.Entity"
         internal const val JAKARTA_PERSISTENCE_MAPPED_SUPERCLASS: String = "jakarta.persistence.MappedSuperclass"
-        internal const val QUERY_PACKAGE: String = "ch.icken.query"
+        protected const val QUERY_PACKAGE: String = "ch.icken.query"
         //endregion
         //region Options
         internal const val OPTION_ADD_GENERATED_ANNOTATION = "addGeneratedAnnotation"

@@ -16,6 +16,7 @@
 
 package ch.icken.processor
 
+import ch.icken.processor.model.KSClassDeclarationWithProperties
 import com.google.devtools.ksp.processing.*
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.validate
@@ -31,9 +32,14 @@ internal class MappedSuperclassProcessor(
             .partition(KSAnnotated::validate)
 
         valid.filterPanacheEntities()
-        //TODO
+            .map { it.withColumnProperties() }
+            .forEach(::createColumnsBaseClass)
 
         return invalid
+    }
+
+    fun createColumnsBaseClass(entity: KSClassDeclarationWithProperties) {
+        //TODO
     }
 }
 

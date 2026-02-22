@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Thijs Koppen
+ * Copyright 2023-2026 Thijs Koppen
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -315,9 +315,10 @@ class PanacheEntityBaseProcessorMockTests : ProcessorMockTestCommon() {
 
         val ksProperties = listOf(firstName, lastName, department)
 
-        val withProperties = mockk<KSClassDeclarationWithProperties>()
-        every { withProperties.ksClassDeclaration } returns ksClass
-        every { withProperties.properties } returns ksProperties
+        val withProperties = KSClassDeclarationWithProperties(
+            ksClassDeclaration = ksClass,
+            properties = ksProperties
+        )
 
         // When
         processor.createColumnsObject(withProperties)

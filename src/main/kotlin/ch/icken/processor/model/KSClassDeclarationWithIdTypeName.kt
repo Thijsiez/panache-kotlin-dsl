@@ -19,7 +19,7 @@ package ch.icken.processor.model
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.squareup.kotlinpoet.TypeName
 
-internal data class KSClassDeclarationWithIdTypeName(
-    val ksClassDeclaration: KSClassDeclaration,
+internal class KSClassDeclarationWithIdTypeName(
+    ksClassDeclaration: KSClassDeclaration,
     val idTypeName: TypeName
-)
+) : KSClassDeclarationWrapper(ksClassDeclaration)
