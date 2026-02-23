@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Thijs Koppen
+ * Copyright 2023-2026 Thijs Koppen
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 
 package ch.icken.processor
 
-import ch.icken.processor.model.KSClassDeclarationWithSuperTypes
-import com.google.devtools.ksp.getAllSuperTypes
 import com.google.devtools.ksp.symbol.*
 
 //region KSAnnotated
@@ -34,15 +32,6 @@ private fun KSAnnotation.isClass(qualifiedAnnotationClassName: String): Boolean 
 
 internal fun KSAnnotation?.isParameterSet(parameterName: String): Boolean =
     this != null && defaultArguments[parameterName] != arguments[parameterName]
-//endregion
-
-//region KSClassDeclaration
-//TODO phase out usage of getAllSuperTypes and replace with custom resolve logic
-internal fun KSClassDeclaration.withSuperTypes() =
-    KSClassDeclarationWithSuperTypes(this, getAllSuperTypes())
-
-internal fun KSClassDeclaration.superclassType(qualifiedSuperclassName: String): KSType? =
-    getAllSuperTypes().firstOrNull { it.declaration.isClass(qualifiedSuperclassName) }
 //endregion
 
 //region KSDeclaration

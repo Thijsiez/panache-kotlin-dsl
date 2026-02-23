@@ -16,26 +16,30 @@
 
 package ch.icken.processor.model
 
-import ch.icken.processor.*
+import ch.icken.processor.annotation
+import ch.icken.processor.hasAnnotation
+import ch.icken.processor.isClass
+import ch.icken.processor.isParameterSet
+import com.google.devtools.ksp.getAllSuperTypes
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import com.squareup.kotlinpoet.ksp.toTypeName
 
 internal class KSClassDeclarationWithSuperTypes(
     ksClassDeclaration: KSClassDeclaration,
-    val superTypes: Sequence<KSType>
+    internal val superTypes: Sequence<KSType>
 ) : KSClassDeclarationWrapper(ksClassDeclaration) {
 
-    fun isSubclass(qualifiedSuperclassName: String): Boolean =
+    internal fun isSubclass(qualifiedSuperclassName: String): Boolean =
         superTypes.any { it.declaration.isClass(qualifiedSuperclassName) }
 
-    fun withIdTypeName(): KSClassDeclarationWithIdTypeName? {
+    internal fun withIdTypeName(): KSClassDeclarationWithIdTypeName? {
         //Determine the type of the @Id column of this class, as specified by the Panache companion object
         val idTypeName = ksClassDeclaration.declarations
             .filterIsInstance<KSClassDeclaration>()
             .singleOrNull(KSClassDeclaration::isCompanionObject)
-            ?.superclassType(HIBERNATE_PANACHE_COMPANION_BASE)
-            //These are the type arguments
+            ?.getAllSuperTypes()
+            ?.firstOrNull { it.declaration.isClass(HIBERNATE_PANACHE_COMPANION_BASE) }
             ?.arguments
             //The @Id column type argument is the last one
             ?.lastOrNull()
@@ -45,7 +49,7 @@ internal class KSClassDeclarationWithSuperTypes(
         return KSClassDeclarationWithIdTypeName(ksClassDeclaration, idTypeName)
     }
 
-    fun withColumnProperties(): KSClassDeclarationWithProperties {
+    internal fun withColumnProperties(): KSClassDeclarationWithProperties {
         val columnProperties = ksClassDeclaration.getAllProperties()
             //When a property is not declared in this class itself, we won't create a column
             //Properties originating from e.g. mapped superclasses are in their own file,
@@ -66,17 +70,20 @@ internal class KSClassDeclarationWithSuperTypes(
         return KSClassDeclarationWithProperties(ksClassDeclaration, columnProperties)
     }
 
-    companion object {
+    internal companion object {
         //region Constants
         internal const val PARAM_NAME_MAPPED_BY = "mappedBy"
         //endregion
         //region Names
         internal const val HIBERNATE_PANACHE_COMPANION_BASE: String =
             "io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase"
-        internal const val JAKARTA_PERSISTENCE_MANY_TO_MANY: String = "jakarta.persistence.ManyToMany"
-        internal const val JAKARTA_PERSISTENCE_ONE_TO_MANY: String = "jakarta.persistence.OneToMany"
-        internal const val JAKARTA_PERSISTENCE_ONE_TO_ONE: String = "jakarta.persistence.OneToOne"
+        private const val JAKARTA_PERSISTENCE_MANY_TO_MANY: String = "jakarta.persistence.ManyToMany"
+        private const val JAKARTA_PERSISTENCE_ONE_TO_MANY: String = "jakarta.persistence.OneToMany"
+        private const val JAKARTA_PERSISTENCE_ONE_TO_ONE: String = "jakarta.persistence.OneToOne"
         internal const val JAKARTA_PERSISTENCE_TRANSIENT: String = "jakarta.persistence.Transient"
         //endregion
     }
 }
+
+internal fun KSClassDeclaration.withSuperTypes() =
+    KSClassDeclarationWithSuperTypes(this, getAllSuperTypes())

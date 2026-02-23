@@ -21,10 +21,12 @@ import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 
 internal class KSClassDeclarationWithProperties(
     ksClassDeclaration: KSClassDeclaration,
-    val properties: List<KSPropertyDeclaration>
+    internal val properties: List<KSPropertyDeclaration>
 ) : KSClassDeclarationWrapper(ksClassDeclaration) {
 
-    val propertiesSize get() = properties.size
+    internal val superTypes get() = ksClassDeclaration.superTypes
 
-    fun <R> mapProperties(transform: (KSPropertyDeclaration) -> R) = properties.map(transform)
+    internal val propertiesSize get() = properties.size
+
+    internal fun <R> mapProperties(transform: (KSPropertyDeclaration) -> R) = properties.map(transform)
 }

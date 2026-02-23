@@ -18,6 +18,7 @@ package ch.icken.processor
 
 import ch.icken.processor.model.KSClassDeclarationWithSuperTypes
 import ch.icken.processor.model.KSClassDeclarationWrapper
+import ch.icken.processor.model.withSuperTypes
 import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
@@ -65,9 +66,10 @@ internal sealed class Processor(options: Map<String, String>) : SymbolProcessor 
         apply { if (addGeneratedAnnotation) addAnnotation(generatedAnnotation) }
     //endregion
 
-    companion object {
+    internal companion object {
         //region Class Names
         private val GeneratedClassName = ClassName("ch.icken.processor", "Generated")
+        internal val LongClassName = ClassName("kotlin", "Long")
         private val SuppressClassName = ClassName("kotlin", "Suppress")
         //endregion
         //region Constants
@@ -79,7 +81,6 @@ internal sealed class Processor(options: Map<String, String>) : SymbolProcessor 
         internal const val HIBERNATE_PANACHE_ENTITY_BASE: String =
             "io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase"
         internal const val JAKARTA_PERSISTENCE_ENTITY: String = "jakarta.persistence.Entity"
-        internal const val JAKARTA_PERSISTENCE_MAPPED_SUPERCLASS: String = "jakarta.persistence.MappedSuperclass"
         protected const val QUERY_PACKAGE: String = "ch.icken.query"
         //endregion
         //region Options

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Thijs Koppen
+ * Copyright 2024-2026 Thijs Koppen
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,8 +81,8 @@ class PanacheEntityBaseProcessorCompileTests : ProcessorCompileTestCommon() {
         compilation.assertNumberOfFiles(1)
         compilation.assertHasFile("EmployeeColumns.kt")
 
-        val employeeColumns = result.loadClass("EmployeeColumns")
-        employeeColumns.assertNumberOfMemberProperties(0)
+        val employeeColumns = result.loadClass("EmployeeColumnsBase")
+        employeeColumns.assertNumberOfDeclaredMemberProperties(0)
     }
 
     @Test
@@ -108,8 +108,8 @@ class PanacheEntityBaseProcessorCompileTests : ProcessorCompileTestCommon() {
         compilation.assertNumberOfFiles(1)
         compilation.assertHasFile("NumberColumns.kt")
 
-        val numberColumns = result.loadClass("NumberColumns")
-        numberColumns.assertNumberOfMemberProperties(0)
+        val numberColumns = result.loadClass("NumberColumnsBase")
+        numberColumns.assertNumberOfDeclaredMemberProperties(0)
     }
 
     @Test
@@ -138,8 +138,9 @@ class PanacheEntityBaseProcessorCompileTests : ProcessorCompileTestCommon() {
         compilation.assertNumberOfFiles(1)
         compilation.assertHasFile("ProductColumns.kt")
 
-        val productColumns = result.loadClass("ProductColumns")
-        productColumns.assertNumberOfMemberProperties(0)
+        val productColumns = result.loadClass("ProductColumnsBase")
+        productColumns.assertNumberOfDeclaredMemberProperties(1)
+        productColumns.assertDeclaresColumnOfType("id", Long::class)
     }
 
     @Test
@@ -186,12 +187,14 @@ class PanacheEntityBaseProcessorCompileTests : ProcessorCompileTestCommon() {
         compilation.assertHasFile("PostColumns.kt")
         compilation.assertHasFile("CommentColumns.kt")
 
-        val postColumns = result.loadClass("PostColumns")
-        postColumns.assertNumberOfMemberProperties(0)
+        val postColumns = result.loadClass("PostColumnsBase")
+        postColumns.assertNumberOfDeclaredMemberProperties(1)
+        postColumns.assertDeclaresColumnOfType("id", Long::class)
 
-        val commentColumns = result.loadClass("CommentColumns")
-        commentColumns.assertNumberOfMemberProperties(1)
-        commentColumns.assertHasMemberPropertyOfType("post", "PostColumnsBase")
+        val commentColumns = result.loadClass("CommentColumnsBase")
+        commentColumns.assertNumberOfDeclaredMemberProperties(2)
+        commentColumns.assertDeclaresColumnOfType("id", Long::class)
+        commentColumns.assertDeclaresMemberPropertyOfType("post", "PostColumnsBase")
     }
 
     @Test
@@ -220,9 +223,10 @@ class PanacheEntityBaseProcessorCompileTests : ProcessorCompileTestCommon() {
         compilation.assertNumberOfFiles(1)
         compilation.assertHasFile("UserColumns.kt")
 
-        val userColumns = result.loadClass("UserColumns")
-        userColumns.assertNumberOfMemberProperties(1)
-        userColumns.assertHasColumnOfType("username", CharSequence::class)
+        val userColumns = result.loadClass("UserColumnsBase")
+        userColumns.assertNumberOfDeclaredMemberProperties(2)
+        userColumns.assertDeclaresColumnOfType("id", Long::class)
+        userColumns.assertDeclaresColumnOfType("username", CharSequence::class)
     }
 
     @Test
@@ -260,17 +264,16 @@ class PanacheEntityBaseProcessorCompileTests : ProcessorCompileTestCommon() {
 
         // Then
         result.assertOk()
-        //TODO
-//        compilation.assertNumberOfFiles(2)
-//        compilation.assertHasFile("BaseColumns.kt")
+        compilation.assertNumberOfFiles(2)
+        compilation.assertHasFile("BaseColumnsBase.kt")
         compilation.assertHasFile("DerivedColumns.kt")
 
-//        val baseColumns = result.loadClass("BaseColumns")
-//        baseColumns.assertNumberOfMemberProperties(1)
-//        baseColumns.assertHasColumnOfType("id", Long::class)
+        val baseColumns = result.loadClass("BaseColumnsBase")
+        baseColumns.assertNumberOfDeclaredMemberProperties(1)
+        baseColumns.assertDeclaresColumnOfType("id", Long::class)
 
-        val derivedColumns = result.loadClass("DerivedColumns")
-        derivedColumns.assertNumberOfMemberProperties(1)
-        derivedColumns.assertHasColumnOfType("name", String::class)
+        val derivedColumns = result.loadClass("DerivedColumnsBase")
+        derivedColumns.assertNumberOfDeclaredMemberProperties(1)
+        derivedColumns.assertDeclaresColumnOfType("name", String::class)
     }
 }

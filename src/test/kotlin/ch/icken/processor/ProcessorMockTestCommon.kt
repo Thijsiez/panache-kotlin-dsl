@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Thijs Koppen
+ * Copyright 2023-2026 Thijs Koppen
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,9 @@
 
 package ch.icken.processor
 
+import ch.icken.processor.model.withSuperTypes
 import com.google.devtools.ksp.symbol.KSClassDeclaration
+import com.google.devtools.ksp.symbol.KSDeclaration
 import com.google.devtools.ksp.symbol.KSNode
 import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.validate
@@ -32,6 +34,7 @@ abstract class ProcessorMockTestCommon {
     fun setUp() {
         mockkStatic(KSClassDeclaration::withSuperTypes)
         mockkStatic(KSClassDeclaration::toClassName)
+        mockkStatic(KSDeclaration::isClass)
         mockkStatic(KSNode::validate)
         mockkStatic(KSType::toClassName)
     }

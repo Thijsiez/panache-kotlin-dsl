@@ -19,5 +19,5 @@ package ch.icken.processor.model
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 
 internal sealed class KSClassDeclarationWrapper(
-    val ksClassDeclaration: KSClassDeclaration
+    internal val ksClassDeclaration: KSClassDeclaration
 )

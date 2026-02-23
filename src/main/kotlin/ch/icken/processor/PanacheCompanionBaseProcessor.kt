@@ -41,91 +41,97 @@ internal class PanacheCompanionBaseProcessor(
         return invalid
     }
 
-    //TODO refactor for readability and align property names with their types
     internal fun createEntityExtensions(entity: KSClassDeclarationWithIdTypeName) {
         val targetPackageName = entity.generatedPackageName
-        val classSimpleName = entity.simpleName
         val extensionFileName = entity.extensionFileName
         logger.info("Generating $targetPackageName.$extensionFileName")
 
         //region Names and types
-        val className = entity.toClassName()
+        val entitySimpleName = entity.simpleName
+        val entityClassName = entity.toClassName()
+        val entityCompanionObjectClassName = entityClassName.nestedClass(CLASS_NAME_COMPANION)
         val columnsObjectClassName = ClassName(targetPackageName, entity.columnsObjectName)
-        val companionClassName = className.nestedClass(CLASS_NAME_COMPANION)
 
-        val expressionType = ExpressionClassName
+        val expressionTypeName = ExpressionClassName
             .plusParameter(columnsObjectClassName)
-        val expressionParameterLambdaType = LambdaTypeName.get(
+        val expressionParameterTypeName = LambdaTypeName.get(
             receiver = columnsObjectClassName,
-            returnType = expressionType
+            returnType = expressionTypeName
         )
-        val queryComponentType = QueryComponentClassName
-            .plusParameter(className)
+        val queryComponentTypeName = QueryComponentClassName
+            .plusParameter(entityClassName)
             .plusParameter(entity.idTypeName)
             .plusParameter(columnsObjectClassName)
 
-        val setterExpressionParameterLambdaType = LambdaTypeName.get(
+        val setterExpressionParameterTypeName = LambdaTypeName.get(
             receiver = columnsObjectClassName,
             returnType = SetterExpressionClassName
         )
-        val initialUpdateComponentType = InitialUpdateComponentClassName
-            .plusParameter(className)
+        val initialUpdateComponentTypeName = InitialUpdateComponentClassName
+            .plusParameter(entityClassName)
             .plusParameter(entity.idTypeName)
             .plusParameter(columnsObjectClassName)
-        val logicalUpdateComponentType = LogicalUpdateComponentClassName
-            .plusParameter(className)
+        val logicalUpdateComponentTypeName = LogicalUpdateComponentClassName
+            .plusParameter(entityClassName)
             .plusParameter(entity.idTypeName)
             .plusParameter(columnsObjectClassName)
         //endregion
 
         //region where, and, or
         val where = FunSpec.builder(FUNCTION_NAME_WHERE)
-            .receiver(companionClassName)
-            .addParameter(PARAM_NAME_EXPRESSION, expressionParameterLambdaType)
-            .returns(queryComponentType)
+            .receiver(entityCompanionObjectClassName)
+            .addParameter(PARAM_NAME_EXPRESSION, expressionParameterTypeName)
+            .returns(queryComponentTypeName)
             .addStatement("return %M($PARAM_NAME_EXPRESSION(%T))",
                 MemberName(QUERY_PACKAGE, FUNCTION_NAME_WHERE), columnsObjectClassName)
-            .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_WHERE$classSimpleName"))
+            .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_WHERE$entitySimpleName"))
+            .addGeneratedAnnotation()
             .addKdoc("""
                 Starts building a SELECT or DELETE query with the returned `expression`.
                 
                 @param  expression  build and return an [Expression][$QUERY_PACKAGE.Expression]
                 @return             a new [QueryComponent][$QUERY_PACKAGE.Component.QueryComponent] instance
                 """.trimIndent())
+            .build()
 
         val and = FunSpec.builder(FUNCTION_NAME_AND)
-            .receiver(queryComponentType)
-            .addParameter(PARAM_NAME_EXPRESSION, expressionParameterLambdaType)
-            .returns(queryComponentType)
+            .receiver(queryComponentTypeName)
+            .addParameter(PARAM_NAME_EXPRESSION, expressionParameterTypeName)
+            .returns(queryComponentTypeName)
             .addStatement("return $FUNCTION_NAME_AND($PARAM_NAME_EXPRESSION(%T))", columnsObjectClassName)
-            .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_AND$classSimpleName"))
+            .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_AND$entitySimpleName"))
+            .addGeneratedAnnotation()
             .addKdoc("""
                 Adds an AND operator to this SELECT/DELETE query with the returned `expression`.
                 
                 @param  expression  build and return an [Expression][$QUERY_PACKAGE.Expression]
                 @return             a new [QueryComponent][$QUERY_PACKAGE.Component.QueryComponent] instance
                 """.trimIndent())
+            .build()
         val or = FunSpec.builder(FUNCTION_NAME_OR)
-            .receiver(queryComponentType)
-            .addParameter(PARAM_NAME_EXPRESSION, expressionParameterLambdaType)
-            .returns(queryComponentType)
+            .receiver(queryComponentTypeName)
+            .addParameter(PARAM_NAME_EXPRESSION, expressionParameterTypeName)
+            .returns(queryComponentTypeName)
             .addStatement("return $FUNCTION_NAME_OR($PARAM_NAME_EXPRESSION(%T))", columnsObjectClassName)
-            .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_OR$classSimpleName"))
+            .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_OR$entitySimpleName"))
+            .addGeneratedAnnotation()
             .addKdoc("""
                 Adds an OR operator to this SELECT/DELETE query with the returned `expression`.
                 
                 @param  expression  build and return an [Expression][$QUERY_PACKAGE.Expression]
                 @return             a new [QueryComponent][$QUERY_PACKAGE.Component.QueryComponent] instance
                 """.trimIndent())
+            .build()
         //endregion
 
         //region count, delete, find, stream
         val count = FunSpec.builder(FUNCTION_NAME_COUNT)
-            .receiver(companionClassName)
-            .addParameter(PARAM_NAME_EXPRESSION, expressionParameterLambdaType)
+            .receiver(entityCompanionObjectClassName)
+            .addParameter(PARAM_NAME_EXPRESSION, expressionParameterTypeName)
             .returns(LongClassName)
             .addStatement("return $FUNCTION_NAME_WHERE($PARAM_NAME_EXPRESSION).$FUNCTION_NAME_COUNT()")
-            .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_COUNT$classSimpleName"))
+            .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_COUNT$entitySimpleName"))
+            .addGeneratedAnnotation()
             .addKdoc("""
                 Counts the number of entities matching the returned `expression`.
                 
@@ -133,13 +139,15 @@ internal class PanacheCompanionBaseProcessor(
                 @return             the number of entities counted
                 @see                io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase.count
                 """.trimIndent())
+            .build()
 
         val delete = FunSpec.builder(FUNCTION_NAME_DELETE)
-            .receiver(companionClassName)
-            .addParameter(PARAM_NAME_EXPRESSION, expressionParameterLambdaType)
+            .receiver(entityCompanionObjectClassName)
+            .addParameter(PARAM_NAME_EXPRESSION, expressionParameterTypeName)
             .returns(LongClassName)
             .addStatement("return $FUNCTION_NAME_WHERE($PARAM_NAME_EXPRESSION).$FUNCTION_NAME_DELETE()")
-            .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_DELETE$classSimpleName"))
+            .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_DELETE$entitySimpleName"))
+            .addGeneratedAnnotation()
             .addKdoc("""
                 Deletes all entities matching the returned `expression`.
                 
@@ -150,14 +158,16 @@ internal class PanacheCompanionBaseProcessor(
                 @return             the number of entities deleted
                 @see                io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase.delete
                 """.trimIndent())
+            .build()
 
-        val findReturns = PanacheQueryClassName.plusParameter(className)
+        val findReturns = PanacheQueryClassName.plusParameter(entityClassName)
         val find = FunSpec.builder(FUNCTION_NAME_FIND)
-            .receiver(companionClassName)
-            .addParameter(PARAM_NAME_EXPRESSION, expressionParameterLambdaType)
+            .receiver(entityCompanionObjectClassName)
+            .addParameter(PARAM_NAME_EXPRESSION, expressionParameterTypeName)
             .returns(findReturns)
             .addStatement("return $FUNCTION_NAME_WHERE($PARAM_NAME_EXPRESSION).$FUNCTION_NAME_FIND()")
-            .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_FIND$classSimpleName"))
+            .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_FIND$entitySimpleName"))
+            .addGeneratedAnnotation()
             .addKdoc("""
                 Finds entities matching the returned `expression`.
                 
@@ -169,13 +179,15 @@ internal class PanacheCompanionBaseProcessor(
                 @return             a new [PanacheQuery][io.quarkus.hibernate.orm.panache.kotlin.PanacheQuery] instance
                 @see                io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase.find
                 """.trimIndent())
+            .build()
         val findSorted = FunSpec.builder(FUNCTION_NAME_FIND)
-            .receiver(companionClassName)
+            .receiver(entityCompanionObjectClassName)
             .addParameter(PARAM_NAME_SORT, SortClassName)
-            .addParameter(PARAM_NAME_EXPRESSION, expressionParameterLambdaType)
+            .addParameter(PARAM_NAME_EXPRESSION, expressionParameterTypeName)
             .returns(findReturns)
             .addStatement("return $FUNCTION_NAME_WHERE($PARAM_NAME_EXPRESSION).$FUNCTION_NAME_FIND($PARAM_NAME_SORT)")
-            .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_FIND_SORTED$classSimpleName"))
+            .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_FIND_SORTED$entitySimpleName"))
+            .addGeneratedAnnotation()
             .addKdoc("""
                 Finds entities matching the returned `expression` and the given sort options.
                 
@@ -188,14 +200,16 @@ internal class PanacheCompanionBaseProcessor(
                 @return             a new [PanacheQuery][io.quarkus.hibernate.orm.panache.kotlin.PanacheQuery] instance
                 @see                io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase.find
                 """.trimIndent())
+            .build()
 
-        val streamReturns = StreamClassName.plusParameter(className)
+        val streamReturns = StreamClassName.plusParameter(entityClassName)
         val stream = FunSpec.builder(FUNCTION_NAME_STREAM)
-            .receiver(companionClassName)
-            .addParameter(PARAM_NAME_EXPRESSION, expressionParameterLambdaType)
+            .receiver(entityCompanionObjectClassName)
+            .addParameter(PARAM_NAME_EXPRESSION, expressionParameterTypeName)
             .returns(streamReturns)
             .addStatement("return $FUNCTION_NAME_WHERE($PARAM_NAME_EXPRESSION).$FUNCTION_NAME_STREAM()")
-            .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_STREAM$classSimpleName"))
+            .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_STREAM$entitySimpleName"))
+            .addGeneratedAnnotation()
             .addKdoc("""
                 Streams all entities matching the returned `expression`.
                 This function is a shortcut for `find().stream()`.
@@ -208,13 +222,15 @@ internal class PanacheCompanionBaseProcessor(
                 without paging
                 @see                io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase.stream
                 """.trimIndent())
+            .build()
         val streamSorted = FunSpec.builder(FUNCTION_NAME_STREAM)
-            .receiver(companionClassName)
+            .receiver(entityCompanionObjectClassName)
             .addParameter(PARAM_NAME_SORT, SortClassName)
-            .addParameter(PARAM_NAME_EXPRESSION, expressionParameterLambdaType)
+            .addParameter(PARAM_NAME_EXPRESSION, expressionParameterTypeName)
             .returns(streamReturns)
             .addStatement("return $FUNCTION_NAME_WHERE($PARAM_NAME_EXPRESSION).$FUNCTION_NAME_STREAM($PARAM_NAME_SORT)")
-            .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_STREAM_SORTED$classSimpleName"))
+            .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_STREAM_SORTED$entitySimpleName"))
+            .addGeneratedAnnotation()
             .addKdoc("""
                 Streams all entities matching the returned `expression` and the given sort options.
                 This function is a shortcut for `find(sort).stream()`.
@@ -228,15 +244,17 @@ internal class PanacheCompanionBaseProcessor(
                 without paging
                 @see                io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase.stream
                 """.trimIndent())
+            .build()
         //endregion
 
         //region single, multiple
         val single = FunSpec.builder(FUNCTION_NAME_SINGLE)
-            .receiver(companionClassName)
-            .addParameter(PARAM_NAME_EXPRESSION, expressionParameterLambdaType)
-            .returns(className)
+            .receiver(entityCompanionObjectClassName)
+            .addParameter(PARAM_NAME_EXPRESSION, expressionParameterTypeName)
+            .returns(entityClassName)
             .addStatement("return $FUNCTION_NAME_WHERE($PARAM_NAME_EXPRESSION).single()")
-            .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_SINGLE$classSimpleName"))
+            .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_SINGLE$entitySimpleName"))
+            .addGeneratedAnnotation()
             .addKdoc("""
                 Finds a single result matching the returned `expression`, or throws if there is not exactly one.
                 This function is a shortcut for `find().singleResult()`.
@@ -247,12 +265,14 @@ internal class PanacheCompanionBaseProcessor(
                 @throws             jakarta.persistence.NonUniqueResultException when there are multiple results
                 @see                io.quarkus.hibernate.orm.panache.kotlin.PanacheQuery.singleResult
                 """.trimIndent())
+            .build()
         val singleSafe = FunSpec.builder(FUNCTION_NAME_SINGLE_SAFE)
-            .receiver(companionClassName)
-            .addParameter(PARAM_NAME_EXPRESSION, expressionParameterLambdaType)
-            .returns(PanacheSingleResultClassName.plusParameter(WildcardTypeName.producerOf(className)))
+            .receiver(entityCompanionObjectClassName)
+            .addParameter(PARAM_NAME_EXPRESSION, expressionParameterTypeName)
+            .returns(PanacheSingleResultClassName.plusParameter(WildcardTypeName.producerOf(entityClassName)))
             .addStatement("return $FUNCTION_NAME_WHERE($PARAM_NAME_EXPRESSION).singleSafe()")
-            .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_SINGLE_SAFE$classSimpleName"))
+            .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_SINGLE_SAFE$entitySimpleName"))
+            .addGeneratedAnnotation()
             .addKdoc("""
                 Finds a single result matching the returned `expression`, but does not throw if there is not exactly one.
                 This function is a shortcut for `find().singleResultSafe()`.
@@ -263,14 +283,16 @@ internal class PanacheCompanionBaseProcessor(
                 @return             a [PanacheSingleResult][$QUERY_PACKAGE.PanacheSingleResult] instance
                 @see                $QUERY_PACKAGE.singleResultSafe
                 """.trimIndent())
+            .build()
 
-        val multipleReturns = ListClassName.plusParameter(className)
+        val multipleReturns = ListClassName.plusParameter(entityClassName)
         val multiple = FunSpec.builder(FUNCTION_NAME_MULTIPLE)
-            .receiver(companionClassName)
-            .addParameter(PARAM_NAME_EXPRESSION, expressionParameterLambdaType)
+            .receiver(entityCompanionObjectClassName)
+            .addParameter(PARAM_NAME_EXPRESSION, expressionParameterTypeName)
             .returns(multipleReturns)
             .addStatement("return $FUNCTION_NAME_WHERE($PARAM_NAME_EXPRESSION).multiple()")
-            .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_MULTIPLE$classSimpleName"))
+            .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_MULTIPLE$entitySimpleName"))
+            .addGeneratedAnnotation()
             .addKdoc("""
                 Finds all entities matching the returned `expression`. This function is a shortcut for `find().list()`.
                 
@@ -279,13 +301,15 @@ internal class PanacheCompanionBaseProcessor(
                 without paging
                 @see                io.quarkus.hibernate.orm.panache.kotlin.PanacheQuery.list
                 """.trimIndent())
+            .build()
         val multipleSorted = FunSpec.builder(FUNCTION_NAME_MULTIPLE)
-            .receiver(companionClassName)
+            .receiver(entityCompanionObjectClassName)
             .addParameter(PARAM_NAME_SORT, SortClassName)
-            .addParameter(PARAM_NAME_EXPRESSION, expressionParameterLambdaType)
+            .addParameter(PARAM_NAME_EXPRESSION, expressionParameterTypeName)
             .returns(multipleReturns)
             .addStatement("return $FUNCTION_NAME_WHERE($PARAM_NAME_EXPRESSION).multiple($PARAM_NAME_SORT)")
-            .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_MULTIPLE_SORTED$classSimpleName"))
+            .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_MULTIPLE_SORTED$entitySimpleName"))
+            .addGeneratedAnnotation()
             .addKdoc("""
                 Finds all entities matching the returned `expression` and the given sort options.
                 This function is a shortcut for `find(sort).list()`.
@@ -296,16 +320,18 @@ internal class PanacheCompanionBaseProcessor(
                 without paging
                 @see                io.quarkus.hibernate.orm.panache.kotlin.PanacheQuery.list
                 """.trimIndent())
+            .build()
         //endregion
 
         //region update, updateAll
         val updateExtensionFunction = MemberName(QUERY_PACKAGE, FUNCTION_NAME_UPDATE)
         val update = FunSpec.builder(FUNCTION_NAME_UPDATE)
-            .receiver(companionClassName)
-            .addParameter(PARAM_NAME_SETTER, setterExpressionParameterLambdaType)
-            .returns(initialUpdateComponentType)
+            .receiver(entityCompanionObjectClassName)
+            .addParameter(PARAM_NAME_SETTER, setterExpressionParameterTypeName)
+            .returns(initialUpdateComponentTypeName)
             .addStatement("return %M(%T, $PARAM_NAME_SETTER)", updateExtensionFunction, columnsObjectClassName)
-            .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_UPDATE$classSimpleName"))
+            .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_UPDATE$entitySimpleName"))
+            .addGeneratedAnnotation()
             .addKdoc("""
                 Starts building an UPDATE query by [set][$QUERY_PACKAGE.Column.set]-ing a new value.
                 
@@ -314,12 +340,14 @@ internal class PanacheCompanionBaseProcessor(
                 @return         a new
                 [InitialUpdateComponent][$QUERY_PACKAGE.Component.UpdateComponent.InitialUpdateComponent] instance
                 """.trimIndent())
+            .build()
         val updateMultiple = FunSpec.builder(FUNCTION_NAME_UPDATE)
-            .receiver(companionClassName)
-            .addParameter(PARAM_NAME_SETTERS, setterExpressionParameterLambdaType, KModifier.VARARG)
-            .returns(initialUpdateComponentType)
+            .receiver(entityCompanionObjectClassName)
+            .addParameter(PARAM_NAME_SETTERS, setterExpressionParameterTypeName, KModifier.VARARG)
+            .returns(initialUpdateComponentTypeName)
             .addStatement("return %M(%T, $PARAM_NAME_SETTERS)", updateExtensionFunction, columnsObjectClassName)
-            .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_UPDATE_MULTIPLE$classSimpleName"))
+            .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_UPDATE_MULTIPLE$entitySimpleName"))
+            .addGeneratedAnnotation()
             .addKdoc("""
                 Starts building an UPDATE query by [set][$QUERY_PACKAGE.Column.set]-ing multiple new values.
                 
@@ -328,14 +356,16 @@ internal class PanacheCompanionBaseProcessor(
                 @return         a new
                 [InitialUpdateComponent][$QUERY_PACKAGE.Component.UpdateComponent.InitialUpdateComponent] instance
                 """.trimIndent())
+            .build()
 
         val updateAll = FunSpec.builder(FUNCTION_NAME_UPDATE_ALL)
-            .receiver(companionClassName)
-            .addParameter(PARAM_NAME_SETTER, setterExpressionParameterLambdaType)
+            .receiver(entityCompanionObjectClassName)
+            .addParameter(PARAM_NAME_SETTER, setterExpressionParameterTypeName)
             .returns(IntClassName)
             .addStatement("return %M(%T, $PARAM_NAME_SETTER).executeWithoutWhere()",
                 updateExtensionFunction, columnsObjectClassName)
-            .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_UPDATE_ALL$classSimpleName"))
+            .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_UPDATE_ALL$entitySimpleName"))
+            .addGeneratedAnnotation()
             .addKdoc("""
                 Updates all entities of this type by [set][$QUERY_PACKAGE.Column.set]-ing a new value.
                 
@@ -348,13 +378,15 @@ internal class PanacheCompanionBaseProcessor(
                 @return         the number of entities updated
                 @see            io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase.update
                 """.trimIndent())
+            .build()
         val updateAllMultiple = FunSpec.builder(FUNCTION_NAME_UPDATE_ALL)
-            .receiver(companionClassName)
-            .addParameter(PARAM_NAME_SETTERS, setterExpressionParameterLambdaType, KModifier.VARARG)
+            .receiver(entityCompanionObjectClassName)
+            .addParameter(PARAM_NAME_SETTERS, setterExpressionParameterTypeName, KModifier.VARARG)
             .returns(IntClassName)
             .addStatement("return %M(%T, $PARAM_NAME_SETTERS).executeWithoutWhere()",
                 updateExtensionFunction, columnsObjectClassName)
-            .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_UPDATE_ALL_MULTIPLE$classSimpleName"))
+            .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_UPDATE_ALL_MULTIPLE$entitySimpleName"))
+            .addGeneratedAnnotation()
             .addKdoc("""
                 Updates all entities of this type by [set][$QUERY_PACKAGE.Column.set]-ing multiple new values.
                 
@@ -367,15 +399,17 @@ internal class PanacheCompanionBaseProcessor(
                 @return         the number of entities updated
                 @see            io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase.update
                 """.trimIndent())
+            .build()
         //endregion
 
         //region whereUpdate, andUpdate, orUpdate
         val whereUpdate = FunSpec.builder(FUNCTION_NAME_WHERE)
-            .receiver(initialUpdateComponentType)
-            .addParameter(PARAM_NAME_EXPRESSION, expressionParameterLambdaType)
-            .returns(logicalUpdateComponentType)
+            .receiver(initialUpdateComponentTypeName)
+            .addParameter(PARAM_NAME_EXPRESSION, expressionParameterTypeName)
+            .returns(logicalUpdateComponentTypeName)
             .addStatement("return $FUNCTION_NAME_WHERE($PARAM_NAME_EXPRESSION(%T))", columnsObjectClassName)
-            .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_WHERE_UPDATE$classSimpleName"))
+            .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_WHERE_UPDATE$entitySimpleName"))
+            .addGeneratedAnnotation()
             .addKdoc("""
                 Adds a WHERE clause to this UPDATE query with the returned `expression`.
                 
@@ -383,13 +417,15 @@ internal class PanacheCompanionBaseProcessor(
                 @return             a new
                 [LogicalUpdateComponent][$QUERY_PACKAGE.Component.UpdateComponent.LogicalUpdateComponent] instance
                 """.trimIndent())
+            .build()
 
         val andUpdate = FunSpec.builder(FUNCTION_NAME_AND)
-            .receiver(logicalUpdateComponentType)
-            .addParameter(PARAM_NAME_EXPRESSION, expressionParameterLambdaType)
-            .returns(logicalUpdateComponentType)
+            .receiver(logicalUpdateComponentTypeName)
+            .addParameter(PARAM_NAME_EXPRESSION, expressionParameterTypeName)
+            .returns(logicalUpdateComponentTypeName)
             .addStatement("return $FUNCTION_NAME_AND($PARAM_NAME_EXPRESSION(%T))", columnsObjectClassName)
-            .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_AND_UPDATE$classSimpleName"))
+            .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_AND_UPDATE$entitySimpleName"))
+            .addGeneratedAnnotation()
             .addKdoc("""
                 Adds an AND operator to this UPDATE query with the returned `expression`.
                 
@@ -397,12 +433,14 @@ internal class PanacheCompanionBaseProcessor(
                 @return             a new
                 [LogicalUpdateComponent][$QUERY_PACKAGE.Component.UpdateComponent.LogicalUpdateComponent] instance
                 """.trimIndent())
+            .build()
         val orUpdate = FunSpec.builder(FUNCTION_NAME_OR)
-            .receiver(logicalUpdateComponentType)
-            .addParameter(PARAM_NAME_EXPRESSION, expressionParameterLambdaType)
-            .returns(logicalUpdateComponentType)
+            .receiver(logicalUpdateComponentTypeName)
+            .addParameter(PARAM_NAME_EXPRESSION, expressionParameterTypeName)
+            .returns(logicalUpdateComponentTypeName)
             .addStatement("return $FUNCTION_NAME_OR($PARAM_NAME_EXPRESSION(%T))", columnsObjectClassName)
-            .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_OR_UPDATE$classSimpleName"))
+            .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_OR_UPDATE$entitySimpleName"))
+            .addGeneratedAnnotation()
             .addKdoc("""
                 Adds an OR operator to this UPDATE query with the returned `expression`.
                 
@@ -410,33 +448,38 @@ internal class PanacheCompanionBaseProcessor(
                 @return             a new
                 [LogicalUpdateComponent][$QUERY_PACKAGE.Component.UpdateComponent.LogicalUpdateComponent] instance
                 """.trimIndent())
+            .build()
         //endregion
 
         //region andExpression, orExpression
         val andExpression = FunSpec.builder(FUNCTION_NAME_AND)
-            .receiver(expressionType)
-            .addParameter(PARAM_NAME_EXPRESSION, expressionParameterLambdaType)
-            .returns(expressionType)
+            .receiver(expressionTypeName)
+            .addParameter(PARAM_NAME_EXPRESSION, expressionParameterTypeName)
+            .returns(expressionTypeName)
             .addStatement("return $FUNCTION_NAME_AND($PARAM_NAME_EXPRESSION(%T))", columnsObjectClassName)
-            .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_AND_EXPRESSION$classSimpleName"))
+            .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_AND_EXPRESSION$entitySimpleName"))
+            .addGeneratedAnnotation()
             .addKdoc("""
                 Adds an AND operator to this query with the returned `expression`.
                 
                 @param  expression  build and return an [Expression][$QUERY_PACKAGE.Expression]
                 @return             a new [Expression][$QUERY_PACKAGE.Expression] instance
                 """.trimIndent())
+            .build()
         val orExpression = FunSpec.builder(FUNCTION_NAME_OR)
-            .receiver(expressionType)
-            .addParameter(PARAM_NAME_EXPRESSION, expressionParameterLambdaType)
-            .returns(expressionType)
+            .receiver(expressionTypeName)
+            .addParameter(PARAM_NAME_EXPRESSION, expressionParameterTypeName)
+            .returns(expressionTypeName)
             .addStatement("return $FUNCTION_NAME_OR($PARAM_NAME_EXPRESSION(%T))", columnsObjectClassName)
-            .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_OR_EXPRESSION$classSimpleName"))
+            .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_OR_EXPRESSION$entitySimpleName"))
+            .addGeneratedAnnotation()
             .addKdoc("""
                 Adds an OR operator to this query with the returned `expression`.
                 
                 @param  expression  build and return an [Expression][$QUERY_PACKAGE.Expression]
                 @return             a new [Expression][$QUERY_PACKAGE.Expression] instance
                 """.trimIndent())
+            .build()
         //endregion
 
         val functions = listOf(where, and, or,
@@ -447,69 +490,65 @@ internal class PanacheCompanionBaseProcessor(
             andExpression, orExpression)
 
         FileSpec.builder(targetPackageName, extensionFileName)
-            .apply {
-                functions.map { it.addGeneratedAnnotation() }
-                    .map(FunSpec.Builder::build)
-                    .forEach(::addFunction)
-            }
+            .addFunctions(functions)
             .addAnnotation(suppressFileAnnotation)
             .addGeneratedAnnotation()
             .build()
             .writeTo(codeGenerator, Dependencies(false))
     }
 
-    companion object {
-        //region Class Names
-        internal val ExpressionClassName = ClassName(QUERY_PACKAGE, "Expression")
-        internal val InitialUpdateComponentClassName =
-            ClassName("$QUERY_PACKAGE.Component.UpdateComponent", "InitialUpdateComponent")
-        internal val IntClassName = ClassName("kotlin", "Int")
-        internal val JvmNameClassName = ClassName("kotlin.jvm", "JvmName")
-        internal val ListClassName = ClassName("kotlin.collections", "List")
-        internal val LogicalUpdateComponentClassName =
-            ClassName("$QUERY_PACKAGE.Component.UpdateComponent", "LogicalUpdateComponent")
-        internal val LongClassName = ClassName("kotlin", "Long")
-        internal val PanacheQueryClassName = ClassName("io.quarkus.hibernate.orm.panache.kotlin", "PanacheQuery")
-        internal val PanacheSingleResultClassName = ClassName(QUERY_PACKAGE, "PanacheSingleResult")
-        internal val QueryComponentClassName = ClassName("$QUERY_PACKAGE.Component", "QueryComponent")
-        internal val SetterExpressionClassName =
-            ClassName("$QUERY_PACKAGE.Component.UpdateComponent.InitialUpdateComponent", "SetterExpression")
-        internal val SortClassName = ClassName("io.quarkus.panache.common", "Sort")
-        internal val StreamClassName = ClassName("java.util.stream", "Stream")
-        //endregion
-        //region Constant
-        internal const val CLASS_NAME_COMPANION = "Companion"
-        internal const val FUNCTION_NAME_AND = "and"
-        internal const val FUNCTION_NAME_AND_EXPRESSION = "andExpression"
-        internal const val FUNCTION_NAME_AND_UPDATE = "andUpdate"
-        internal const val FUNCTION_NAME_COUNT = "count"
-        internal const val FUNCTION_NAME_DELETE = "delete"
-        internal const val FUNCTION_NAME_FIND = "find"
-        internal const val FUNCTION_NAME_FIND_SORTED = "findSorted"
-        internal const val FUNCTION_NAME_MULTIPLE = "multiple"
-        internal const val FUNCTION_NAME_MULTIPLE_SORTED = "multipleSorted"
-        internal const val FUNCTION_NAME_OR = "or"
-        internal const val FUNCTION_NAME_OR_EXPRESSION = "orExpression"
-        internal const val FUNCTION_NAME_OR_UPDATE = "orUpdate"
-        internal const val FUNCTION_NAME_SINGLE = "single"
-        internal const val FUNCTION_NAME_SINGLE_SAFE = "singleSafe"
-        internal const val FUNCTION_NAME_STREAM = "stream"
-        internal const val FUNCTION_NAME_STREAM_SORTED = "streamSorted"
-        internal const val FUNCTION_NAME_UPDATE = "update"
-        internal const val FUNCTION_NAME_UPDATE_ALL = "updateAll"
-        internal const val FUNCTION_NAME_UPDATE_ALL_MULTIPLE = "updateAllMultiple"
-        internal const val FUNCTION_NAME_UPDATE_MULTIPLE = "updateMultiple"
-        internal const val FUNCTION_NAME_WHERE = "where"
-        internal const val FUNCTION_NAME_WHERE_UPDATE = "whereUpdate"
-        internal const val PARAM_NAME_EXPRESSION = "expression"
-        internal const val PARAM_NAME_SETTER = "setter"
-        internal const val PARAM_NAME_SETTERS = "setters"
-        internal const val PARAM_NAME_SORT = "sort"
-        //endregion
-
-        internal fun jvmNameAnnotation(name: String) = AnnotationSpec.builder(JvmNameClassName)
+    private fun jvmNameAnnotation(name: String) =
+        AnnotationSpec.builder(JvmNameClassName)
             .addMember("%S", name)
             .build()
+
+    internal companion object {
+        //region Class Names
+        private val ExpressionClassName = ClassName(QUERY_PACKAGE, "Expression")
+        private val InitialUpdateComponentClassName =
+            ClassName("$QUERY_PACKAGE.Component.UpdateComponent", "InitialUpdateComponent")
+        private val IntClassName = ClassName("kotlin", "Int")
+        private val JvmNameClassName = ClassName("kotlin.jvm", "JvmName")
+        internal val ListClassName = ClassName("kotlin.collections", "List")
+        private val LogicalUpdateComponentClassName =
+            ClassName("$QUERY_PACKAGE.Component.UpdateComponent", "LogicalUpdateComponent")
+        private val PanacheQueryClassName = ClassName("io.quarkus.hibernate.orm.panache.kotlin", "PanacheQuery")
+        private val PanacheSingleResultClassName = ClassName(QUERY_PACKAGE, "PanacheSingleResult")
+        private val QueryComponentClassName = ClassName("$QUERY_PACKAGE.Component", "QueryComponent")
+        private val SetterExpressionClassName =
+            ClassName("$QUERY_PACKAGE.Component.UpdateComponent.InitialUpdateComponent", "SetterExpression")
+        private val SortClassName = ClassName("io.quarkus.panache.common", "Sort")
+        private val StreamClassName = ClassName("java.util.stream", "Stream")
+        //endregion
+        //region Constant
+        private const val CLASS_NAME_COMPANION = "Companion"
+        private const val FUNCTION_NAME_AND = "and"
+        private const val FUNCTION_NAME_AND_EXPRESSION = "andExpression"
+        private const val FUNCTION_NAME_AND_UPDATE = "andUpdate"
+        private const val FUNCTION_NAME_COUNT = "count"
+        private const val FUNCTION_NAME_DELETE = "delete"
+        private const val FUNCTION_NAME_FIND = "find"
+        private const val FUNCTION_NAME_FIND_SORTED = "findSorted"
+        private const val FUNCTION_NAME_MULTIPLE = "multiple"
+        private const val FUNCTION_NAME_MULTIPLE_SORTED = "multipleSorted"
+        private const val FUNCTION_NAME_OR = "or"
+        private const val FUNCTION_NAME_OR_EXPRESSION = "orExpression"
+        private const val FUNCTION_NAME_OR_UPDATE = "orUpdate"
+        private const val FUNCTION_NAME_SINGLE = "single"
+        private const val FUNCTION_NAME_SINGLE_SAFE = "singleSafe"
+        private const val FUNCTION_NAME_STREAM = "stream"
+        private const val FUNCTION_NAME_STREAM_SORTED = "streamSorted"
+        private const val FUNCTION_NAME_UPDATE = "update"
+        private const val FUNCTION_NAME_UPDATE_ALL = "updateAll"
+        private const val FUNCTION_NAME_UPDATE_ALL_MULTIPLE = "updateAllMultiple"
+        private const val FUNCTION_NAME_UPDATE_MULTIPLE = "updateMultiple"
+        private const val FUNCTION_NAME_WHERE = "where"
+        private const val FUNCTION_NAME_WHERE_UPDATE = "whereUpdate"
+        private const val PARAM_NAME_EXPRESSION = "expression"
+        private const val PARAM_NAME_SETTER = "setter"
+        private const val PARAM_NAME_SETTERS = "setters"
+        private const val PARAM_NAME_SORT = "sort"
+        //endregion
     }
 }
 

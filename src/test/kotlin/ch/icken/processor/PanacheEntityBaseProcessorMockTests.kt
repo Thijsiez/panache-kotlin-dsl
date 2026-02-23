@@ -16,11 +16,13 @@
 
 package ch.icken.processor
 
+import ch.icken.processor.EntityProcessor.Companion.HIBERNATE_PANACHE_ENTITY
+import ch.icken.processor.EntityProcessor.Companion.JAKARTA_PERSISTENCE_JOIN_COLUMN
+import ch.icken.processor.EntityProcessor.Companion.JAKARTA_PERSISTENCE_MAPPED_SUPERCLASS
+import ch.icken.processor.EntityProcessor.Companion.PARAM_NAME_TYPE
+import ch.icken.processor.EntityProcessor.Companion.PROCESSOR_COLUMN_TYPE
+import ch.icken.processor.EntityProcessor.Companion.StringClassName
 import ch.icken.processor.PanacheCompanionBaseProcessor.Companion.ListClassName
-import ch.icken.processor.PanacheEntityBaseProcessor.Companion.JAKARTA_PERSISTENCE_JOIN_COLUMN
-import ch.icken.processor.PanacheEntityBaseProcessor.Companion.PARAM_NAME_TYPE
-import ch.icken.processor.PanacheEntityBaseProcessor.Companion.PROCESSOR_COLUMN_TYPE
-import ch.icken.processor.PanacheEntityBaseProcessor.Companion.StringClassName
 import ch.icken.processor.Processor.Companion.HIBERNATE_PANACHE_ENTITY_BASE
 import ch.icken.processor.Processor.Companion.JAKARTA_PERSISTENCE_ENTITY
 import ch.icken.processor.Processor.Companion.OPTION_ADD_GENERATED_ANNOTATION
@@ -28,6 +30,7 @@ import ch.icken.processor.model.KSClassDeclarationWithProperties
 import ch.icken.processor.model.KSClassDeclarationWithSuperTypes
 import ch.icken.processor.model.KSClassDeclarationWithSuperTypes.Companion.JAKARTA_PERSISTENCE_TRANSIENT
 import ch.icken.processor.model.KSClassDeclarationWithSuperTypes.Companion.PARAM_NAME_MAPPED_BY
+import ch.icken.processor.model.withSuperTypes
 import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.processing.Resolver
@@ -89,7 +92,7 @@ class PanacheEntityBaseProcessorMockTests : ProcessorMockTestCommon() {
         verify(exactly = 1) {
             processor.createColumnsObject(withArg {
                 assertEquals(validClass, it.ksClassDeclaration)
-                assertEquals(1, it.properties.size)
+                assertEquals(1, it.propertiesSize)
                 assertEquals(columnProperty, it.properties[0])
             })
         }
@@ -237,9 +240,20 @@ class PanacheEntityBaseProcessorMockTests : ProcessorMockTestCommon() {
         val classSimpleName = mockk<KSName>()
         every { classSimpleName.asString() } returns "Employee"
 
+        val superclassDeclaration = mockk<KSDeclaration>()
+        every { superclassDeclaration.isClass(HIBERNATE_PANACHE_ENTITY) } returns true
+        every { superclassDeclaration.hasAnnotation(JAKARTA_PERSISTENCE_MAPPED_SUPERCLASS) } returns true
+
+        val superclassType = mockk<KSType>()
+        every { superclassType.declaration } returns superclassDeclaration
+
+        val superclassTypeReference = mockk<KSTypeReference>()
+        every { superclassTypeReference.resolve() } returns superclassType
+
         val ksClass = mockk<KSClassDeclaration>()
         every { ksClass.packageName } returns classPackageName
         every { ksClass.simpleName } returns classSimpleName
+        every { ksClass.superTypes } returns sequenceOf(superclassTypeReference)
 
         //region firstName (not JoinColumn, not ColumnType)
         val firstNameSimpleName = mockk<KSName>()

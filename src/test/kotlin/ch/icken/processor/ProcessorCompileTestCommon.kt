@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Thijs Koppen
+ * Copyright 2024-2026 Thijs Koppen
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import org.intellij.lang.annotations.Language
 import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
 import org.junit.jupiter.api.Assertions.*
 import kotlin.reflect.KClass
-import kotlin.reflect.full.memberProperties
+import kotlin.reflect.full.declaredMemberProperties
 
 @OptIn(ExperimentalCompilerApi::class)
 abstract class ProcessorCompileTestCommon {
@@ -33,6 +33,7 @@ abstract class ProcessorCompileTestCommon {
         kspWithCompilation = true
         sources = listOf(*source)
         symbolProcessorProviders = mutableListOf(
+            MappedSuperclassProcessorProvider(),
             PanacheCompanionBaseProcessorProvider(),
             PanacheEntityBaseProcessorProvider()
         )
@@ -54,12 +55,12 @@ abstract class ProcessorCompileTestCommon {
     protected fun JvmCompilationResult.loadClass(className: String, outputPackage: String = "generated"): Class<*> =
         this.classLoader.loadClass(if (outputPackage.isBlank()) className else "$outputPackage.$className")
 
-    protected fun Class<*>.assertNumberOfMemberProperties(expectedNumberOfProperties: Int) {
-        assertEquals(expectedNumberOfProperties, kotlin.memberProperties.size)
+    protected fun Class<*>.assertNumberOfDeclaredMemberProperties(expectedNumberOfProperties: Int) {
+        assertEquals(expectedNumberOfProperties, kotlin.declaredMemberProperties.size)
     }
 
-    protected fun Class<*>.assertHasMemberPropertyOfType(propertyName: String, expectedTypeName: String) {
-        val property = kotlin.memberProperties.find { it.name == propertyName }
+    protected fun Class<*>.assertDeclaresMemberPropertyOfType(propertyName: String, expectedTypeName: String) {
+        val property = kotlin.declaredMemberProperties.find { it.name == propertyName }
         assertNotNull(property)
 
         val returnType = property!!.returnType
@@ -70,8 +71,8 @@ abstract class ProcessorCompileTestCommon {
         }
     }
 
-    protected fun Class<*>.assertHasColumnOfType(columnName: String, expectedType: KClass<*>) {
-        val property = kotlin.memberProperties.find { it.name == columnName }
+    protected fun Class<*>.assertDeclaresColumnOfType(columnName: String, expectedType: KClass<*>) {
+        val property = kotlin.declaredMemberProperties.find { it.name == columnName }
         assertNotNull(property)
 
         val returnType = property!!.returnType

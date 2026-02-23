@@ -16,13 +16,15 @@
 
 package ch.icken.processor
 
-import ch.icken.processor.PanacheCompanionBaseProcessor.Companion.LongClassName
 import ch.icken.processor.Processor.Companion.HIBERNATE_PANACHE_ENTITY_BASE
 import ch.icken.processor.Processor.Companion.JAKARTA_PERSISTENCE_ENTITY
+import ch.icken.processor.Processor.Companion.LongClassName
 import ch.icken.processor.Processor.Companion.OPTION_ADD_GENERATED_ANNOTATION
 import ch.icken.processor.model.KSClassDeclarationWithIdTypeName
 import ch.icken.processor.model.KSClassDeclarationWithSuperTypes
 import ch.icken.processor.model.KSClassDeclarationWithSuperTypes.Companion.HIBERNATE_PANACHE_COMPANION_BASE
+import ch.icken.processor.model.withSuperTypes
+import com.google.devtools.ksp.getAllSuperTypes
 import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.processing.Resolver
@@ -64,12 +66,16 @@ class PanacheCompanionBaseProcessorMockTests : ProcessorMockTestCommon() {
         val idTypeArgument = mockk<KSTypeArgument>()
         every { idTypeArgument.toTypeName() } returns idTypeName
 
+        val companionSuperclassDeclaration = mockk<KSDeclaration>()
+        every { companionSuperclassDeclaration.isClass(HIBERNATE_PANACHE_COMPANION_BASE) } returns true
+
         val companionSuperclassType = mockk<KSType>()
         every { companionSuperclassType.arguments } returns listOf(idTypeArgument)
+        every { companionSuperclassType.declaration } returns companionSuperclassDeclaration
 
         val companionObject = mockk<KSClassDeclaration>()
         every { companionObject.isCompanionObject } returns true
-        every { companionObject.superclassType(eq(HIBERNATE_PANACHE_COMPANION_BASE)) } returns companionSuperclassType
+        every { companionObject.getAllSuperTypes() } returns sequenceOf(companionSuperclassType)
 
         val qualifiedPackageName = "ch.icken.model"
         val packageName = mockk<KSName>()
@@ -109,7 +115,7 @@ class PanacheCompanionBaseProcessorMockTests : ProcessorMockTestCommon() {
         // Given
         val companionObject = mockk<KSClassDeclaration>()
         every { companionObject.isCompanionObject } returns true
-        every { companionObject.superclassType(eq(HIBERNATE_PANACHE_COMPANION_BASE)) } returns null
+        every { companionObject.getAllSuperTypes() } returns emptySequence()
 
         val validClass = mockk<KSClassDeclaration>()
         every { validClass.validate(any()) } returns true

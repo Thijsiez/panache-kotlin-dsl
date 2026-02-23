@@ -21,5 +21,5 @@ import com.squareup.kotlinpoet.TypeName
 
 internal class KSClassDeclarationWithIdTypeName(
     ksClassDeclaration: KSClassDeclaration,
-    val idTypeName: TypeName
+    internal val idTypeName: TypeName
 ) : KSClassDeclarationWrapper(ksClassDeclaration)

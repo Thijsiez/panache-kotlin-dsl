@@ -20,6 +20,8 @@ import ch.icken.processor.model.KSClassDeclarationWithProperties
 import com.google.devtools.ksp.processing.*
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.validate
+import com.squareup.kotlinpoet.FileSpec
+import com.squareup.kotlinpoet.ksp.writeTo
 
 internal class MappedSuperclassProcessor(
     options: Map<String, String>,
@@ -33,13 +35,24 @@ internal class MappedSuperclassProcessor(
 
         valid.filterPanacheEntities()
             .map { it.withColumnProperties() }
-            .forEach(::createColumnsBaseClass)
+            .forEach(::createColumnsBaseSuperclass)
 
         return invalid
     }
 
-    fun createColumnsBaseClass(entity: KSClassDeclarationWithProperties) {
-        //TODO
+    internal fun createColumnsBaseSuperclass(entity: KSClassDeclarationWithProperties) {
+        val targetPackageName = entity.generatedPackageName
+        val columnsBaseClassName = entity.columnsBaseClassName
+        logger.info("Generating $targetPackageName.$columnsBaseClassName (${entity.propertiesSize} columns)")
+
+        val columnsBaseClass = createColumnsBaseClass(entity)
+
+        FileSpec.builder(targetPackageName, columnsBaseClassName)
+            .addType(columnsBaseClass)
+            .addAnnotation(suppressFileAnnotation)
+            .addGeneratedAnnotation()
+            .build()
+            .writeTo(codeGenerator, Dependencies(false))
     }
 }
 
