@@ -18,6 +18,8 @@ package ch.icken.processor
 
 import ch.icken.processor.model.KSClassDeclarationWithProperties
 import ch.icken.processor.model.KSClassDeclarationWrapper
+import com.google.devtools.ksp.getDeclaredProperties
+import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSDeclaration
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.google.devtools.ksp.symbol.KSType
@@ -33,10 +35,7 @@ internal sealed class EntityProcessor(options: Map<String, String>) : Processor(
 
     protected fun createColumnsBaseClass(entity: KSClassDeclarationWithProperties): TypeSpec {
         val columnsBaseClassConstructorParameter = ParameterSpec
-            .builder(
-                name = PARAM_NAME_PARENT,
-                type = StringClassName.copy(nullable = true)
-            )
+            .builder(PARAM_NAME_PARENT, StringClassName.copy(nullable = true))
             .defaultValue("%L", null)
             .build()
         val columnsBaseClassConstructor = FunSpec.constructorBuilder()
@@ -44,28 +43,38 @@ internal sealed class EntityProcessor(options: Map<String, String>) : Processor(
             .addParameter(columnsBaseClassConstructorParameter)
             .build()
 
-        val mappedSuperclass = entity.superTypes
-            .map { it.resolve().declaration }
-            .singleOrNull { it.hasAnnotation(JAKARTA_PERSISTENCE_MAPPED_SUPERCLASS) }
+        val columnProperties = entity.mapProperties(::createColumnProperty)
 
         val columnsBaseClassBuilder = TypeSpec.classBuilder(entity.columnsBaseClassName)
             .addModifiers(KModifier.OPEN)
             .addTypeVariable(TypeVariableName(TYPE_VARIABLE_NAME_COLUMNS))
             .addGeneratedAnnotation()
             .primaryConstructor(columnsBaseClassConstructor)
-            .addProperties(entity.mapProperties(::createColumnProperty))
+            .addProperties(columnProperties)
+
+        val mappedSuperclass = entity.superTypes
+            .map { it.resolve().declaration }
+            .filterIsInstance<KSClassDeclaration>()
+            .singleOrNull { it.hasAnnotation(JAKARTA_PERSISTENCE_MAPPED_SUPERCLASS) }
 
         if (mappedSuperclass != null) {
+            //This library only processes entities defined within the project of which this library is a dependency
             //Since PanacheEntity is not part of the entities being processed, no Columns base class is generated
-            //When this entity's superclass is PanacheEntity, we do not want to specify a superclass
-            //Instead, we'll add the "id" property from PanacheEntity to this one
+            //If this entity's superclass is PanacheEntity, the Columns base class' superclass wouldn't exist
+            //Instead, we'll add PanacheEntity's column properties to this Columns base class
             if (mappedSuperclass.isClass(HIBERNATE_PANACHE_ENTITY)) {
-                columnsBaseClassBuilder.addProperty(createPanacheEntityIdProperty())
+                val panacheEntityColumnProperties = mappedSuperclass.getDeclaredProperties()
+                    .map(::createColumnProperty)
+                    .toList()
+
+                columnsBaseClassBuilder.addProperties(panacheEntityColumnProperties)
             } else {
                 val mappedSuperclassName = ClassName(mappedSuperclass.generatedPackageName,
                     mappedSuperclass.columnsBaseClassName)
                     .plusParameter(TypeVariableName(TYPE_VARIABLE_NAME_COLUMNS))
+
                 columnsBaseClassBuilder.superclass(mappedSuperclassName)
+                    .addSuperclassConstructorParameter("%L", PARAM_NAME_PARENT)
             }
         }
 
@@ -106,18 +115,6 @@ internal sealed class EntityProcessor(options: Map<String, String>) : Processor(
 
         return PropertySpec.builder(propertyName, joinColumnPropertyTypeName)
             .getter(joinColumnPropertyGetter)
-            .addGeneratedAnnotation()
-            .build()
-    }
-
-    private fun createPanacheEntityIdProperty(): PropertySpec {
-        val idPropertyName = "id"
-
-        val idColumnPropertyTypeName = ColumnClassName.plusParameter(TypeVariableName(TYPE_VARIABLE_NAME_COLUMNS))
-            .plusParameter(LongClassName.copy(nullable = true))
-
-        return PropertySpec.builder(idPropertyName, idColumnPropertyTypeName)
-            .initializer("%T(%P)", ColumnClassName, "\${$PARAM_NAME_PARENT.orEmpty()}$idPropertyName")
             .addGeneratedAnnotation()
             .build()
     }

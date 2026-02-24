@@ -21,6 +21,7 @@ import ch.icken.processor.hasAnnotation
 import ch.icken.processor.isClass
 import ch.icken.processor.isParameterSet
 import com.google.devtools.ksp.getAllSuperTypes
+import com.google.devtools.ksp.getDeclaredProperties
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import com.squareup.kotlinpoet.ksp.toTypeName
@@ -50,11 +51,7 @@ internal class KSClassDeclarationWithSuperTypes(
     }
 
     internal fun withColumnProperties(): KSClassDeclarationWithProperties {
-        val columnProperties = ksClassDeclaration.getAllProperties()
-            //When a property is not declared in this class itself, we won't create a column
-            //Properties originating from e.g. mapped superclasses are in their own file,
-            // which is then declared as the superclass for our base Columns implementation class
-            .filter { it.parentDeclaration == ksClassDeclaration }
+        val columnProperties = ksClassDeclaration.getDeclaredProperties()
             //When a property has no backing field, there's nothing to save, so we won't generate a column
             .filter { it.hasBackingField }
             //When a property is annotated with JPA's @Transient, it is not mapped to a column in the database
