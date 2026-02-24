@@ -47,7 +47,7 @@ internal sealed class Processor(options: Map<String, String>) : SymbolProcessor 
     protected fun KSClassDeclarationWrapper.toClassName(): ClassName = ksClassDeclaration.toClassName()
 
     //region Options
-    protected val addGeneratedAnnotation = options[OPTION_ADD_GENERATED_ANNOTATION].toBoolean()
+    private val addGeneratedAnnotation = options[OPTION_ADD_GENERATED_ANNOTATION].toBoolean()
     //endregion
 
     //region Annotations
@@ -56,7 +56,7 @@ internal sealed class Processor(options: Map<String, String>) : SymbolProcessor 
         .addMember("%S", "unused")
         .build()
 
-    protected val generatedAnnotation = AnnotationSpec.builder(GeneratedClassName)
+    private val generatedAnnotation = AnnotationSpec.builder(GeneratedClassName)
         .addMember("%S", javaClass.name)
         .addMember("%S", LocalDateTime.now().toString())
         .addMember("%S", "Generated using panache-kotlin-dsl")

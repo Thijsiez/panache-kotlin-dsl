@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Thijs Koppen
+ * Copyright 2023-2026 Thijs Koppen
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import ch.icken.query.Expression.BooleanExpression.BooleanValueExpression.*
 import ch.icken.query.Expression.BooleanExpression.IsExpression.IsNotNull
 import ch.icken.query.Expression.BooleanExpression.IsExpression.IsNull
 
-class Column<Columns, Type : Any?>(internal val name: String) {
+class Column<Columns, Type>(internal val name: String) {
     /**
      * Creates a [SetterExpression][ch.icken.query.Component.UpdateComponent.InitialUpdateComponent.SetterExpression]
      * for this column

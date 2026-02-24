@@ -78,7 +78,7 @@ class PanacheEntityBaseProcessorMockTests : ProcessorMockTestCommon() {
         val withSuperTypes = mockk<KSClassDeclarationWithSuperTypes>()
         every { withSuperTypes.ksClassDeclaration } returns validClass
         every { withSuperTypes.isSubclass(eq(HIBERNATE_PANACHE_ENTITY_BASE)) } returns true
-        every { withSuperTypes.withColumnProperties() }  answers { callOriginal() }
+        every { withSuperTypes.withColumnProperties() } answers { callOriginal() }
 
         every { validClass.withSuperTypes() } returns withSuperTypes
 
@@ -236,13 +236,13 @@ class PanacheEntityBaseProcessorMockTests : ProcessorMockTestCommon() {
     fun testCreateColumnsObject() {
 
         // Given
-        val packageName = "ch.icken.model"
         val classPackageName = mockk<KSName>()
-        every { classPackageName.asString() } returns packageName
+        every { classPackageName.asString() } returns "ch.icken.model"
 
         val classSimpleName = mockk<KSName>()
         every { classSimpleName.asString() } returns "Employee"
 
+        //region superclass
         val superclassDeclaration = mockk<KSDeclaration>()
         every { superclassDeclaration.isClass(HIBERNATE_PANACHE_ENTITY) } returns true
         every { superclassDeclaration.hasAnnotation(JAKARTA_PERSISTENCE_MAPPED_SUPERCLASS) } returns true
@@ -252,6 +252,7 @@ class PanacheEntityBaseProcessorMockTests : ProcessorMockTestCommon() {
 
         val superclassTypeReference = mockk<KSTypeReference>()
         every { superclassTypeReference.resolve() } returns superclassType
+        //endregion
 
         val ksClass = mockk<KSClassDeclaration>()
         every { ksClass.packageName } returns classPackageName
@@ -311,15 +312,15 @@ class PanacheEntityBaseProcessorMockTests : ProcessorMockTestCommon() {
         val departmentSimpleName = mockk<KSName>()
         every { departmentSimpleName.asString() } returns "department"
 
-        val departmentTypeSimpleName = mockk<KSName>()
-        every { departmentTypeSimpleName.asString() } returns "Department"
+        val departmentDeclarationSimpleName = mockk<KSName>()
+        every { departmentDeclarationSimpleName.asString() } returns "Department"
 
-        val departmentTypeDeclaration = mockk<KSDeclaration>()
-        every { departmentTypeDeclaration.packageName } returns classPackageName
-        every { departmentTypeDeclaration.simpleName } returns departmentTypeSimpleName
+        val departmentDeclaration = mockk<KSDeclaration>()
+        every { departmentDeclaration.packageName } returns classPackageName
+        every { departmentDeclaration.simpleName } returns departmentDeclarationSimpleName
 
         val departmentType = mockk<KSType>()
-        every { departmentType.declaration } returns departmentTypeDeclaration
+        every { departmentType.declaration } returns departmentDeclaration
 
         val departmentTypeReference = mockk<KSTypeReference>()
         every { departmentTypeReference.resolve() } returns departmentType
@@ -330,11 +331,9 @@ class PanacheEntityBaseProcessorMockTests : ProcessorMockTestCommon() {
         every { department.hasAnnotation(eq(JAKARTA_PERSISTENCE_JOIN_COLUMN)) } returns true
         //endregion
 
-        val ksProperties = listOf(firstName, lastName, department)
-
         val withProperties = KSClassDeclarationWithProperties(
             ksClassDeclaration = ksClass,
-            properties = ksProperties
+            properties = listOf(firstName, lastName, department)
         )
 
         // When

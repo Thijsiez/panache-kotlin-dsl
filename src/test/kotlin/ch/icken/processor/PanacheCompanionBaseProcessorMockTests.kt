@@ -77,14 +77,13 @@ class PanacheCompanionBaseProcessorMockTests : ProcessorMockTestCommon() {
         every { companionObject.isCompanionObject } returns true
         every { companionObject.getAllSuperTypes() } returns sequenceOf(companionSuperclassType)
 
-        val qualifiedPackageName = "ch.icken.model"
-        val packageName = mockk<KSName>()
-        every { packageName.asString() } returns qualifiedPackageName
+        val classPackageName = mockk<KSName>()
+        every { classPackageName.asString() } returns "ch.icken.model"
 
         val validClass = mockk<KSClassDeclaration>()
         every { validClass.validate(any()) } returns true
         every { validClass.declarations } returns sequenceOf(companionObject)
-        every { validClass.packageName } returns packageName
+        every { validClass.packageName } returns classPackageName
 
         val withSuperTypes = mockk<KSClassDeclarationWithSuperTypes>()
         every { withSuperTypes.ksClassDeclaration } returns validClass
@@ -293,15 +292,15 @@ class PanacheCompanionBaseProcessorMockTests : ProcessorMockTestCommon() {
         val simpleName = "Employee"
         val className = ClassName(packageName, simpleName)
 
-        val packageSimpleName = mockk<KSName>()
-        every { packageSimpleName.asString() } returns packageName
+        val classPackageName = mockk<KSName>()
+        every { classPackageName.asString() } returns packageName
 
         val classSimpleName = mockk<KSName>()
         every { classSimpleName.asString() } returns simpleName
 
         val ksClass = mockk<KSClassDeclaration>()
         every { ksClass.toClassName() } returns className
-        every { ksClass.packageName } returns packageSimpleName
+        every { ksClass.packageName } returns classPackageName
         every { ksClass.simpleName } returns classSimpleName
 
         val withIdTypeName = KSClassDeclarationWithIdTypeName(
