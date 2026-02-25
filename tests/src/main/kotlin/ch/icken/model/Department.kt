@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Thijs Koppen
+ * Copyright 2023-2026 Thijs Koppen
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,21 +17,22 @@
 package ch.icken.model
 
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanion
-import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntity
-import jakarta.persistence.*
+import jakarta.persistence.CascadeType
+import jakarta.persistence.Entity
+import jakarta.persistence.OneToMany
+import jakarta.persistence.Table
 
 @Suppress("unused")
 @Entity
 @Table(name = "DEPARTMENT")
 class Department(
 
-    @Column(name = "NAME", unique = true,  nullable = false)
-    var name: String,
+    name: String,
 
     @OneToMany(cascade = [CascadeType.ALL], mappedBy = "department", orphanRemoval = true)
     val employees: MutableSet<Employee> = HashSet()
 
-) : PanacheEntity() {
+) : NamedPanacheEntity(name) {
 
     companion object : PanacheCompanion<Department>
 }

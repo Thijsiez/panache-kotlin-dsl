@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2026 Thijs Koppen
+ * Copyright 2026 Thijs Koppen
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,23 +16,14 @@
 
 package ch.icken.model
 
-import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanion
-import jakarta.persistence.CascadeType
-import jakarta.persistence.Entity
-import jakarta.persistence.OneToMany
-import jakarta.persistence.Table
+import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntity
+import jakarta.persistence.Column
+import jakarta.persistence.MappedSuperclass
 
-@Suppress("unused")
-@Entity
-@Table(name = "CLIENT")
-class Client(
+@MappedSuperclass
+class NamedPanacheEntity(
 
-    name: String,
+    @Column(name = "NAME", unique = true,  nullable = false)
+    var name: String,
 
-    @OneToMany(cascade = [CascadeType.ALL], mappedBy = "client", orphanRemoval = true)
-    val assignments: MutableSet<Assignment> = HashSet()
-
-) : NamedPanacheEntity(name) {
-
-    companion object : PanacheCompanion<Client>
-}
+) : PanacheEntity()

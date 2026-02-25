@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Thijs Koppen
+ * Copyright 2023-2026 Thijs Koppen
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ repositories {
 
 dependencies {
     val quarkusVersion: String by project
-    implementation(platform("io.quarkus:quarkus-bom:$quarkusVersion"))
+    implementation(platform("io.quarkus.platform:quarkus-bom:$quarkusVersion"))
     implementation("io.quarkus:quarkus-jdbc-h2")
     implementation("io.quarkus:quarkus-hibernate-orm-panache-kotlin")
     implementation(project(":panache-kotlin-dsl"))
@@ -56,6 +56,7 @@ kotlin {
 allOpen {
     annotation("jakarta.enterprise.context.ApplicationScoped")
     annotation("jakarta.persistence.Entity")
+    annotation("jakarta.persistence.MappedSuperclass")
     annotation("jakarta.ws.rs.Path")
     annotation("io.quarkus.test.junit.QuarkusTest")
 }

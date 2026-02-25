@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Thijs Koppen
+ * Copyright 2023-2026 Thijs Koppen
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,7 @@ package ch.icken.model
 import ch.icken.model.generated.*
 import ch.icken.query.*
 import io.quarkus.test.junit.QuarkusTest
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertInstanceOf
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
@@ -48,9 +47,12 @@ class QueryTests {
         // When
         //WHERE LAST_NAME LIKE '%son'
         val sons = Employee.find { lastName like "%son" }.list()
+        //WHERE NAME = 'HR'
+        val hr = Department.find { name eq "HR" }.firstResult()
 
         // Then
         assertEquals(2, sons.size)
+        assertNotNull(hr)
     }
 
     @Test
