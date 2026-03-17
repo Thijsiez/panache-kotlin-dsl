@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.1.3
+- Process/generate `@MappedSuperclass` inheritance structures
+
 ## 0.1.2
 - Don't generate Columns for properties without backing field
 
