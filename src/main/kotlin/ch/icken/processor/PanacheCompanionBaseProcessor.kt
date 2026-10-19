@@ -41,6 +41,7 @@ internal class PanacheCompanionBaseProcessor(
         return invalid
     }
 
+    @OptIn(ExperimentalKotlinPoetApi::class)
     internal fun createEntityExtensions(entity: KSClassDeclarationWithIdTypeName) {
         val targetPackageName = entity.generatedPackageName
         val extensionFileName = entity.extensionFileName
@@ -63,6 +64,18 @@ internal class PanacheCompanionBaseProcessor(
             .plusParameter(entity.idTypeName)
             .plusParameter(columnsObjectClassName)
 
+        val orderExpressionParameterTypeName = LambdaTypeName.get(
+            receiver = columnsObjectClassName,
+            returnType = UNIT,
+            contextParameters = listOf(
+                OrderBuilderClassName.plusParameter(columnsObjectClassName)
+            )
+        )
+        val orderTypeName = OrderClassName
+            .plusParameter(entityClassName)
+            .plusParameter(entity.idTypeName)
+            .plusParameter(columnsObjectClassName)
+
         val setterExpressionParameterTypeName = LambdaTypeName.get(
             receiver = columnsObjectClassName,
             returnType = SetterExpressionClassName
@@ -77,7 +90,7 @@ internal class PanacheCompanionBaseProcessor(
             .plusParameter(columnsObjectClassName)
         //endregion
 
-        //region where, and, or
+        //region where, and, or, orderBy
         val where = FunSpec.builder(FUNCTION_NAME_WHERE)
             .receiver(entityCompanionObjectClassName)
             .addParameter(PARAM_NAME_EXPRESSION, expressionParameterTypeName)
@@ -120,6 +133,33 @@ internal class PanacheCompanionBaseProcessor(
                 
                 @param  expression  build and return an [Expression][$QUERY_PACKAGE.Expression]
                 @return             a new [QueryComponent][$QUERY_PACKAGE.Component.QueryComponent] instance
+                """.trimIndent())
+            .build()
+
+        val orderBy = FunSpec.builder(FUNCTION_NAME_ORDER_BY)
+            .receiver(queryComponentTypeName)
+            .addParameter(PARAM_NAME_EXPRESSION, orderExpressionParameterTypeName)
+            .returns(orderTypeName)
+            .addStatement("return $FUNCTION_NAME_ORDER_BY(%T, $PARAM_NAME_EXPRESSION)", columnsObjectClassName)
+            .addAnnotation(jvmNameAnnotation("$FUNCTION_NAME_ORDER_BY$entitySimpleName"))
+            .addGeneratedAnnotation()
+            .addKdoc("""
+                Adds sort options to this SELECT/DELETE query as defined in `expression`.
+                This operation is optional and must be the last operation in the chain,
+                after which you can only `find()`, `stream()`, or `multiple()`.
+
+                Allows for multiple columns, for example:
+                ```
+                val result = User.where { ... }
+                    .orderBy {
+                        lastName.desc()
+                        firstName.asc()
+                    }
+                    .multiple()
+                ```
+                
+                @param  expression  declare the columns to be sorted, and their direction (required)
+                @return             a new [Order][$QUERY_PACKAGE.Order] instance
                 """.trimIndent())
             .build()
         //endregion
@@ -417,7 +457,7 @@ internal class PanacheCompanionBaseProcessor(
             .build()
         //endregion
 
-        val functions = listOf(where, and, or,
+        val functions = listOf(where, and, or, orderBy,
             count, delete, find, stream,
             single, singleSafe, multiple,
             update, updateMultiple, updateAll, updateAllMultiple,
@@ -447,6 +487,8 @@ internal class PanacheCompanionBaseProcessor(
         internal val ListClassName = ClassName("kotlin.collections", "List")
         private val LogicalUpdateComponentClassName =
             ClassName("$QUERY_PACKAGE.Component.UpdateComponent", "LogicalUpdateComponent")
+        private val OrderClassName = ClassName(QUERY_PACKAGE, "Order")
+        private val OrderBuilderClassName = OrderClassName.nestedClass("Builder")
         private val PanacheQueryClassName = ClassName("io.quarkus.hibernate.orm.panache.kotlin", "PanacheQuery")
         private val QueryComponentClassName = ClassName("$QUERY_PACKAGE.Component", "QueryComponent")
         private val SetterExpressionClassName = ClassName(QUERY_PACKAGE, "SetterExpression")
@@ -465,6 +507,7 @@ internal class PanacheCompanionBaseProcessor(
         private const val FUNCTION_NAME_OR = "or"
         private const val FUNCTION_NAME_OR_EXPRESSION = "orExpression"
         private const val FUNCTION_NAME_OR_UPDATE = "orUpdate"
+        private const val FUNCTION_NAME_ORDER_BY = "orderBy"
         private const val FUNCTION_NAME_SINGLE = "single"
         private const val FUNCTION_NAME_SINGLE_SAFE = "singleSafe"
         private const val FUNCTION_NAME_STREAM = "stream"

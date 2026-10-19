@@ -24,6 +24,7 @@ import ch.icken.query.Component.UpdateComponent.SetterUpdateComponent
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
 import org.jboss.logging.Logger
+import org.jetbrains.annotations.ApiStatus
 
 sealed class Component<Entity : PanacheEntityBase, Id : Any, Columns>(
     protected val companion: PanacheCompanionBase<Entity, Id>
@@ -36,9 +37,11 @@ sealed class Component<Entity : PanacheEntityBase, Id : Any, Columns>(
 
     internal inline fun <R> withCompiled(block: Compiled.() -> R): R {
         val compiled = compile()
-        LOG.debug(compiled.params.entries.fold(compiled.query) { acc, param ->
+        val message = compiled.params.entries.fold(compiled.query) { acc, param ->
             acc.replace(":${param.key}", param.value.toString())
-        })
+        }
+
+        LOG.debug(message)
         return compiled.block()
     }
     //endregion
@@ -53,11 +56,18 @@ sealed class Component<Entity : PanacheEntityBase, Id : Any, Columns>(
     ) : Component<Entity, Id, Columns>(companion) {
 
         //region Intermediate operations
+        @ApiStatus.Internal
         fun and(expression: Expression<Columns>): QueryComponent<Entity, Id, Columns> =
             LogicalQueryComponent.AndQueryComponent(companion, this, expression)
 
+        @ApiStatus.Internal
         fun or(expression: Expression<Columns>): QueryComponent<Entity, Id, Columns> =
             LogicalQueryComponent.OrQueryComponent(companion, this, expression)
+
+        @ApiStatus.Internal
+        fun orderBy(columns: Columns, expression: context(Order.Builder<Columns>) Columns.() -> Unit):
+                Order<Entity, Id, Columns> =
+            Order.Builder<Columns>().apply { expression(this, columns) }.build(companion, this)
         //endregion
 
         //region Terminal operations
@@ -202,6 +212,7 @@ sealed class Component<Entity : PanacheEntityBase, Id : Any, Columns>(
         ) : UpdateComponent<Entity, Id, Columns>(companion) {
 
             //region Intermediate operations
+            @ApiStatus.Internal
             fun where(expression: Expression<Columns>): LogicalUpdateComponent<Entity, Id, Columns> =
                 LogicalUpdateComponent.WhereUpdateComponent(companion, this, expression)
             //endregion
@@ -237,9 +248,11 @@ sealed class Component<Entity : PanacheEntityBase, Id : Any, Columns>(
         ) : UpdateComponent<Entity, Id, Columns>(companion) {
 
             //region Intermediate operations
+            @ApiStatus.Internal
             fun and(expression: Expression<Columns>): LogicalUpdateComponent<Entity, Id, Columns> =
                 AndUpdateComponent(companion, this, expression)
 
+            @ApiStatus.Internal
             fun or(expression: Expression<Columns>): LogicalUpdateComponent<Entity, Id, Columns> =
                 OrUpdateComponent(companion, this, expression)
             //endregion

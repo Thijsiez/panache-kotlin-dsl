@@ -16,13 +16,17 @@
 
 package ch.icken.query
 
+import io.quarkus.panache.common.Sort
+import org.jetbrains.annotations.ApiStatus
 import kotlin.random.Random
 
 sealed class Expression<Columns> {
 
     //region Intermediate operations
+    @ApiStatus.Internal
     fun and(expression: Expression<Columns>): Expression<Columns> = LogicalExpression.AndExpression(this, expression)
 
+    @ApiStatus.Internal
     fun or(expression: Expression<Columns>): Expression<Columns> = LogicalExpression.OrExpression(this, expression)
     //endregion
 
@@ -155,7 +159,25 @@ sealed class Expression<Columns> {
     }
 }
 
-class SetterExpression internal constructor(private val columnName: String, private val value: Any?) {
+class OrderByExpression internal constructor(
+    internal val columnName: String,
+    internal val direction: Sort.Direction,
+    private val nullsFirst: Boolean? = null
+) {
+
+    val nullPrecedence: Sort.NullPrecedence?
+        get() = when (nullsFirst) {
+            true -> Sort.NullPrecedence.NULLS_FIRST
+            false -> Sort.NullPrecedence.NULLS_LAST
+            null -> null
+        }
+}
+
+class SetterExpression internal constructor(
+    private val columnName: String,
+    private val value: Any?
+) {
+
     private val parameterName: String = generateParameterName()
 
     internal fun compile(): Compiled = when (value) {

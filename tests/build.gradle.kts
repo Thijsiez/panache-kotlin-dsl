@@ -50,6 +50,7 @@ kotlin {
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_17)
         javaParameters.set(true)
+        freeCompilerArgs.set(listOf("-XXLanguage:+ContextParameters"))
     }
     jvmToolchain(17)
 }

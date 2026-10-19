@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Thijs Koppen
+ * Copyright 2023-2026 Thijs Koppen
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,6 +57,9 @@ java {
     targetCompatibility = JavaVersion.VERSION_17
 }
 kotlin {
+    compilerOptions {
+        freeCompilerArgs.set(listOf("-XXLanguage:+ContextParameters"))
+    }
     jvmToolchain(17)
 }
 mavenPublishing {

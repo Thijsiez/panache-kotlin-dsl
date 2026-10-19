@@ -32,7 +32,6 @@ class QueryTests {
         // Given
 
         // When
-        //SELECT COUNT(*) FROM EMPLOYEE WHERE GENDER != 'M'
         val numberOfNotMen = Employee.count { gender neq Employee.Gender.M }
 
         // Then
@@ -45,9 +44,7 @@ class QueryTests {
         // Given
 
         // When
-        //WHERE LAST_NAME LIKE '%son'
         val sons = Employee.find { lastName like "%son" }.list()
-        //WHERE NAME = 'HR'
         val hr = Department.find { name eq "HR" }.firstResult()
 
         // Then
@@ -61,8 +58,6 @@ class QueryTests {
         // Given
 
         // When
-        //WHERE (SALARY > 50000.0 AND SALARY <= 60000.0)
-        // OR SALARY BETWEEN 75000.0 AND 85000.0
         val averageSalary = Employee
             .where {
                 salary.gt(50_000.0)
@@ -84,7 +79,6 @@ class QueryTests {
         // Given
 
         // When
-        //WHERE FIRST_NAME = 'John'
         val john = Employee.where { firstName eq "John" }.singleSafe()
 
         // Then
@@ -97,10 +91,24 @@ class QueryTests {
         // Given
 
         // When
-        //WHERE BIRTH_DATE < 1970-01-01
         val bornBeforeEpoch = Employee.multiple { birthDate lt LocalDate.EPOCH }
 
         // Then
         assertEquals(2, bornBeforeEpoch.size)
+    }
+
+    @Test
+    fun testOrderBy() {
+
+        // Given
+
+        // When
+        val riley = Employee.where { department.name eq "Engineering" }
+            .orderBy { lastName.asc() }
+            .multiple()
+            .first()
+
+        // Then
+        assertEquals("Riley", riley.firstName)
     }
 }

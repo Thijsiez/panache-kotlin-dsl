@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Thijs Koppen
+ * Copyright 2024-2026 Thijs Koppen
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,6 @@ class UpdateTests {
         // Given
 
         // When
-        //UPDATE EMPLOYEE SET SALARY = 0.0
         val entitiesUpdated = Employee.updateAll { salary set 0.0 }
 
         // Then
@@ -55,7 +54,6 @@ class UpdateTests {
         // Given
 
         // When
-        //UPDATE EMPLOYEE SET SALARY = 100000.0 WHERE SALARY < 100000.0
         val entitiesUpdated = Employee
             .update { salary set 100_000.0 }
             .where { salary lt 100_000.0 }

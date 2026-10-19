@@ -34,6 +34,37 @@ class Column<Columns, Type>(internal val name: String) {
      * @return          a new `SetterExpression` instance
      */
     infix fun set(value: Type) = SetterExpression(name, value)
+
+    /**
+     * Sorts the results of this query by this column (ascending)
+     */
+    context(builder: Order.Builder<Columns>)
+    fun asc() = builder.addAscending(name)
+
+    /**
+     * Sorts the results of this query by this column (ascending)
+     *
+     * @param   nullsFirst  defines whether results with no value in this column
+     *                      come before or after results with a value
+     */
+    context(builder: Order.Builder<Columns>)
+    fun asc(nullsFirst: Boolean) = builder.addAscending(name, nullsFirst)
+
+    /**
+     * Sorts the results of this query by this column (descending)
+     */
+    context(builder: Order.Builder<Columns>)
+    fun desc() = builder.addDescending(name)
+
+    /**
+     * Sorts the results of this query by this column (descending)
+     *
+     *
+     * @param   nullsFirst  defines whether results with no value in this column
+     *                      come before or after results with a value
+     */
+    context(builder: Order.Builder<Columns>)
+    fun desc(nullsFirst: Boolean) = builder.addDescending(name, nullsFirst)
 }
 
 //region eq
