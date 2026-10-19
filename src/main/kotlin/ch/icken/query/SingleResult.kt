@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Thijs Koppen
+ * Copyright 2023-2026 Thijs Koppen
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,17 +18,17 @@ package ch.icken.query
 
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheQuery
 
-sealed class PanacheSingleResult<Entity> {
-    data object NoResult : PanacheSingleResult<Nothing>()
-    data class Result<Entity>(val value: Entity) : PanacheSingleResult<Entity>()
-    data object NotUnique : PanacheSingleResult<Nothing>()
+sealed class SingleResult<Entity> {
+    data object NoResult : SingleResult<Nothing>()
+    data class Result<Entity>(val value: Entity) : SingleResult<Entity>()
+    data object NotUnique : SingleResult<Nothing>()
 }
 
-fun <Entity : Any> PanacheQuery<Entity>.singleResultSafe(): PanacheSingleResult<out Entity> {
+fun <Entity : Any> PanacheQuery<Entity>.singleResultSafe(): SingleResult<out Entity> {
     val results = list()
     return when (results.size) {
-        0 -> PanacheSingleResult.NoResult
-        1 -> PanacheSingleResult.Result(results[0])
-        else -> PanacheSingleResult.NotUnique
+        0 -> SingleResult.NoResult
+        1 -> SingleResult.Result(results[0])
+        else -> SingleResult.NotUnique
     }
 }

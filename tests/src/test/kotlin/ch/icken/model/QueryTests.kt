@@ -88,7 +88,7 @@ class QueryTests {
         val john = Employee.where { firstName eq "John" }.singleSafe()
 
         // Then
-        assertInstanceOf(PanacheSingleResult.Result::class.java, john)
+        assertInstanceOf(SingleResult.Result::class.java, john)
     }
 
     @Test

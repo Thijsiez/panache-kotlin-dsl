@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Thijs Koppen
+ * Copyright 2024-2026 Thijs Koppen
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,21 +16,21 @@
 
 package ch.icken.query
 
+import kotlin.random.Random
+
 sealed class Expression<Columns> {
-    //region Chaining operations
+
+    //region Intermediate operations
     fun and(expression: Expression<Columns>): Expression<Columns> = LogicalExpression.AndExpression(this, expression)
+
     fun or(expression: Expression<Columns>): Expression<Columns> = LogicalExpression.OrExpression(this, expression)
     //endregion
 
     //region compile
-    internal fun compile(): Compiled = when (this) {
-        is LogicalExpression -> {
-            val compiledExpression = compileExpression()
-            Compiled("(${compiledExpression.expression})", compiledExpression.parameters)
-        }
-        else -> compileExpression()
-    }
+    internal open fun compile(): Compiled = compileExpression()
+
     protected abstract fun compileExpression(): Compiled
+
     class Compiled internal constructor(val expression: String, val parameters: Map<String, Any>)
     //endregion
 
@@ -38,11 +38,13 @@ sealed class Expression<Columns> {
         protected val key: String,
         protected val operator: String
     ) : Expression<Columns>() {
+
         sealed class BooleanValueExpression<Columns>(
             key: String,
             operator: String,
             private val value: Any
         ) : BooleanExpression<Columns>(key, operator) {
+
             private val parameterName: String = generateParameterName()
 
             override fun compileExpression() = Compiled(
@@ -52,24 +54,31 @@ sealed class Expression<Columns> {
 
             class EqualTo<Columns> internal constructor(key: String, value: Any) :
                 BooleanValueExpression<Columns>(key, "=", value)
+
             class NotEqualTo<Columns> internal constructor(key: String, value: Any) :
                 BooleanValueExpression<Columns>(key, "!=", value)
+
             class LessThan<Columns> internal constructor(key: String, value: Any) :
                 BooleanValueExpression<Columns>(key, "<", value)
+
             class GreaterThan<Columns> internal constructor(key: String, value: Any) :
                 BooleanValueExpression<Columns>(key, ">", value)
+
             class LessThanOrEqualTo<Columns> internal constructor(key: String, value: Any) :
                 BooleanValueExpression<Columns>(key, "<=", value)
+
             class GreaterThanOrEqualTo<Columns> internal constructor(key: String, value: Any) :
                 BooleanValueExpression<Columns>(key, ">=", value)
 
             class In<Columns> internal constructor(key: String, values: Collection<Any>) :
                 BooleanValueExpression<Columns>(key, "IN", values)
+
             class NotIn<Columns> internal constructor(key: String, values: Collection<Any>) :
                 BooleanValueExpression<Columns>(key, "NOT IN", values)
 
             class Like<Columns> internal constructor(key: String, pattern: String) :
                 BooleanValueExpression<Columns>(key, "LIKE", pattern)
+
             class NotLike<Columns> internal constructor(key: String, pattern: String) :
                 BooleanValueExpression<Columns>(key, "NOT LIKE", pattern)
         }
@@ -80,6 +89,7 @@ sealed class Expression<Columns> {
             private val min: Any,
             private val maxIncl: Any
         ) : BooleanExpression<Columns>(key, operator) {
+
             private val minParameterName: String = generateParameterName()
             private val maxInclParameterName: String = generateParameterName()
 
@@ -90,6 +100,7 @@ sealed class Expression<Columns> {
 
             class Between<Columns> internal constructor(key: String, min: Any, maxIncl: Any) :
                 BetweenExpression<Columns>(key, "BETWEEN", min, maxIncl)
+
             class NotBetween<Columns> internal constructor(key: String, min: Any, maxIncl: Any) :
                 BetweenExpression<Columns>(key, "NOT BETWEEN", min, maxIncl)
         }
@@ -98,6 +109,7 @@ sealed class Expression<Columns> {
             key: String,
             operator: String
         ) : BooleanExpression<Columns>(key, operator) {
+
             override fun compileExpression() = Compiled(
                 expression = "$key $operator NULL",
                 parameters = emptyMap()
@@ -105,6 +117,7 @@ sealed class Expression<Columns> {
 
             class IsNull<Columns> internal constructor(key: String) :
                 IsExpression<Columns>(key, "IS")
+
             class IsNotNull<Columns> internal constructor(key: String) :
                 IsExpression<Columns>(key, "IS NOT")
         }
@@ -115,6 +128,12 @@ sealed class Expression<Columns> {
         private val operator: String,
         private val expression: Expression<Columns>
     ) : Expression<Columns>() {
+
+        override fun compile(): Compiled {
+            val compiledExpression = compileExpression()
+            return Compiled("(${compiledExpression.expression})", compiledExpression.parameters)
+        }
+
         override fun compileExpression(): Compiled {
             val compiledPrevious = previous.compileExpression()
             val compiledExpression = expression.compileExpression()
@@ -128,9 +147,26 @@ sealed class Expression<Columns> {
             previous: Expression<Columns>,
             expression: Expression<Columns>
         ) : LogicalExpression<Columns>(previous, "AND", expression)
+
         class OrExpression<Columns> internal constructor(
             previous: Expression<Columns>,
             expression: Expression<Columns>
         ) : LogicalExpression<Columns>(previous, "OR", expression)
     }
 }
+
+class SetterExpression internal constructor(private val columnName: String, private val value: Any?) {
+    private val parameterName: String = generateParameterName()
+
+    internal fun compile(): Compiled = when (value) {
+        null -> Compiled("$columnName = null", null)
+        else -> Compiled("$columnName = :$parameterName", parameterName to value)
+    }
+
+    class Compiled internal constructor(val assignment: String, val parameter: Pair<String, Any>?)
+}
+
+private const val CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+private fun generateParameterName() = (0 ..< 8)
+    .map { CHARS[Random.nextInt(CHARS.length)] }
+    .toCharArray().concatToString()

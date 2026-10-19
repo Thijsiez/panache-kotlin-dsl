@@ -25,19 +25,21 @@ import ch.icken.query.Expression.BooleanExpression.IsExpression.IsNotNull
 import ch.icken.query.Expression.BooleanExpression.IsExpression.IsNull
 
 class Column<Columns, Type>(internal val name: String) {
+
     /**
-     * Creates a [SetterExpression][ch.icken.query.Component.UpdateComponent.InitialUpdateComponent.SetterExpression]
+     * Creates a [SetterExpression][ch.icken.query.SetterExpression]
      * for this column
      *
      * @param   value   the new value for this column
      * @return          a new `SetterExpression` instance
      */
-    infix fun set(value: Type) = Component.UpdateComponent.InitialUpdateComponent.SetterExpression(name, value)
+    infix fun set(value: Type) = SetterExpression(name, value)
 }
 
 //region eq
 private fun <Columns> eq(name: String, value: Any?): Expression<Columns> =
     if (value == null) IsNull(name) else EqualTo(name, value)
+
 /**
  * Creates an [Expression][ch.icken.query.Expression] using the '=' operator.
  *
@@ -46,6 +48,7 @@ private fun <Columns> eq(name: String, value: Any?): Expression<Columns> =
  */
 @JvmName("eq")
 infix fun <Columns, Type : Any> Column<Columns, Type>.eq(value: Type) = eq<Columns>(name, value)
+
 /**
  * Creates an [Expression][ch.icken.query.Expression] using the '=' operator when `value` is not null,
  * or using 'IS NULL' when `value` is null.
@@ -56,9 +59,11 @@ infix fun <Columns, Type : Any> Column<Columns, Type>.eq(value: Type) = eq<Colum
 @JvmName("eqNullable")
 infix fun <Columns, Type : Any> Column<Columns, Type?>.eq(value: Type?) = eq<Columns>(name, value)
 //endregion
+
 //region neq
 private fun <Columns> neq(name: String, value: Any?): Expression<Columns> =
     if (value == null) IsNotNull(name) else NotEqualTo(name, value)
+
 /**
  * Creates an [Expression][ch.icken.query.Expression] using the '!=' operator.
  *
@@ -67,6 +72,7 @@ private fun <Columns> neq(name: String, value: Any?): Expression<Columns> =
  */
 @JvmName("neq")
 infix fun <Columns, Type : Any> Column<Columns, Type>.neq(value: Type) = neq<Columns>(name, value)
+
 /**
  * Creates an [Expression][ch.icken.query.Expression] using the '!=' operator when `value` is not null,
  * or using 'IS NOT NULL' when `value` is not null.
@@ -77,8 +83,10 @@ infix fun <Columns, Type : Any> Column<Columns, Type>.neq(value: Type) = neq<Col
 @JvmName("neqNullable")
 infix fun <Columns, Type : Any> Column<Columns, Type?>.neq(value: Type?) = neq<Columns>(name, value)
 //endregion
+
 //region lt
 private fun <Columns> lt(name: String, value: Any): Expression<Columns> = LessThan(name, value)
+
 /**
  * Creates an [Expression][ch.icken.query.Expression] using the '<' operator.
  *
@@ -87,6 +95,7 @@ private fun <Columns> lt(name: String, value: Any): Expression<Columns> = LessTh
  */
 @JvmName("lt")
 infix fun <Columns, Type : Any> Column<Columns, Type>.lt(value: Type) = lt<Columns>(name, value)
+
 /**
  * Creates an [Expression][ch.icken.query.Expression] using the '<' operator.
  *
@@ -96,8 +105,10 @@ infix fun <Columns, Type : Any> Column<Columns, Type>.lt(value: Type) = lt<Colum
 @JvmName("ltNullable")
 infix fun <Columns, Type : Any> Column<Columns, Type?>.lt(value: Type) = lt<Columns>(name, value)
 //endregion
+
 //region gt
 private fun <Columns> gt(name: String, value: Any): Expression<Columns> = GreaterThan(name, value)
+
 /**
  * Creates an [Expression][ch.icken.query.Expression] using the '>' operator.
  *
@@ -106,6 +117,7 @@ private fun <Columns> gt(name: String, value: Any): Expression<Columns> = Greate
  */
 @JvmName("gt")
 infix fun <Columns, Type : Any> Column<Columns, Type>.gt(value: Type) = gt<Columns>(name, value)
+
 /**
  * Creates an [Expression][ch.icken.query.Expression] using the '>' operator.
  *
@@ -115,8 +127,10 @@ infix fun <Columns, Type : Any> Column<Columns, Type>.gt(value: Type) = gt<Colum
 @JvmName("gtNullable")
 infix fun <Columns, Type : Any> Column<Columns, Type?>.gt(value: Type) = gt<Columns>(name, value)
 //endregion
+
 //region lte
 private fun <Columns> lte(name: String, value: Any): Expression<Columns> = LessThanOrEqualTo(name, value)
+
 /**
  * Creates an [Expression][ch.icken.query.Expression] using the '<=' operator.
  *
@@ -125,6 +139,7 @@ private fun <Columns> lte(name: String, value: Any): Expression<Columns> = LessT
  */
 @JvmName("lte")
 infix fun <Columns, Type : Any> Column<Columns, Type>.lte(value: Type) = lte<Columns>(name, value)
+
 /**
  * Creates an [Expression][ch.icken.query.Expression] using the '<=' operator.
  *
@@ -134,8 +149,10 @@ infix fun <Columns, Type : Any> Column<Columns, Type>.lte(value: Type) = lte<Col
 @JvmName("lteNullable")
 infix fun <Columns, Type : Any> Column<Columns, Type?>.lte(value: Type) = lte<Columns>(name, value)
 //endregion
+
 //region gte
 private fun <Columns> gte(name: String, value: Any): Expression<Columns> = GreaterThanOrEqualTo(name, value)
+
 /**
  * Creates an [Expression][ch.icken.query.Expression] using the '>=' operator.
  *
@@ -144,6 +161,7 @@ private fun <Columns> gte(name: String, value: Any): Expression<Columns> = Great
  */
 @JvmName("gte")
 infix fun <Columns, Type : Any> Column<Columns, Type>.gte(value: Type) = gte<Columns>(name, value)
+
 /**
  * Creates an [Expression][ch.icken.query.Expression] using the '>=' operator.
  *
@@ -156,6 +174,7 @@ infix fun <Columns, Type : Any> Column<Columns, Type?>.gte(value: Type) = gte<Co
 
 //region in
 private fun <Columns> `in`(name: String, values: Collection<Any>): Expression<Columns> = In(name, values)
+
 /**
  * Creates an [Expression][ch.icken.query.Expression] using the 'IN' operator.
  *
@@ -164,6 +183,7 @@ private fun <Columns> `in`(name: String, values: Collection<Any>): Expression<Co
  */
 @JvmName("in")
 infix fun <Columns, Type : Any> Column<Columns, Type>.`in`(values: Collection<Type>) = `in`<Columns>(name, values)
+
 /**
  * Creates an [Expression][ch.icken.query.Expression] using the 'IN' operator.
  *
@@ -173,8 +193,10 @@ infix fun <Columns, Type : Any> Column<Columns, Type>.`in`(values: Collection<Ty
 @JvmName("inNullable")
 infix fun <Columns, Type : Any> Column<Columns, Type?>.`in`(values: Collection<Type>) = `in`<Columns>(name, values)
 //endregion
+
 //region notIn
 private fun <Columns> notIn(name: String, values: Collection<Any>): Expression<Columns> = NotIn(name, values)
+
 /**
  * Creates an [Expression][ch.icken.query.Expression] using the 'NOT IN' operator.
  *
@@ -183,6 +205,7 @@ private fun <Columns> notIn(name: String, values: Collection<Any>): Expression<C
  */
 @JvmName("notIn")
 infix fun <Columns, Type : Any> Column<Columns, Type>.notIn(values: Collection<Type>) = notIn<Columns>(name, values)
+
 /**
  * Creates an [Expression][ch.icken.query.Expression] using the 'NOT IN' operator.
  *
@@ -196,6 +219,7 @@ infix fun <Columns, Type : Any> Column<Columns, Type?>.notIn(values: Collection<
 //region like
 private fun <Columns> like(name: String, pattern: String?): Expression<Columns> =
     if (pattern == null) IsNull(name) else Like(name, pattern)
+
 /**
  * Creates an [Expression][ch.icken.query.Expression] using the 'LIKE' operator.
  *
@@ -204,6 +228,7 @@ private fun <Columns> like(name: String, pattern: String?): Expression<Columns> 
  */
 @JvmName("like")
 infix fun <Columns> Column<Columns, String>.like(pattern: String) = like<Columns>(name, pattern)
+
 /**
  * Creates an [Expression][ch.icken.query.Expression] using the 'LIKE' operator when `pattern` is not null,
  * or using 'IS NULL' when `pattern` is null.
@@ -214,9 +239,11 @@ infix fun <Columns> Column<Columns, String>.like(pattern: String) = like<Columns
 @JvmName("likeNullable")
 infix fun <Columns> Column<Columns, String?>.like(pattern: String?) = like<Columns>(name, pattern)
 //endregion
+
 //region notLike
 private fun <Columns> notLike(name: String, pattern: String?): Expression<Columns> =
     if (pattern == null) IsNotNull(name) else NotLike(name, pattern)
+
 /**
  * Creates an [Expression][ch.icken.query.Expression] using the 'NOT LIKE' operator.
  *
@@ -225,6 +252,7 @@ private fun <Columns> notLike(name: String, pattern: String?): Expression<Column
  */
 @JvmName("notLike")
 infix fun <Columns> Column<Columns, String>.notLike(pattern: String) = notLike<Columns>(name, pattern)
+
 /**
  * Creates an [Expression][ch.icken.query.Expression] using the 'NOT LIKE' operator when `pattern` is not null,
  * or using 'IS NOT NULL' when `pattern` is not null.
@@ -243,6 +271,7 @@ private fun <Columns> between(name: String, min: Any?, maxIncl: Any?): Expressio
     min == null && maxIncl != null -> LessThanOrEqualTo(name, maxIncl)
     else -> IsNull(name)
 }
+
 /**
  * Creates an [Expression][ch.icken.query.Expression] using the 'BETWEEN' operator.
  *
@@ -253,6 +282,7 @@ private fun <Columns> between(name: String, min: Any?, maxIncl: Any?): Expressio
 @JvmName("between")
 fun <Columns, Type : Any> Column<Columns, Type>.between(min: Type, maxIncl: Type) =
     between<Columns>(name, min, maxIncl)
+
 /**
  * Creates an [Expression][ch.icken.query.Expression] using exactly one of the following:
  * - the 'BETWEEN' operator when both `min` and `maxIncl` are not null
@@ -268,6 +298,7 @@ fun <Columns, Type : Any> Column<Columns, Type>.between(min: Type, maxIncl: Type
 fun <Columns, Type : Any> Column<Columns, Type?>.between(min: Type?, maxIncl: Type?) =
     between<Columns>(name, min, maxIncl)
 //endregion
+
 //region notBetween
 private fun <Columns> notBetween(name: String, min: Any?, maxIncl: Any?): Expression<Columns> = when {
     min != null && maxIncl != null -> NotBetween(name, min, maxIncl)
@@ -275,6 +306,7 @@ private fun <Columns> notBetween(name: String, min: Any?, maxIncl: Any?): Expres
     min == null && maxIncl != null -> GreaterThan(name, maxIncl)
     else -> IsNotNull(name)
 }
+
 /**
  * Creates an [Expression][ch.icken.query.Expression] using the 'NOT BETWEEN' operator.
  *
@@ -285,6 +317,7 @@ private fun <Columns> notBetween(name: String, min: Any?, maxIncl: Any?): Expres
 @JvmName("notBetween")
 fun <Columns, Type : Any> Column<Columns, Type>.notBetween(min: Type, maxIncl: Type) =
     notBetween<Columns>(name, min, maxIncl)
+
 /**
  * Creates an [Expression][ch.icken.query.Expression] using exactly one of the following:
  * - the 'NOT BETWEEN' operator when both `min` and `maxIncl` are not null

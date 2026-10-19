@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Thijs Koppen
+ * Copyright 2024-2026 Thijs Koppen
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,23 +20,23 @@ package ch.icken.query
 
 import ch.icken.query.Component.QueryComponent
 import ch.icken.query.Component.QueryComponent.InitialQueryComponent
-import ch.icken.query.Component.UpdateComponent.InitialUpdateComponent
-import ch.icken.query.Component.UpdateComponent.InitialUpdateComponent.SetterExpression
+import ch.icken.query.Component.UpdateComponent.SetterUpdateComponent
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase
 import io.quarkus.hibernate.orm.panache.kotlin.PanacheEntityBase
-import io.quarkus.panache.common.Sort
 import org.jboss.logging.Logger
 
 sealed class Component<Entity : PanacheEntityBase, Id : Any, Columns>(
     protected val companion: PanacheCompanionBase<Entity, Id>
 ) {
+
     //region compile
     internal abstract fun compile(): Compiled
-    class Compiled internal constructor(val component: String, val parameters: Map<String, Any>)
+
+    class Compiled internal constructor(val query: String, val params: Map<String, Any>)
 
     internal inline fun <R> withCompiled(block: Compiled.() -> R): R {
         val compiled = compile()
-        LOG.debug(compiled.parameters.entries.fold(compiled.component) { acc, param ->
+        LOG.debug(compiled.params.entries.fold(compiled.query) { acc, param ->
             acc.replace(":${param.key}", param.value.toString())
         })
         return compiled.block()
@@ -51,9 +51,11 @@ sealed class Component<Entity : PanacheEntityBase, Id : Any, Columns>(
         companion: PanacheCompanionBase<Entity, Id>,
         protected val expression: Expression<Columns>
     ) : Component<Entity, Id, Columns>(companion) {
-        //region Chaining operations
+
+        //region Intermediate operations
         fun and(expression: Expression<Columns>): QueryComponent<Entity, Id, Columns> =
             LogicalQueryComponent.AndQueryComponent(companion, this, expression)
+
         fun or(expression: Expression<Columns>): QueryComponent<Entity, Id, Columns> =
             LogicalQueryComponent.OrQueryComponent(companion, this, expression)
         //endregion
@@ -65,7 +67,8 @@ sealed class Component<Entity : PanacheEntityBase, Id : Any, Columns>(
          * @return  the number of entities counted
          * @see     io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase.count
          */
-        fun count() = withCompiled { companion.count(component, parameters) }
+        fun count() = withCompiled { companion.count(query, params) }
+
         /**
          * Deletes all entities matching the preceding query.
          *
@@ -75,7 +78,8 @@ sealed class Component<Entity : PanacheEntityBase, Id : Any, Columns>(
          * @return  the number of entities deleted
          * @see     io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase.delete
          */
-        fun delete() = withCompiled { companion.delete(component, parameters) }
+        fun delete() = withCompiled { companion.delete(query, params) }
+
         /**
          * Finds entities matching the preceding query.
          *
@@ -86,19 +90,8 @@ sealed class Component<Entity : PanacheEntityBase, Id : Any, Columns>(
          * @return  a new [PanacheQuery][io.quarkus.hibernate.orm.panache.kotlin.PanacheQuery] instance
          * @see     io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase.find
          */
-        fun find() = withCompiled { companion.find(component, parameters) }
-        /**
-         * Finds entities matching the preceding query and the given sort options.
-         *
-         * May be used to chain functionality not (yet) abstracted by this library, like
-         * [page][io.quarkus.hibernate.orm.panache.kotlin.PanacheQuery.page] and
-         * [project][io.quarkus.hibernate.orm.panache.kotlin.PanacheQuery.project].
-         *
-         * @param   sort    the sort strategy to use
-         * @return          a new [PanacheQuery][io.quarkus.hibernate.orm.panache.kotlin.PanacheQuery] instance
-         * @see             io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase.find
-         */
-        fun find(sort: Sort) = withCompiled { companion.find(component, sort, parameters) }
+        fun find() = withCompiled { companion.find(query, params) }
+
         /**
          * Streams all entities matching the preceding query. This function is a shortcut for `find().stream()`.
          *
@@ -108,19 +101,7 @@ sealed class Component<Entity : PanacheEntityBase, Id : Any, Columns>(
          * @return  a new [Stream][java.util.stream.Stream] instance containing all results, without paging
          * @see     io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase.stream
          */
-        fun stream() = withCompiled { companion.stream(component, parameters) }
-        /**
-         * Streams all entities matching the preceding query and the given sort options.
-         * This function is a shortcut for `find(sort).stream()`.
-         *
-         * WARNING: this function requires a transaction to be active,
-         * otherwise the underlying cursor may be closed before the end of the stream.
-         *
-         * @param   sort    the sort strategy to use
-         * @return          a new [Stream][java.util.stream.Stream] instance containing all results, without paging
-         * @see             io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase.stream
-         */
-        fun stream(sort: Sort) = withCompiled { companion.stream(component, sort, parameters) }
+        fun stream() = withCompiled { companion.stream(query, params) }
 
         /**
          * Finds a single result matching the preceding query, or throws if there is not exactly one.
@@ -132,14 +113,15 @@ sealed class Component<Entity : PanacheEntityBase, Id : Any, Columns>(
          * @see     io.quarkus.hibernate.orm.panache.kotlin.PanacheQuery.singleResult
          */
         fun single() = find().singleResult()
+
         /**
          * Finds a single result matching the preceding query, but does not throw if there is not exactly one.
          * This function is a shortcut for `find().singleResultSafe()`.
          *
          * This function will always return one of the following:
-         * - [NoResult][ch.icken.query.PanacheSingleResult.NoResult] when there is no result
-         * - A new instance of [Result][ch.icken.query.PanacheSingleResult.Result] when there is exactly one result
-         * - [NotUnique][ch.icken.query.PanacheSingleResult.NotUnique] when there are multiple results
+         * - [NoResult][ch.icken.query.SingleResult.NoResult] when there is no result
+         * - A new instance of [Result][ch.icken.query.SingleResult.Result] when there is exactly one result
+         * - [NotUnique][ch.icken.query.SingleResult.NotUnique] when there are multiple results
          *
          * Below is an example of how this result could be used:
          * ```
@@ -151,10 +133,11 @@ sealed class Component<Entity : PanacheEntityBase, Id : Any, Columns>(
          * }
          * ```
          *
-         * @return  a [PanacheSingleResult][ch.icken.query.PanacheSingleResult] instance
+         * @return  a [SingleResult][ch.icken.query.SingleResult] instance
          * @see     ch.icken.query.singleResultSafe
          */
         fun singleSafe() = find().singleResultSafe()
+
         /**
          * Finds all entities matching the preceding query. This function is a shortcut for `find().list()`.
          *
@@ -162,26 +145,18 @@ sealed class Component<Entity : PanacheEntityBase, Id : Any, Columns>(
          * @see     io.quarkus.hibernate.orm.panache.kotlin.PanacheQuery.list
          */
         fun multiple() = find().list()
-        /**
-         * Finds all entities matching the preceding query and the given sort options.
-         * This function is a shortcut for `find(sort).list()`.
-         *
-         * @param   sort    the sort strategy to use
-         * @return          a new [List][kotlin.collections.List] instance containing all results, without paging
-         * @see             io.quarkus.hibernate.orm.panache.kotlin.PanacheQuery.list
-         */
-        fun multiple(sort: Sort) = find(sort).list()
         //endregion
 
         class InitialQueryComponent<Entity : PanacheEntityBase, Id : Any, Columns> internal constructor(
             companion: PanacheCompanionBase<Entity, Id>,
             expression: Expression<Columns>
         ) : QueryComponent<Entity, Id, Columns>(companion, expression) {
+
             override fun compile(): Compiled {
                 val compiledExpression = expression.compile()
                 return Compiled(
-                    component = compiledExpression.expression,
-                    parameters = compiledExpression.parameters
+                    query = compiledExpression.expression,
+                    params = compiledExpression.parameters
                 )
             }
         }
@@ -192,12 +167,13 @@ sealed class Component<Entity : PanacheEntityBase, Id : Any, Columns>(
             private val operator: String,
             expression: Expression<Columns>
         ) : QueryComponent<Entity, Id, Columns>(companion, expression) {
+
             override fun compile(): Compiled {
                 val compiledPrevious = previous.compile()
                 val compiledExpression = expression.compile()
                 return Compiled(
-                    component = "${compiledPrevious.component} $operator ${compiledExpression.expression}",
-                    parameters = compiledPrevious.parameters + compiledExpression.parameters
+                    query = "${compiledPrevious.query} $operator ${compiledExpression.expression}",
+                    params = compiledPrevious.params + compiledExpression.parameters
                 )
             }
 
@@ -206,6 +182,7 @@ sealed class Component<Entity : PanacheEntityBase, Id : Any, Columns>(
                 previous: QueryComponent<Entity, Id, Columns>,
                 expression: Expression<Columns>
             ) : LogicalQueryComponent<Entity, Id, Columns>(companion, previous, "AND", expression)
+
             class OrQueryComponent<Entity : PanacheEntityBase, Id : Any, Columns> internal constructor(
                 companion: PanacheCompanionBase<Entity, Id>,
                 previous: QueryComponent<Entity, Id, Columns>,
@@ -217,12 +194,14 @@ sealed class Component<Entity : PanacheEntityBase, Id : Any, Columns>(
     sealed class UpdateComponent<Entity : PanacheEntityBase, Id : Any, Columns>(
         companion: PanacheCompanionBase<Entity, Id>
     ) : Component<Entity, Id, Columns>(companion) {
-        class InitialUpdateComponent<Entity : PanacheEntityBase, Id : Any, Columns> internal constructor(
+
+        class SetterUpdateComponent<Entity : PanacheEntityBase, Id : Any, Columns> internal constructor(
             companion: PanacheCompanionBase<Entity, Id>,
             private val columns: Columns,
             private val setters: Array<out Columns.() -> SetterExpression>
         ) : UpdateComponent<Entity, Id, Columns>(companion) {
-            //region Chaining operations
+
+            //region Intermediate operations
             fun where(expression: Expression<Columns>): LogicalUpdateComponent<Entity, Id, Columns> =
                 LogicalUpdateComponent.WhereUpdateComponent(companion, this, expression)
             //endregion
@@ -238,25 +217,15 @@ sealed class Component<Entity : PanacheEntityBase, Id : Any, Columns>(
              * @return  the number of entities updated
              * @see     io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase.update
              */
-            fun executeWithoutWhere() = withCompiled { companion.update(component, parameters) }
+            fun executeWithoutWhere() = withCompiled { companion.update(query, params) }
             //endregion
 
             override fun compile(): Compiled {
                 val compiledSetters = setters.map { it(columns).compile() }
                 return Compiled(
-                    component = compiledSetters.joinToString { it.assignment },
-                    parameters = compiledSetters.mapNotNull { it.parameter }.associate { it }
+                    query = compiledSetters.joinToString { it.assignment },
+                    params = compiledSetters.mapNotNull { it.parameter }.associate { it }
                 )
-            }
-
-            class SetterExpression internal constructor(private val columnName: String, private val value: Any?) {
-                private val parameterName: String = generateParameterName()
-
-                internal fun compile(): Compiled = when (value) {
-                    null -> Compiled("$columnName = null", null)
-                    else -> Compiled("$columnName = :$parameterName", parameterName to value)
-                }
-                class Compiled internal constructor(val assignment: String, val parameter: Pair<String, Any>?)
             }
         }
 
@@ -266,9 +235,11 @@ sealed class Component<Entity : PanacheEntityBase, Id : Any, Columns>(
             private val operator: String,
             private val expression: Expression<Columns>
         ) : UpdateComponent<Entity, Id, Columns>(companion) {
-            //region Chaining operations
+
+            //region Intermediate operations
             fun and(expression: Expression<Columns>): LogicalUpdateComponent<Entity, Id, Columns> =
                 AndUpdateComponent(companion, this, expression)
+
             fun or(expression: Expression<Columns>): LogicalUpdateComponent<Entity, Id, Columns> =
                 OrUpdateComponent(companion, this, expression)
             //endregion
@@ -282,15 +253,15 @@ sealed class Component<Entity : PanacheEntityBase, Id : Any, Columns>(
              * @return  the number of entities updated
              * @see     io.quarkus.hibernate.orm.panache.kotlin.PanacheCompanionBase.update
              */
-            fun execute() = withCompiled { companion.update(component, parameters) }
+            fun execute() = withCompiled { companion.update(query, params) }
             //endregion
 
             override fun compile(): Compiled {
                 val compiledPrevious = previous.compile()
                 val compiledExpression = expression.compile()
                 return Compiled(
-                    component = "${compiledPrevious.component} $operator ${compiledExpression.expression}",
-                    parameters = compiledPrevious.parameters + compiledExpression.parameters
+                    query = "${compiledPrevious.query} $operator ${compiledExpression.expression}",
+                    params = compiledPrevious.params + compiledExpression.parameters
                 )
             }
 
@@ -299,11 +270,13 @@ sealed class Component<Entity : PanacheEntityBase, Id : Any, Columns>(
                 previous: UpdateComponent<Entity, Id, Columns>,
                 expression: Expression<Columns>
             ) : LogicalUpdateComponent<Entity, Id, Columns>(companion, previous, "AND", expression)
+
             class OrUpdateComponent<Entity : PanacheEntityBase, Id : Any, Columns> internal constructor(
                 companion: PanacheCompanionBase<Entity, Id>,
                 previous: UpdateComponent<Entity, Id, Columns>,
                 expression: Expression<Columns>
             ) : LogicalUpdateComponent<Entity, Id, Columns>(companion, previous, "OR", expression)
+
             class WhereUpdateComponent<Entity : PanacheEntityBase, Id : Any, Columns> internal constructor(
                 companion: PanacheCompanionBase<Entity, Id>,
                 previous: UpdateComponent<Entity, Id, Columns>,
@@ -315,10 +288,11 @@ sealed class Component<Entity : PanacheEntityBase, Id : Any, Columns>(
 
 fun <Entity : PanacheEntityBase, Id : Any, Columns>
         PanacheCompanionBase<Entity, Id>.update(columns: Columns, setter: Columns.() -> SetterExpression):
-        InitialUpdateComponent<Entity, Id, Columns> = InitialUpdateComponent(this, columns, arrayOf(setter))
+        SetterUpdateComponent<Entity, Id, Columns> = SetterUpdateComponent(this, columns, arrayOf(setter))
+
 fun <Entity : PanacheEntityBase, Id : Any, Columns>
         PanacheCompanionBase<Entity, Id>.update(columns: Columns, setters: Array<out Columns.() -> SetterExpression>):
-        InitialUpdateComponent<Entity, Id, Columns> = InitialUpdateComponent(this, columns, setters)
+        SetterUpdateComponent<Entity, Id, Columns> = SetterUpdateComponent(this, columns, setters)
 
 fun <Entity : PanacheEntityBase, Id : Any, Columns>
         PanacheCompanionBase<Entity, Id>.where(expression: Expression<Columns>):

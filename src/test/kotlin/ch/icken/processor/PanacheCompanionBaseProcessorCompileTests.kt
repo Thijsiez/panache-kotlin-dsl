@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Thijs Koppen
+ * Copyright 2024-2026 Thijs Koppen
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,23 +47,20 @@ class PanacheCompanionBaseProcessorCompileTests : ProcessorCompileTestCommon() {
         compilation.assertHasFile("EmployeeExtensions.kt")
 
         val employeeExtensions = result.loadClass("EmployeeExtensionsKt")
-        employeeExtensions.assertNumberOfDeclaredMethods(22)
+        employeeExtensions.assertNumberOfDeclaredMethods(19)
         employeeExtensions.assertHasDeclaredMethodWithName("andEmployee")
         employeeExtensions.assertHasDeclaredMethodWithName("andExpressionEmployee")
         employeeExtensions.assertHasDeclaredMethodWithName("andUpdateEmployee")
         employeeExtensions.assertHasDeclaredMethodWithName("countEmployee")
         employeeExtensions.assertHasDeclaredMethodWithName("deleteEmployee")
         employeeExtensions.assertHasDeclaredMethodWithName("findEmployee")
-        employeeExtensions.assertHasDeclaredMethodWithName("findSortedEmployee")
         employeeExtensions.assertHasDeclaredMethodWithName("multipleEmployee")
-        employeeExtensions.assertHasDeclaredMethodWithName("multipleSortedEmployee")
         employeeExtensions.assertHasDeclaredMethodWithName("orEmployee")
         employeeExtensions.assertHasDeclaredMethodWithName("orExpressionEmployee")
         employeeExtensions.assertHasDeclaredMethodWithName("orUpdateEmployee")
         employeeExtensions.assertHasDeclaredMethodWithName("singleEmployee")
         employeeExtensions.assertHasDeclaredMethodWithName("singleSafeEmployee")
         employeeExtensions.assertHasDeclaredMethodWithName("streamEmployee")
-        employeeExtensions.assertHasDeclaredMethodWithName("streamSortedEmployee")
         employeeExtensions.assertHasDeclaredMethodWithName("updateAllEmployee")
         employeeExtensions.assertHasDeclaredMethodWithName("updateAllMultipleEmployee")
         employeeExtensions.assertHasDeclaredMethodWithName("updateEmployee")
