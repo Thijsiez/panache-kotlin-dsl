@@ -72,7 +72,7 @@ class PanacheEntityBaseProcessorMockTests : ProcessorMockTestCommon() {
         every { columnProperty.annotation(any()).isParameterSet(eq(PARAM_NAME_MAPPED_BY)) } returns false
 
         val validClass = mockk<KSClassDeclaration>()
-        every { validClass.validate(any()) } returns true
+        every { validClass.validate(any(), false) } returns true
         every { validClass.getDeclaredProperties() } returns sequenceOf(columnProperty)
 
         val withSuperTypes = mockk<KSClassDeclarationWithSuperTypes>()
@@ -109,7 +109,7 @@ class PanacheEntityBaseProcessorMockTests : ProcessorMockTestCommon() {
         every { columnProperty.hasAnnotation(eq(JAKARTA_PERSISTENCE_TRANSIENT)) } returns true
 
         val validClass = mockk<KSClassDeclaration>()
-        every { validClass.validate(any()) } returns true
+        every { validClass.validate(any(), false) } returns true
         every { validClass.getDeclaredProperties() } returns sequenceOf(columnProperty)
 
         val withSuperTypes = mockk<KSClassDeclarationWithSuperTypes>()
@@ -141,7 +141,7 @@ class PanacheEntityBaseProcessorMockTests : ProcessorMockTestCommon() {
 
         // Given
         val validClass = mockk<KSClassDeclaration>()
-        every { validClass.validate(any()) } returns true
+        every { validClass.validate(any(), false) } returns true
         every { validClass.getDeclaredProperties() } returns emptySequence()
 
         val withSuperTypes = mockk<KSClassDeclarationWithSuperTypes>()
@@ -173,7 +173,7 @@ class PanacheEntityBaseProcessorMockTests : ProcessorMockTestCommon() {
 
         // Given
         val validClass = mockk<KSClassDeclaration>()
-        every { validClass.validate(any()) } returns true
+        every { validClass.validate(any(), false) } returns true
 
         val withSuperTypes = mockk<KSClassDeclarationWithSuperTypes>()
         every { withSuperTypes.isSubclass(eq(HIBERNATE_PANACHE_ENTITY_BASE)) } returns false
@@ -197,7 +197,7 @@ class PanacheEntityBaseProcessorMockTests : ProcessorMockTestCommon() {
 
         // Given
         val validFunction = mockk<KSFunctionDeclaration>()
-        every { validFunction.validate(any()) } returns true
+        every { validFunction.validate(any(), false) } returns true
 
         every { resolver.getSymbolsWithAnnotation(eq(JAKARTA_PERSISTENCE_ENTITY)) } returns sequenceOf(validFunction)
 
@@ -216,7 +216,7 @@ class PanacheEntityBaseProcessorMockTests : ProcessorMockTestCommon() {
 
         // Given
         val invalidClass = mockk<KSClassDeclaration>()
-        every { invalidClass.validate(any()) } returns false
+        every { invalidClass.validate(any(), false) } returns false
 
         every { resolver.getSymbolsWithAnnotation(eq(JAKARTA_PERSISTENCE_ENTITY)) } returns sequenceOf(invalidClass)
 

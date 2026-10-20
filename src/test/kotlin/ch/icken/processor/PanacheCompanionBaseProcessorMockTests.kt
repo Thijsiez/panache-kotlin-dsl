@@ -81,7 +81,7 @@ class PanacheCompanionBaseProcessorMockTests : ProcessorMockTestCommon() {
         every { classPackageName.asString() } returns "ch.icken.model"
 
         val validClass = mockk<KSClassDeclaration>()
-        every { validClass.validate(any()) } returns true
+        every { validClass.validate(any(), false) } returns true
         every { validClass.declarations } returns sequenceOf(companionObject)
         every { validClass.packageName } returns classPackageName
 
@@ -117,7 +117,7 @@ class PanacheCompanionBaseProcessorMockTests : ProcessorMockTestCommon() {
         every { companionObject.getAllSuperTypes() } returns emptySequence()
 
         val validClass = mockk<KSClassDeclaration>()
-        every { validClass.validate(any()) } returns true
+        every { validClass.validate(any(), false) } returns true
         every { validClass.declarations } returns sequenceOf(companionObject)
 
         val withSuperTypes = mockk<KSClassDeclarationWithSuperTypes>()
@@ -146,7 +146,7 @@ class PanacheCompanionBaseProcessorMockTests : ProcessorMockTestCommon() {
         every { companionObject.isCompanionObject } returns false
 
         val validClass = mockk<KSClassDeclaration>()
-        every { validClass.validate(any()) } returns true
+        every { validClass.validate(any(), false) } returns true
         every { validClass.declarations } returns sequenceOf(companionObject)
 
         val withSuperTypes = mockk<KSClassDeclarationWithSuperTypes>()
@@ -174,7 +174,7 @@ class PanacheCompanionBaseProcessorMockTests : ProcessorMockTestCommon() {
         val function = mockk<KSFunctionDeclaration>()
 
         val validClass = mockk<KSClassDeclaration>()
-        every { validClass.validate(any()) } returns true
+        every { validClass.validate(any(), false) } returns true
         every { validClass.declarations } returns sequenceOf(function)
 
         val withSuperTypes = mockk<KSClassDeclarationWithSuperTypes>()
@@ -200,7 +200,7 @@ class PanacheCompanionBaseProcessorMockTests : ProcessorMockTestCommon() {
 
         // Given
         val validClass = mockk<KSClassDeclaration>()
-        every { validClass.validate(any()) } returns true
+        every { validClass.validate(any(), false) } returns true
         every { validClass.declarations } returns emptySequence()
 
         val withSuperTypes = mockk<KSClassDeclarationWithSuperTypes>()
@@ -226,7 +226,7 @@ class PanacheCompanionBaseProcessorMockTests : ProcessorMockTestCommon() {
 
         // Given
         val validClass = mockk<KSClassDeclaration>()
-        every { validClass.validate(any()) } returns true
+        every { validClass.validate(any(), false) } returns true
 
         val withSuperTypes = mockk<KSClassDeclarationWithSuperTypes>()
         every { withSuperTypes.isSubclass(eq(HIBERNATE_PANACHE_ENTITY_BASE)) } returns false
@@ -249,7 +249,7 @@ class PanacheCompanionBaseProcessorMockTests : ProcessorMockTestCommon() {
 
         // Given
         val validFunction = mockk<KSFunctionDeclaration>()
-        every { validFunction.validate(any()) } returns true
+        every { validFunction.validate(any(), false) } returns true
 
         every { resolver.getSymbolsWithAnnotation(eq(JAKARTA_PERSISTENCE_ENTITY)) } returns sequenceOf(validFunction)
 
@@ -268,7 +268,7 @@ class PanacheCompanionBaseProcessorMockTests : ProcessorMockTestCommon() {
 
         // Given
         val validClass = mockk<KSClassDeclaration>()
-        every { validClass.validate(any()) } returns false
+        every { validClass.validate(any(), false) } returns false
 
         every { resolver.getSymbolsWithAnnotation(eq(JAKARTA_PERSISTENCE_ENTITY)) } returns sequenceOf(validClass)
 

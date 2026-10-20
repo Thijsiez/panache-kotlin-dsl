@@ -57,9 +57,6 @@ java {
     targetCompatibility = JavaVersion.VERSION_17
 }
 kotlin {
-    compilerOptions {
-        freeCompilerArgs.addAll("-XXLanguage:+ContextParameters")
-    }
     jvmToolchain(17)
 }
 mavenPublishing {

@@ -32,7 +32,7 @@ internal class PanacheCompanionBaseProcessor(
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
         val (valid, invalid) = resolver.getSymbolsWithAnnotation(JAKARTA_PERSISTENCE_ENTITY)
-            .partition(KSAnnotated::validate)
+            .partition { it.validate(enableNewFeatures = false) }
 
         valid.filterPanacheEntities()
             .mapNotNull { it.withIdTypeName() }

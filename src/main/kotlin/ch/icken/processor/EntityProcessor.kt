@@ -99,7 +99,7 @@ internal sealed class EntityProcessor(options: Map<String, String>) : Processor(
             .plusParameter(columnTypeName)
 
         return PropertySpec.builder(propertyName, columnPropertyTypeName)
-            .initializer("%T(%P)", ColumnClassName, "\${$PARAM_NAME_PARENT.orEmpty()}$propertyName")
+            .initializer("%T(%P)", ColumnClassName, $$"${$$PARAM_NAME_PARENT.orEmpty()}$$propertyName")
             .addGeneratedAnnotation()
             .build()
     }

@@ -31,7 +31,7 @@ internal class MappedSuperclassProcessor(
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
         val (valid, invalid) = resolver.getSymbolsWithAnnotation(JAKARTA_PERSISTENCE_MAPPED_SUPERCLASS)
-            .partition(KSAnnotated::validate)
+            .partition { it.validate(enableNewFeatures = false) }
 
         valid.filterPanacheEntities()
             .map { it.withColumnProperties() }

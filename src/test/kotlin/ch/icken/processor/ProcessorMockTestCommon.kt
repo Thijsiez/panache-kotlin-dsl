@@ -27,6 +27,7 @@ import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
+import kotlin.reflect.KFunction
 
 abstract class ProcessorMockTestCommon {
 
@@ -35,7 +36,8 @@ abstract class ProcessorMockTestCommon {
         mockkStatic(KSClassDeclaration::withSuperTypes)
         mockkStatic(KSClassDeclaration::toClassName)
         mockkStatic(KSDeclaration::isClass)
-        mockkStatic(KSNode::validate)
+        val validateFunctionReference: (KSNode, (KSNode?, KSNode) -> Boolean, Boolean) -> Boolean = KSNode::validate
+        mockkStatic(validateFunctionReference as KFunction<*>)
         mockkStatic(KSType::toClassName)
     }
 

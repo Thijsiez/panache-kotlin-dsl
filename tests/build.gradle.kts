@@ -47,7 +47,6 @@ java {
 kotlin {
     compilerOptions {
         javaParameters.set(true)
-        freeCompilerArgs.addAll("-XXLanguage:+ContextParameters")
     }
     jvmToolchain(21)
 }

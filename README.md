@@ -70,7 +70,8 @@ TODO
   - `eq`, `neq`, `lt`, `gt`, `lte`, `gte`, `in`, `notIn`, `between`, and `notBetween`
 - Supports `like` and `notLike` expressions in a null-safe way for String columns
 - Supports `and` and `or` expressions for building up a query
-- Adds the `PanacheSingleResult` sealed class and `singleResultSafe()` extension function to return a single result without throwing exceptions.
+  - Supports `orderBy` expressions for sorting the results of a query
+- Adds the `SingleResult` sealed class and `singleResultSafe()` extension function to return a single result without throwing exceptions.
   - Allows you to handle no/multiple results with a `when (result) { ... }` block instead of try-catching
 ### Code Generation
 - Generate `Column`s for non-transient and non-mapped fields in Panache entities
@@ -84,7 +85,3 @@ TODO
 
 ## Known Issues
 - Code generation does not handle fields of generic types (e.g. `List<E>`, `Set<E>`, etc.), but as far as I'm aware this is difficult to get working with Hibernate anyway.
-
-## Planned Features
-These features will be added some time in the future. Please do submit an issue if you'd like these sooner rather than later :)
-- DSL for sorting expressions

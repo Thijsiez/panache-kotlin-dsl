@@ -68,7 +68,7 @@ class MappedSuperclassProcessorMockTests : ProcessorMockTestCommon() {
         every { columnProperty.annotation(any()).isParameterSet(eq(PARAM_NAME_MAPPED_BY)) } returns false
 
         val mappedSuperclass = mockk<KSClassDeclaration>()
-        every { mappedSuperclass.validate(any()) } returns true
+        every { mappedSuperclass.validate(any(), false) } returns true
         every { mappedSuperclass.getDeclaredProperties() } returns sequenceOf(columnProperty)
 
         val withSuperTypes = mockk<KSClassDeclarationWithSuperTypes>()

@@ -29,7 +29,6 @@ abstract class ProcessorCompileTestCommon {
 
     protected fun compilation(vararg source: SourceFile) = KotlinCompilation().apply {
         useKsp2()
-        kotlincArguments = listOf("-XXLanguage:+ContextParameters")
         inheritClassPath = true
         kspWithCompilation = true
         sources = listOf(*source)
