@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-
 plugins {
     kotlin("jvm")
     kotlin("plugin.allopen")
@@ -31,7 +29,7 @@ repositories {
 }
 
 dependencies {
-    val quarkusVersion: String by project
+    val quarkusVersion = project.property("quarkusVersion") as String
     implementation(platform("io.quarkus.platform:quarkus-bom:$quarkusVersion"))
     implementation("io.quarkus:quarkus-jdbc-h2")
     implementation("io.quarkus:quarkus-hibernate-orm-panache-kotlin")
@@ -43,16 +41,15 @@ dependencies {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
 }
 kotlin {
     compilerOptions {
-        jvmTarget.set(JvmTarget.JVM_17)
         javaParameters.set(true)
-        freeCompilerArgs.set(listOf("-XXLanguage:+ContextParameters"))
+        freeCompilerArgs.addAll("-XXLanguage:+ContextParameters")
     }
-    jvmToolchain(17)
+    jvmToolchain(21)
 }
 allOpen {
     annotation("jakarta.enterprise.context.ApplicationScoped")

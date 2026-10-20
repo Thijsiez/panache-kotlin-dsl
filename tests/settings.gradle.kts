@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Thijs Koppen
+ * Copyright 2023-2026 Thijs Koppen
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,13 +21,13 @@ pluginManagement {
     }
 
     plugins {
-        val kotlinVersion: String by settings
-        val kspVersion: String by settings
-        val quarkusVersion: String by settings
-        val dokkaVersion: String by settings
-        val koverVersion: String by settings
-        val sonarqubeVersion: String by settings
-        val mavenPublishVersion: String by settings
+        val kotlinVersion = providers.gradleProperty("kotlinVersion").get()
+        val kspVersion = providers.gradleProperty("kspVersion").get()
+        val quarkusVersion = providers.gradleProperty("quarkusVersion").get()
+        val dokkaVersion = providers.gradleProperty("dokkaVersion").get()
+        val koverVersion = providers.gradleProperty("koverVersion").get()
+        val sonarqubeVersion = providers.gradleProperty("sonarqubeVersion").get()
+        val mavenPublishVersion = providers.gradleProperty("mavenPublishVersion").get()
 
         kotlin("jvm") version kotlinVersion
         kotlin("plugin.allopen") version kotlinVersion

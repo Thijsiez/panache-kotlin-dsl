@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Thijs Koppen
+ * Copyright 2023-2026 Thijs Koppen
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,10 @@ pluginManagement {
     }
 
     plugins {
-        val kotlinVersion: String by settings
-        val dokkaVersion: String by settings
-        val koverVersion: String by settings
-        val mavenPublishVersion: String by settings
+        val kotlinVersion = providers.gradleProperty("kotlinVersion").get()
+        val dokkaVersion = providers.gradleProperty("dokkaVersion").get()
+        val koverVersion = providers.gradleProperty("koverVersion").get()
+        val mavenPublishVersion = providers.gradleProperty("mavenPublishVersion").get()
 
         kotlin("jvm") version kotlinVersion
         id("org.jetbrains.dokka") version dokkaVersion
@@ -33,5 +33,5 @@ pluginManagement {
     }
 }
 
-val artifactId: String by settings
+val artifactId = providers.gradleProperty("artifactId").get()
 rootProject.name = artifactId

@@ -21,9 +21,9 @@ plugins {
     id("com.vanniktech.maven.publish")
 }
 
-val groupId: String by project
+val groupId = project.property("groupId") as String
 setGroup(groupId)
-val version: String by project
+val version = project.property("version") as String
 setVersion(version)
 
 repositories {
@@ -31,22 +31,22 @@ repositories {
 }
 
 dependencies {
-    val quarkusVersion: String by project
+    val quarkusVersion = project.property("quarkusVersion") as String
     compileOnly("io.quarkus:quarkus-hibernate-orm-panache-kotlin:$quarkusVersion")
 
-    val kspVersion: String by project
+    val kspVersion = project.property("kspVersion") as String
     implementation("com.google.devtools.ksp:symbol-processing-api:$kspVersion")
-    val kotlinPoetVersion: String by project
+    val kotlinPoetVersion = project.property("kotlinPoetVersion") as String
     implementation("com.squareup:kotlinpoet-ksp:$kotlinPoetVersion")
 
     testImplementation(kotlin("reflect"))
     testImplementation("io.quarkus:quarkus-hibernate-orm-panache-kotlin:${quarkusVersion}")
-    val jupiterVersion: String by project
+    val jupiterVersion = project.property("jupiterVersion") as String
     testImplementation(platform("org.junit:junit-bom:$jupiterVersion"))
     testImplementation("org.junit.jupiter:junit-jupiter")
-    val mockkVersion: String by project
+    val mockkVersion = project.property("mockkVersion") as String
     testImplementation("io.mockk:mockk:$mockkVersion")
-    val compileTestingVersion: String by project
+    val compileTestingVersion = project.property("compileTestingVersion") as String
     testImplementation("dev.zacsweers.kctfork:ksp:$compileTestingVersion")
 
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
@@ -58,7 +58,7 @@ java {
 }
 kotlin {
     compilerOptions {
-        freeCompilerArgs.set(listOf("-XXLanguage:+ContextParameters"))
+        freeCompilerArgs.addAll("-XXLanguage:+ContextParameters")
     }
     jvmToolchain(17)
 }
