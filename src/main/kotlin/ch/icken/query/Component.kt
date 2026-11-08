@@ -31,12 +31,12 @@ sealed class Component<Entity : PanacheEntityBase, Id : Any, Columns>(
 ) {
 
     //region compile
-    internal abstract fun compile(): Compiled
+    internal abstract fun compile(pn: ParameterName): Compiled
 
     class Compiled internal constructor(val query: String, val params: Map<String, Any>)
 
     internal inline fun <R> withCompiled(block: Compiled.() -> R): R {
-        val compiled = compile()
+        val compiled = compile(ParameterName())
         val message = compiled.params.entries.fold(compiled.query) { acc, param ->
             acc.replace(":${param.key}", param.value.toString())
         }
@@ -162,8 +162,8 @@ sealed class Component<Entity : PanacheEntityBase, Id : Any, Columns>(
             expression: Expression<Columns>
         ) : QueryComponent<Entity, Id, Columns>(companion, expression) {
 
-            override fun compile(): Compiled {
-                val compiledExpression = expression.compile()
+            override fun compile(pn: ParameterName): Compiled {
+                val compiledExpression = expression.compile(pn)
                 return Compiled(
                     query = compiledExpression.expression,
                     params = compiledExpression.parameters
@@ -178,9 +178,9 @@ sealed class Component<Entity : PanacheEntityBase, Id : Any, Columns>(
             expression: Expression<Columns>
         ) : QueryComponent<Entity, Id, Columns>(companion, expression) {
 
-            override fun compile(): Compiled {
-                val compiledPrevious = previous.compile()
-                val compiledExpression = expression.compile()
+            override fun compile(pn: ParameterName): Compiled {
+                val compiledPrevious = previous.compile(pn)
+                val compiledExpression = expression.compile(pn)
                 return Compiled(
                     query = "${compiledPrevious.query} $operator ${compiledExpression.expression}",
                     params = compiledPrevious.params + compiledExpression.parameters
@@ -231,8 +231,8 @@ sealed class Component<Entity : PanacheEntityBase, Id : Any, Columns>(
             fun executeWithoutWhere() = withCompiled { companion.update(query, params) }
             //endregion
 
-            override fun compile(): Compiled {
-                val compiledSetters = setters.map { it(columns).compile() }
+            override fun compile(pn: ParameterName): Compiled {
+                val compiledSetters = setters.map { it(columns).compile(pn) }
                 return Compiled(
                     query = compiledSetters.joinToString { it.assignment },
                     params = compiledSetters.mapNotNull { it.parameter }.associate { it }
@@ -269,9 +269,9 @@ sealed class Component<Entity : PanacheEntityBase, Id : Any, Columns>(
             fun execute() = withCompiled { companion.update(query, params) }
             //endregion
 
-            override fun compile(): Compiled {
-                val compiledPrevious = previous.compile()
-                val compiledExpression = expression.compile()
+            override fun compile(pn: ParameterName): Compiled {
+                val compiledPrevious = previous.compile(pn)
+                val compiledExpression = expression.compile(pn)
                 return Compiled(
                     query = "${compiledPrevious.query} $operator ${compiledExpression.expression}",
                     params = compiledPrevious.params + compiledExpression.parameters

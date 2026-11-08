@@ -18,7 +18,6 @@ package ch.icken.query
 
 import io.quarkus.panache.common.Sort
 import org.jetbrains.annotations.ApiStatus
-import kotlin.random.Random
 
 sealed class Expression<Columns> {
 
@@ -31,9 +30,9 @@ sealed class Expression<Columns> {
     //endregion
 
     //region compile
-    internal open fun compile(): Compiled = compileExpression()
+    internal open fun compile(pn: ParameterName): Compiled = compileExpression(pn)
 
-    protected abstract fun compileExpression(): Compiled
+    protected abstract fun compileExpression(pn: ParameterName): Compiled
 
     class Compiled internal constructor(val expression: String, val parameters: Map<String, Any>)
     //endregion
@@ -49,12 +48,13 @@ sealed class Expression<Columns> {
             private val value: Any
         ) : BooleanExpression<Columns>(key, operator) {
 
-            private val parameterName: String = generateParameterName()
-
-            override fun compileExpression() = Compiled(
-                expression = "$key $operator :$parameterName",
-                parameters = mapOf(parameterName to value)
-            )
+            override fun compileExpression(pn: ParameterName): Compiled {
+                val parameterName = pn.next()
+                return Compiled(
+                    expression = "$key $operator :$parameterName",
+                    parameters = mapOf(parameterName to value)
+                )
+            }
 
             class EqualTo<Columns> internal constructor(key: String, value: Any) :
                 BooleanValueExpression<Columns>(key, "=", value)
@@ -94,13 +94,14 @@ sealed class Expression<Columns> {
             private val maxIncl: Any
         ) : BooleanExpression<Columns>(key, operator) {
 
-            private val minParameterName: String = generateParameterName()
-            private val maxInclParameterName: String = generateParameterName()
-
-            override fun compileExpression() = Compiled(
-                expression = "$key $operator :$minParameterName AND :$maxInclParameterName",
-                parameters = mapOf(minParameterName to min, maxInclParameterName to maxIncl)
-            )
+            override fun compileExpression(pn: ParameterName): Compiled {
+                val minParameterName = pn.next()
+                val maxInclParameterName = pn.next()
+                return Compiled(
+                    expression = "$key $operator :$minParameterName AND :$maxInclParameterName",
+                    parameters = mapOf(minParameterName to min, maxInclParameterName to maxIncl)
+                )
+            }
 
             class Between<Columns> internal constructor(key: String, min: Any, maxIncl: Any) :
                 BetweenExpression<Columns>(key, "BETWEEN", min, maxIncl)
@@ -114,7 +115,7 @@ sealed class Expression<Columns> {
             operator: String
         ) : BooleanExpression<Columns>(key, operator) {
 
-            override fun compileExpression() = Compiled(
+            override fun compileExpression(pn: ParameterName) = Compiled(
                 expression = "$key $operator NULL",
                 parameters = emptyMap()
             )
@@ -133,14 +134,17 @@ sealed class Expression<Columns> {
         private val expression: Expression<Columns>
     ) : Expression<Columns>() {
 
-        override fun compile(): Compiled {
-            val compiledExpression = compileExpression()
-            return Compiled("(${compiledExpression.expression})", compiledExpression.parameters)
+        override fun compile(pn: ParameterName): Compiled {
+            val compiledExpression = compileExpression(pn)
+            return Compiled(
+                expression = "(${compiledExpression.expression})",
+                parameters = compiledExpression.parameters
+            )
         }
 
-        override fun compileExpression(): Compiled {
-            val compiledPrevious = previous.compileExpression()
-            val compiledExpression = expression.compileExpression()
+        override fun compileExpression(pn: ParameterName): Compiled {
+            val compiledPrevious = previous.compileExpression(pn)
+            val compiledExpression = expression.compileExpression(pn)
             return Compiled(
                 expression = "${compiledPrevious.expression} $operator ${compiledExpression.expression}",
                 parameters = compiledPrevious.parameters + compiledExpression.parameters
@@ -178,17 +182,26 @@ class SetterExpression internal constructor(
     private val value: Any?
 ) {
 
-    private val parameterName: String = generateParameterName()
-
-    internal fun compile(): Compiled = when (value) {
-        null -> Compiled("$columnName = null", null)
-        else -> Compiled("$columnName = :$parameterName", parameterName to value)
+    internal fun compile(pn: ParameterName): Compiled = when (value) {
+        null -> Compiled(
+            assignment = "$columnName = null",
+            parameter = null
+        )
+        else -> {
+            val parameterName = pn.next()
+            Compiled(
+                assignment = "$columnName = :$parameterName",
+                parameter = parameterName to value
+            )
+        }
     }
 
     class Compiled internal constructor(val assignment: String, val parameter: Pair<String, Any>?)
 }
 
-private const val CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-private fun generateParameterName() = (0 ..< 8)
-    .map { CHARS[Random.nextInt(CHARS.length)] }
-    .toCharArray().concatToString()
+class ParameterName {
+
+    private var count = 0
+
+    fun next() = "p${++count}"
+}

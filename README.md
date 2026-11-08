@@ -46,13 +46,25 @@ ksp {
 <details>
 <summary><b>Gradle Groovy DSL</b></summary>
 
-TODO
-</details>
-
-<details>
-<summary><b>Apache Maven</b></summary>
-
-TODO
+Add the KSP Gradle plugin to your build file
+```groovy
+plugins {
+    id "com.google.devtools.ksp" version "2.3.0"
+}
+```
+Add this library to your build file and register it with KSP
+```groovy
+dependencies {
+    implementation "ch.icken:panache-kotlin-dsl:0.1.3"
+    ksp "ch.icken:panache-kotlin-dsl:0.1.3"
+}
+```
+Optionally configure the behavior
+```groovy
+ksp {
+    arg "addGeneratedAnnotation", "true"
+}
+```
 </details>
 
 ## Requirements
