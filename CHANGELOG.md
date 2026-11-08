@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.0
+- Add `orderBy` expression for sorting the results of a query
+- Change minimum Quarkus version to `3.37.0`
+  - This is the oldest version to support Kotlin `2.4.0`
+- Change KSP version to `2.3.13`
+
 ## 0.1.3
 - Process/generate `@MappedSuperclass` inheritance structures
 
