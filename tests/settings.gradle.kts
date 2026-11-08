@@ -22,22 +22,15 @@ pluginManagement {
 
     plugins {
         val kotlinVersion = providers.gradleProperty("kotlinVersion").get()
-        val kspVersion = providers.gradleProperty("kspVersion").get()
-        val quarkusVersion = providers.gradleProperty("quarkusVersion").get()
-        val dokkaVersion = providers.gradleProperty("dokkaVersion").get()
-        val koverVersion = providers.gradleProperty("koverVersion").get()
-        val sonarqubeVersion = providers.gradleProperty("sonarqubeVersion").get()
-        val mavenPublishVersion = providers.gradleProperty("mavenPublishVersion").get()
-
         kotlin("jvm") version kotlinVersion
         kotlin("plugin.allopen") version kotlinVersion
         kotlin("plugin.jpa") version kotlinVersion
-        id("com.google.devtools.ksp") version kspVersion
-        id("io.quarkus") version quarkusVersion
-        id("org.jetbrains.dokka") version dokkaVersion
-        id("org.jetbrains.kotlinx.kover") version koverVersion
-        id("org.sonarqube") version sonarqubeVersion
-        id("com.vanniktech.maven.publish") version mavenPublishVersion
+        id("com.google.devtools.ksp") version providers.gradleProperty("kspVersion").get()
+        id("io.quarkus") version providers.gradleProperty("quarkusVersion").get()
+        id("org.jetbrains.dokka") version providers.gradleProperty("dokkaVersion").get()
+        id("org.jetbrains.kotlinx.kover") version providers.gradleProperty("koverVersion").get()
+        id("org.sonarqube") version providers.gradleProperty("sonarqubeVersion").get()
+        id("com.vanniktech.maven.publish") version providers.gradleProperty("mavenPublishVersion").get()
     }
 
     include(":panache-kotlin-dsl")

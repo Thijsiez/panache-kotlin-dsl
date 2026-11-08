@@ -21,17 +21,11 @@ pluginManagement {
     }
 
     plugins {
-        val kotlinVersion = providers.gradleProperty("kotlinVersion").get()
-        val dokkaVersion = providers.gradleProperty("dokkaVersion").get()
-        val koverVersion = providers.gradleProperty("koverVersion").get()
-        val mavenPublishVersion = providers.gradleProperty("mavenPublishVersion").get()
-
-        kotlin("jvm") version kotlinVersion
-        id("org.jetbrains.dokka") version dokkaVersion
-        id("org.jetbrains.kotlinx.kover") version koverVersion
-        id("com.vanniktech.maven.publish") version mavenPublishVersion
+        kotlin("jvm") version providers.gradleProperty("kotlinVersion").get()
+        id("org.jetbrains.dokka") version providers.gradleProperty("dokkaVersion").get()
+        id("org.jetbrains.kotlinx.kover") version providers.gradleProperty("koverVersion").get()
+        id("com.vanniktech.maven.publish") version providers.gradleProperty("mavenPublishVersion").get()
     }
 }
 
-val artifactId = providers.gradleProperty("artifactId").get()
-rootProject.name = artifactId
+rootProject.name = providers.gradleProperty("artifactId").get()

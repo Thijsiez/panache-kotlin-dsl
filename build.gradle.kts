@@ -34,20 +34,15 @@ dependencies {
     val quarkusVersion = project.property("quarkusVersion") as String
     compileOnly("io.quarkus:quarkus-hibernate-orm-panache-kotlin:$quarkusVersion")
 
-    val kspVersion = project.property("kspVersion") as String
-    implementation("com.google.devtools.ksp:symbol-processing-api:$kspVersion")
-    val kotlinPoetVersion = project.property("kotlinPoetVersion") as String
-    implementation("com.squareup:kotlinpoet-ksp:$kotlinPoetVersion")
+    implementation("com.google.devtools.ksp:symbol-processing-api:${project.property("kspVersion") as String}")
+    implementation("com.squareup:kotlinpoet-ksp:${project.property("kotlinPoetVersion") as String}")
 
     testImplementation(kotlin("reflect"))
-    testImplementation("io.quarkus:quarkus-hibernate-orm-panache-kotlin:${quarkusVersion}")
-    val jupiterVersion = project.property("jupiterVersion") as String
-    testImplementation(platform("org.junit:junit-bom:$jupiterVersion"))
+    testImplementation("io.quarkus:quarkus-hibernate-orm-panache-kotlin:$quarkusVersion")
+    testImplementation(platform("org.junit:junit-bom:${project.property("jupiterVersion") as String}"))
     testImplementation("org.junit.jupiter:junit-jupiter")
-    val mockkVersion = project.property("mockkVersion") as String
-    testImplementation("io.mockk:mockk:$mockkVersion")
-    val compileTestingVersion = project.property("compileTestingVersion") as String
-    testImplementation("dev.zacsweers.kctfork:ksp:$compileTestingVersion")
+    testImplementation("io.mockk:mockk:${project.property("mockkVersion") as String}")
+    testImplementation("dev.zacsweers.kctfork:ksp:${project.property("compileTestingVersion") as String}")
 
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
